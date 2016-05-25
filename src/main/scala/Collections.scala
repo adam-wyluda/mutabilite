@@ -69,7 +69,9 @@ class Set[A](val addr: Long) extends AnyVal with Collection with Traversable[A] 
   def add(elem: A): Boolean = ???
   def remove(elem: A): Boolean = ???
 
-  // TODO add intersect, union
+  def intersect(that: Set[A]): Set[A] = ???
+  def union(that: Set[A]): Set[A] = ???
+  def diff(that: Set[A]): Set[A] = ???
 
   override def size: Int = ???
   override def foreach[U](f: (A) => U): Unit = ???
