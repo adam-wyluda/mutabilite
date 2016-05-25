@@ -4,11 +4,11 @@ import scala.collection.generic.CanBuildFrom
 import scala.{collection => onheap}
 
 trait Collection extends Any {
-  def addr: Long
+//  def addr: Long
 
-  def readSize = ???
-  def isEmpty = addr == 0L
-  def nonEmpty = addr != 0L
+  def readSize: Int = ???
+  def isEmpty: Boolean = ???
+  def nonEmpty: Boolean = !isEmpty
 }
 
 trait Traversable[A] extends Any {
@@ -25,9 +25,15 @@ trait Traversable[A] extends Any {
 }
 
 object Test extends App {
-  val s = new Seq[Int](0L)
-  val o = s.to[onheap.Set]
-  println(o.contains(3))
+//  val s = new Seq[Int](0L)
+//  val o = s.to[onheap.Set]
+//  println(o.contains(3))
+
+  val opt = new Opt[Int](25)
+  val none = new Opt
+  println(opt.isEmpty)
+  println(opt.get)
+  println(none.isEmpty)
 }
 
 // For every off-heap collection
@@ -37,16 +43,26 @@ object Companion {
   def from[A, B](seq: onheap.Seq[A], map: A => B): Traversable[B] = ???
 }
 
-class Opt[A](val addr: Long) extends AnyVal with Collection with Traversable[A] {
+class Opt[A] extends Collection with Traversable[A] {
+
+  private[this] class Holder(val elem: A)
+
+  private[this] var holder: Holder = null
+
+  def this(elem: A) = {
+    this()
+    holder = new Holder(elem)
+  }
 
   // Dereference primitive or cast self to data class
-  def get(): A = ???
+  def get(): A = if (nonEmpty) holder.elem else throw new NoSuchElementException
 
+  override def isEmpty: Boolean = holder == null
   override def size: Int = if (nonEmpty) 1 else 0
   override def foreach[U](f: (A) => U): Unit = if (nonEmpty) f(get())
 }
 
-class Seq[A](val addr: Long) extends AnyVal with Collection with Traversable[A] {
+class Seq[A] extends Collection with Traversable[A] {
 
   def apply(index: Int): A = ???
 
@@ -62,7 +78,7 @@ class Seq[A](val addr: Long) extends AnyVal with Collection with Traversable[A] 
   override def foreach[U](f: (A) => U): Unit = ???
 }
 
-class Set[A](val addr: Long) extends AnyVal with Collection with Traversable[A] {
+class Set[A] extends Collection with Traversable[A] {
 
   def apply(elem: A): Boolean = ???
 
@@ -77,7 +93,7 @@ class Set[A](val addr: Long) extends AnyVal with Collection with Traversable[A] 
   override def foreach[U](f: (A) => U): Unit = ???
 }
 
-class Map[K, V](val addr: Long) extends AnyVal with Collection with Traversable[(K, V)] {
+class Map[K, V] extends Collection with Traversable[(K, V)] {
 
   def apply(key: K): Opt[V] = ???
 
