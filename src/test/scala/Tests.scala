@@ -1,12 +1,12 @@
 package test
 
 import scala.{collection => stdlib}
-import org.scalatest.FunSuite
+import org.scalatest.{BeforeAndAfter, FunSuite}
 import offheap.collection._
 
 class OptTest extends FunSuite {
-  lazy val opt = new Opt[Int](25)
-  lazy val none = new Opt[Int]
+  val opt = new Opt[Int](25)
+  val none = new Opt[Int]
 
   test("isEmpty") {
     assert(opt.nonEmpty)
@@ -32,11 +32,12 @@ class OptTest extends FunSuite {
   }
 }
 
-class SeqTest extends FunSuite {
-  lazy val seq = {
-    val seq = new Seq[Int]
+class SeqTest extends FunSuite with BeforeAndAfter {
+  var seq: Seq[Int] = _
+
+  before {
+    seq = new Seq[Int]
     1 to 10 foreach (seq.append(_))
-    seq
   }
 
   test("isEmpty") {
@@ -102,12 +103,13 @@ class SeqTest extends FunSuite {
   }
 }
 
-class SetTest extends FunSuite {
-  lazy val set = {
-    val set = new Set[Int]
-    1 to 7 foreach (set.add(_))
-    5 to 10 foreach (set.add(_))
-    set
+class SetTest extends FunSuite with BeforeAndAfter {
+  var set: Set[Int] = _
+
+  before {
+    set = new Set[Int]
+//    1 to 7 foreach (set.add(_))
+//    5 to 10 foreach (set.add(_))
   }
 
   test("isEmpty") {
@@ -185,15 +187,16 @@ class SetTest extends FunSuite {
   }
 }
 
-class MapTest extends FunSuite {
-  lazy val map = {
-    val map = new Map[Int, String]
-    map.put(1, "one")
-    map.put(2, "too")
-    map.put(3, "tree")
-    map.put(2, "two")
-    map.put(3, "three")
-    map
+class MapTest extends FunSuite with BeforeAndAfter {
+  var map: Map[Int, String] = _
+
+  before {
+    map = new Map[Int, String]
+//    map.put(1, "one")
+//    map.put(2, "too")
+//    map.put(3, "tree")
+//    map.put(2, "two")
+//    map.put(3, "three")
   }
 
   def expected(arg: Int): String = arg match {
@@ -233,12 +236,12 @@ class MapTest extends FunSuite {
     val nothing = map.put(4, "for")
     assert(map.size == 4)
     assert(nothing.isEmpty)
-    assert(map(4) == "for")
+    assert(map(4).get() == "for")
 
     val previous = map.put(4, "four")
     assert(map.size == 4)
     assert(previous.get() == "for")
-    assert(map(4) == "four")
+    assert(map(4).get() == "four")
   }
 
   test("remove") {

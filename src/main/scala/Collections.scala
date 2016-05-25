@@ -1,6 +1,7 @@
 package offheap.collection
 
 import scala.collection.generic.CanBuildFrom
+import scala.reflect.ClassTag
 import scala.{collection => onheap}
 
 trait Collection extends Any {
@@ -60,20 +61,61 @@ class Opt[A] extends Collection with Traversable[A] {
   override def foreach[U](f: (A) => U): Unit = if (nonEmpty) f(get())
 }
 
-class Seq[A] extends Collection with Traversable[A] {
+class Seq[A](implicit tag: ClassTag[A])
+    extends Collection with Traversable[A] {
 
-  def apply(index: Int): A = ???
+  private[this] var array: Array[A] = new Array[A](1)
+  private[this] var _size = 0
 
-  def append(elems: A*): Unit = ???
+  def apply(index: Int): A = array(index)
+
+  def append(elems: A*): Unit = {
+    val newSize = _size + elems.size
+    growTo(newSize)
+    elems.foreach { e =>
+      array(_size) = e
+      _size += 1
+    }
+  }
+
   def append(offheap: Traversable[A]): Unit = ???
-  def update(index: Int, value: A): Unit = ???
-  def remove(n: Int): A = ???
 
-  def index(elem: A): Int = ???
-  def insert(index: Int, elem: A) = ???
+  def update(index: Int, value: A): Unit = {
+    array(index) = value
+  }
 
-  override def size: Int = readSize
-  override def foreach[U](f: (A) => U): Unit = ???
+  def remove(n: Int): A = {
+    val removed = array(n)
+    n until _size foreach { i =>
+      array(i) = array(i + 1)
+    }
+    _size -= 1
+    removed
+  }
+
+  def index(elem: A): Int = array indexOf elem
+
+  def insert(index: Int, elem: A): Unit = {
+    val newSize = _size + 1
+    growTo(newSize)
+    (_size - 1) to index by -1 foreach { i =>
+      array(i + 1) = array(i)
+    }
+    array(index) = elem
+  }
+
+  private def shouldGrow(newSize: Int) = newSize > array.size
+  private def grow = {
+    val newArray = new Array[A](array.size * 2)
+    Array.copy(array, 0, newArray, 0, array.size)
+    this.array = newArray
+  }
+  private def growTo(size: Int) = while (shouldGrow(size)) grow
+
+  override def isEmpty = _size == 0
+  override def size: Int = _size
+  override def foreach[U](f: (A) => U): Unit =
+    0 until _size foreach (a => f(array(a)))
 }
 
 class Set[A] extends Collection with Traversable[A] {
