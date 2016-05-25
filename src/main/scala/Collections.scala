@@ -14,10 +14,13 @@ trait Collection extends Any {
 trait Traversable[A] extends Any {
   def size: Int
   def isEmpty: Boolean
+  def nonEmpty: Boolean
   def foreach[U](f: A => U)
 
-  def to[T[_]](implicit canBuild: CanBuildFrom[_, A, T[A]]): T[A] = to[T, A](identity)
-  def to[T[_], B](map: A => B)(implicit canBuild: CanBuildFrom[_, B, T[B]]): T[B] = {
+  def to[T[_]](implicit canBuild: CanBuildFrom[_, A, T[A]]): T[A] =
+    to[T, A](identity)
+  def to[T[_], B](map: A => B)(
+      implicit canBuild: CanBuildFrom[_, B, T[B]]): T[B] = {
     val builder = canBuild()
     foreach(builder += map(_))
     builder.result()
@@ -25,15 +28,9 @@ trait Traversable[A] extends Any {
 }
 
 object Test extends App {
-//  val s = new Seq[Int](0L)
-//  val o = s.to[onheap.Set]
-//  println(o.contains(3))
-
-  val opt = new Opt[Int](25)
-  val none = new Opt
-  println(opt.isEmpty)
-  println(opt.get)
-  println(none.isEmpty)
+  val s = new Seq[Int]()
+  val o = s.to[onheap.Set]
+  println(o.contains(3))
 }
 
 // For every off-heap collection
@@ -55,7 +52,8 @@ class Opt[A] extends Collection with Traversable[A] {
   }
 
   // Dereference primitive or cast self to data class
-  def get(): A = if (nonEmpty) holder.elem else throw new NoSuchElementException
+  def get(): A =
+    if (nonEmpty) holder.elem else throw new NoSuchElementException
 
   override def isEmpty: Boolean = holder == null
   override def size: Int = if (nonEmpty) 1 else 0
