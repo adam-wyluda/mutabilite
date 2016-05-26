@@ -90,6 +90,7 @@ class SeqTest extends FunSuite with BeforeAndAfter {
     for (i <- 1 to 10) {
       assert(seq.index(i) == i - 1)
     }
+    assert(seq.index(0) == -1)
   }
 
   test("insert") {
@@ -108,8 +109,8 @@ class SetTest extends FunSuite with BeforeAndAfter {
 
   before {
     set = new Set[Int]
-//    1 to 7 foreach (set.add(_))
-//    5 to 10 foreach (set.add(_))
+    1 to 7 foreach (set.add(_))
+    5 to 10 foreach (set.add(_))
   }
 
   test("isEmpty") {
@@ -151,8 +152,8 @@ class SetTest extends FunSuite with BeforeAndAfter {
       assert(!set.remove(i))
     }
     assert(set.size == 5)
-    1 to 10 by 2 foreach (i => assert(set(i)))
-    2 to 10 by 2 foreach (i => assert(!set(i)))
+    1 to 10 by 2 foreach (i => assert(!set(i)))
+    2 to 10 by 2 foreach (i => assert(set(i)))
   }
 
   test("intersect") {
@@ -177,7 +178,8 @@ class SetTest extends FunSuite with BeforeAndAfter {
 
   test("diff") {
     val other = new Set[Int]
-    5 to 15 foreach (other.add(_))
+    5 to 15 foreach (set.add(_))
+    5 to 10 foreach (other.add(_))
 
     val diff = set diff other
     assert(diff.size == 9)

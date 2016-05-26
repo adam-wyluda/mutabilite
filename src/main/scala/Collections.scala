@@ -93,7 +93,13 @@ class Seq[A](implicit tag: ClassTag[A])
     removed
   }
 
-  def index(elem: A): Int = array indexOf elem
+  def index(elem: A): Int = {
+    var result = -1
+    0 until _size foreach { i =>
+      if (result == -1 && array(i) == elem) result = i
+    }
+    result
+  }
 
   def insert(index: Int, elem: A): Unit = {
     val newSize = _size + 1
@@ -118,19 +124,57 @@ class Seq[A](implicit tag: ClassTag[A])
     0 until _size foreach (a => f(array(a)))
 }
 
-class Set[A] extends Collection with Traversable[A] {
+class Set[A](implicit tag: ClassTag[A])
+    extends Collection with Traversable[A] {
 
-  def apply(elem: A): Boolean = ???
+  private[this] val seq = new Seq[A]
 
-  def add(elem: A): Boolean = ???
-  def remove(elem: A): Boolean = ???
+  def apply(elem: A): Boolean = seq.index(elem) != -1
 
-  def intersect(that: Set[A]): Set[A] = ???
-  def union(that: Set[A]): Set[A] = ???
-  def diff(that: Set[A]): Set[A] = ???
+  def add(elem: A): Boolean = {
+    if (this(elem)) {
+      false
+    } else {
+      seq.append(elem)
+      true
+    }
+  }
 
-  override def size: Int = ???
-  override def foreach[U](f: (A) => U): Unit = ???
+  def remove(elem: A): Boolean = {
+    if (this(elem)) {
+      seq.remove(seq.index(elem))
+      true
+    } else {
+      false
+    }
+  }
+
+  def intersect(that: Set[A]): Set[A] = {
+    val result = new Set[A]
+    foreach { a =>
+      if (that(a)) result.add(a)
+    }
+    result
+  }
+
+  def union(that: Set[A]): Set[A] = {
+    val result = new Set[A]
+    this foreach (result.add(_))
+    that foreach (result.add(_))
+    result
+  }
+
+  def diff(that: Set[A]): Set[A] = {
+    val result = new Set[A]
+    foreach { a =>
+      if (!that(a)) result.add(a)
+    }
+    result
+  }
+
+  override def isEmpty = seq isEmpty
+  override def size: Int = seq.size
+  override def foreach[U](f: (A) => U): Unit = seq foreach f
 }
 
 class Map[K, V] extends Collection with Traversable[(K, V)] {
