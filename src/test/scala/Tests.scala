@@ -292,7 +292,7 @@ class MapTest extends FunSuite with BeforeAndAfter {
     4 to 6 foreach (i => assert(!map.contains(i)))
   }
 
-  test("to map") {
+  test("to seq") {
     val stdMap = map.to[stdlib.Seq]
     val exp = (1 to 3) map (i => (i, expected(i)))
     assert(stdMap == exp)
