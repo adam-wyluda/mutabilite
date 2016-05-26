@@ -30,8 +30,10 @@ trait Traversable[A] extends Any {
 
 object Test extends App {
   val s = new Seq[Int]()
+  s.append(3)
   val o = s.to[onheap.Set]
   println(o.contains(3))
+  println(o.contains(2))
 }
 
 // For every off-heap collection
