@@ -86,7 +86,7 @@ class Seq[A](implicit tag: ClassTag[A])
 
   def remove(n: Int): A = {
     val removed = array(n)
-    n until _size foreach { i =>
+    n until (_size - 1) foreach { i =>
       array(i) = array(i + 1)
     }
     _size -= 1
@@ -108,6 +108,7 @@ class Seq[A](implicit tag: ClassTag[A])
       array(i + 1) = array(i)
     }
     array(index) = elem
+    _size += 1
   }
 
   private def shouldGrow(newSize: Int) = newSize > array.size
@@ -172,24 +173,63 @@ class Set[A](implicit tag: ClassTag[A])
     result
   }
 
-  override def isEmpty = seq isEmpty
+  override def isEmpty = seq.isEmpty
   override def size: Int = seq.size
   override def foreach[U](f: (A) => U): Unit = seq foreach f
 }
 
-class Map[K, V] extends Collection with Traversable[(K, V)] {
+class Map[K, V](implicit tag: ClassTag[(K, V)])
+    extends Collection with Traversable[(K, V)] {
 
-  def apply(key: K): Opt[V] = ???
+  private[this] val seq = new Seq[(K, V)]
 
-  def put(key: K, value: V): Opt[V] = ???
-  def remove(key: K): Opt[V] = ???
+  def apply(key: K): Opt[V] = {
+    var result = new Opt[V]
+    seq foreach {
+      case (k, v) =>
+        if (k == key) result = new Opt[V](v)
+    }
+    result
+  }
 
-  def keys: Set[K] = ???
-  def values: Seq[V] = ???
+  def put(key: K, value: V): Opt[V] = {
+    val previous = remove(key)
+    seq.append((key, value))
+    previous
+  }
+
+  def remove(key: K): Opt[V] = {
+    val previous = this(key)
+    if (contains(key)) {
+      val index = keyIndex(key)
+      seq.remove(index)
+    }
+    previous
+  }
+
+  def keys(implicit tag: ClassTag[K]): Set[K] = {
+    val result = new Set[K]
+    foreach { case (k, v) => result.add(k) }
+    result
+  }
+
+  def values(implicit tag: ClassTag[V]): Seq[V] = {
+    val result = new Seq[V]
+    foreach { case (k, v) => result.append(v) }
+    result
+  }
 
   // May be redundant since apply returns an option
   def contains(key: K): Boolean = this(key).nonEmpty
 
-  override def size: Int = ???
-  override def foreach[U](f: ((K, V)) => U): Unit = ???
+  private def keyIndex(key: K) = {
+    var result = -1
+    var index = 0
+    seq foreach { case (k, v) => if (k == key) result = index else index += 1 }
+    result
+  }
+
+  override def isEmpty = seq.isEmpty
+  override def size: Int = seq.size
+  override def foreach[U](f: ((K, V)) => U): Unit = seq foreach f
 }

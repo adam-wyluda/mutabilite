@@ -79,11 +79,15 @@ class SeqTest extends FunSuite with BeforeAndAfter {
 
   test("remove") {
     seq.remove(1)
+    assert(seq.size == 9)
 
     assert(seq(0) == 1)
     for (i <- 1 until 9) {
       assert(seq(i) == i + 2)
     }
+
+    seq.remove(seq.size - 1)
+    assert(seq.size == 8)
   }
 
   test("index") {
@@ -95,6 +99,7 @@ class SeqTest extends FunSuite with BeforeAndAfter {
 
   test("insert") {
     seq.insert(1, 50)
+    assert(seq.size == 11)
 
     assert(seq(0) == 1)
     assert(seq(1) == 50)
@@ -194,11 +199,11 @@ class MapTest extends FunSuite with BeforeAndAfter {
 
   before {
     map = new Map[Int, String]
-//    map.put(1, "one")
-//    map.put(2, "too")
-//    map.put(3, "tree")
-//    map.put(2, "two")
-//    map.put(3, "three")
+    map.put(1, "one")
+    map.put(2, "too")
+    map.put(3, "tree")
+    map.put(2, "two")
+    map.put(3, "three")
   }
 
   def expected(arg: Int): String = arg match {
@@ -269,7 +274,7 @@ class MapTest extends FunSuite with BeforeAndAfter {
     val values = map.values
 
     assert(values.size == 3)
-    1 to 3 foreach (i => assert(values(i) == expected(i)))
+    0 until values.size foreach (i => assert(values(i) == expected(i + 1)))
   }
 
   test("contains") {
