@@ -16,6 +16,12 @@ class StdlibSeqBenchmark {
     seq
   }
 
+  val updatedSeq: stdlib.mutable.ArrayBuffer[Int] = {
+    val seq = stdlib.mutable.ArrayBuffer[Int]()
+    1 to 10000 foreach (seq.append(_))
+    seq
+  }
+
   val random = Random
 
   @Benchmark
@@ -45,7 +51,7 @@ class StdlibSeqBenchmark {
 
   @Benchmark
   def updateSequential() = {
-    val s = stdlib.mutable.ArrayBuffer[Int](seq: _*)
+    val s = updatedSeq
     val size = s.size
     var i = 0
     while (i < size) {
@@ -56,7 +62,7 @@ class StdlibSeqBenchmark {
 
   @Benchmark
   def updateRandom() = {
-    val s = stdlib.mutable.ArrayBuffer[Int](seq: _*)
+    val s = updatedSeq
     val size = s.size
     var i = 0
     while (i < size) {
@@ -70,6 +76,12 @@ class StdlibSeqBenchmark {
 class SeqBenchmark {
 
   val seq: Seq[Int] = {
+    val seq = new Seq[Int]
+    1 to 10000 foreach (seq.append(_))
+    seq
+  }
+
+  val updatedSeq: Seq[Int] = {
     val seq = new Seq[Int]
     1 to 10000 foreach (seq.append(_))
     seq
@@ -104,9 +116,8 @@ class SeqBenchmark {
 
   @Benchmark
   def updateSequential() = {
-    val s = new Seq[Int](seq.size)
+    val s = updatedSeq
     val size = s.size
-    s.append(seq)
     var i = 0
     while (i < size) {
       s(i) = i * 2
@@ -116,8 +127,7 @@ class SeqBenchmark {
 
   @Benchmark
   def updateRandom() = {
-    val s = new Seq[Int](seq.size)
-    s.append(seq)
+    val s = updatedSeq
     val size = s.size
     var i = 0
     while (i < size) {
