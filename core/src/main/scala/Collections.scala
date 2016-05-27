@@ -63,10 +63,11 @@ class Opt[A] extends Collection with Traversable[A] {
   override def foreach[U](f: (A) => U): Unit = if (nonEmpty) f(get())
 }
 
-class Seq[A](implicit tag: ClassTag[A])
-    extends Collection with Traversable[A] {
+class Seq[A](initialSize: Int = 1)(implicit tag: ClassTag[A])
+    extends Collection
+    with Traversable[A] {
 
-  private[this] var array: Array[A] = new Array[A](1)
+  private[this] var array: Array[A] = new Array[A](initialSize)
   private[this] var _size = 0
 
   def apply(index: Int): A = array(index)
@@ -80,7 +81,14 @@ class Seq[A](implicit tag: ClassTag[A])
     }
   }
 
-  def append(offheap: Traversable[A]): Unit = ???
+  def append(that: Traversable[A]): Unit = {
+    val newSize = _size + that.size
+    growTo(newSize)
+    that foreach { e =>
+      array(_size) = e
+      _size += 1
+    }
+  }
 
   def update(index: Int, value: A): Unit = {
     array(index) = value
@@ -116,7 +124,7 @@ class Seq[A](implicit tag: ClassTag[A])
   private def shouldGrow(newSize: Int) = newSize > array.size
   private def grow = {
     val newArray = new Array[A](array.size * 2)
-    Array.copy(array, 0, newArray, 0, array.size)
+    Array.copy(array, 0, newArray, 0, _size)
     this.array = newArray
   }
   private def growTo(size: Int) = while (shouldGrow(size)) grow
@@ -128,7 +136,8 @@ class Seq[A](implicit tag: ClassTag[A])
 }
 
 class Set[A](implicit tag: ClassTag[A])
-    extends Collection with Traversable[A] {
+    extends Collection
+    with Traversable[A] {
 
   private[this] val seq = new Seq[A]
 
@@ -181,7 +190,8 @@ class Set[A](implicit tag: ClassTag[A])
 }
 
 class Map[K, V](implicit tag: ClassTag[(K, V)])
-    extends Collection with Traversable[(K, V)] {
+    extends Collection
+    with Traversable[(K, V)] {
 
   private[this] val seq = new Seq[(K, V)]
 

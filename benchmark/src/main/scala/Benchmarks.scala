@@ -10,9 +10,9 @@ import scala.{collection => stdlib}
 @State(Scope.Thread)
 class StdlibSeqBenchmark {
 
-  val seq: stdlib.IndexedSeq[Int] = {
-    var seq = stdlib.IndexedSeq[Int]()
-    1 to 10000 foreach (i => seq = seq :+ i)
+  val seq: stdlib.mutable.ArrayBuffer[Int] = {
+    val seq = stdlib.mutable.ArrayBuffer[Int]()
+    1 to 10000 foreach (seq.append(_))
     seq
   }
 
@@ -21,7 +21,8 @@ class StdlibSeqBenchmark {
   @Benchmark
   def readSequential(blackhole: Blackhole) = {
     var i = 0
-    while (i < seq.size) {
+    val size = seq.size
+    while (i < size) {
       blackhole.consume(seq(i))
       i += 1
     }
@@ -30,6 +31,38 @@ class StdlibSeqBenchmark {
   @Benchmark
   def readRandom(blackhole: Blackhole) = {
     blackhole.consume(seq(random.nextInt(seq.size)))
+  }
+
+  @Benchmark
+  def append() = {
+    val s = stdlib.mutable.ArrayBuffer[Int]()
+    var i = 0
+    while (i < 100000) {
+      s.append(i)
+      i += 1
+    }
+  }
+
+  @Benchmark
+  def updateSequential() = {
+    val s = stdlib.mutable.ArrayBuffer[Int](seq: _*)
+    val size = s.size
+    var i = 0
+    while (i < size) {
+      s(i) = i * 2
+      i += 1
+    }
+  }
+
+  @Benchmark
+  def updateRandom() = {
+    val s = stdlib.mutable.ArrayBuffer[Int](seq: _*)
+    val size = s.size
+    var i = 0
+    while (i < size) {
+      s(random.nextInt(size)) = i * 2
+      i += 1
+    }
   }
 }
 
@@ -47,7 +80,8 @@ class SeqBenchmark {
   @Benchmark
   def readSequential(blackhole: Blackhole) = {
     var i = 0
-    while (i < seq.size) {
+    val size = seq.size
+    while (i < size) {
       blackhole.consume(seq(i))
       i += 1
     }
@@ -56,5 +90,39 @@ class SeqBenchmark {
   @Benchmark
   def readRandom(blackhole: Blackhole) = {
     blackhole.consume(seq(random.nextInt(seq.size)))
+  }
+
+  @Benchmark
+  def append() = {
+    val s = new Seq[Int]
+    var i = 0
+    while (i < 100000) {
+      s.append(i)
+      i += 1
+    }
+  }
+
+  @Benchmark
+  def updateSequential() = {
+    val s = new Seq[Int](seq.size)
+    val size = s.size
+    s.append(seq)
+    var i = 0
+    while (i < size) {
+      s(i) = i * 2
+      i += 1
+    }
+  }
+
+  @Benchmark
+  def updateRandom() = {
+    val s = new Seq[Int](seq.size)
+    s.append(seq)
+    val size = s.size
+    var i = 0
+    while (i < size) {
+      s(random.nextInt(size)) = i * 2
+      i += 1
+    }
   }
 }
