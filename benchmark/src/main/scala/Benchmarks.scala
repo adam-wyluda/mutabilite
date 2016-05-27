@@ -10,8 +10,8 @@ import scala.{collection => stdlib}
 @State(Scope.Thread)
 class StdlibSeqBenchmark {
 
-  val seq: stdlib.Seq[Int] = {
-    var seq = stdlib.Seq[Int]()
+  val seq: stdlib.IndexedSeq[Int] = {
+    var seq = stdlib.IndexedSeq[Int]()
     1 to 10000 foreach (i => seq = seq :+ i)
     seq
   }
