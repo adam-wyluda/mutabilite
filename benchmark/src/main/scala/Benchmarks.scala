@@ -70,6 +70,25 @@ class StdlibSeqBenchmark {
       i += 1
     }
   }
+
+  @Benchmark
+  def foreach(blackhole: Blackhole) = seq foreach (blackhole.consume(_))
+
+  @Benchmark
+  def remove() = {
+    val s = stdlib.mutable.ArrayBuffer[Int](seq: _*)
+    while (s.nonEmpty) s.remove(0)
+  }
+
+  @Benchmark
+  def prepend() = {
+    val s = stdlib.mutable.ArrayBuffer[Int]()
+    var i = 0
+    while (i < 10000) {
+      s.insert(0, i)
+      i += 1
+    }
+  }
 }
 
 @State(Scope.Thread)
@@ -106,7 +125,7 @@ class SeqBenchmark {
 
   @Benchmark
   def append() = {
-    val s = new Seq[Int]
+    val s = new Seq[Int](initialSize = 16)
     var i = 0
     while (i < 100000) {
       s.append(i)
@@ -132,6 +151,26 @@ class SeqBenchmark {
     var i = 0
     while (i < size) {
       s(random.nextInt(size)) = i * 2
+      i += 1
+    }
+  }
+
+  @Benchmark
+  def foreach(blackhole: Blackhole) = seq foreach (blackhole.consume(_))
+
+  @Benchmark
+  def remove() = {
+    val s = new Seq[Int]
+    s.append(seq)
+    while (s.nonEmpty) s.remove(0)
+  }
+
+  @Benchmark
+  def prepend() = {
+    val s = new Seq[Int]
+    var i = 0
+    while (i < 10000) {
+      s.insert(0, i)
       i += 1
     }
   }
