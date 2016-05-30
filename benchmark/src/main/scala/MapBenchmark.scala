@@ -94,3 +94,51 @@ class MapRemoveStdlibBenchmark {
     while (i < 1000) { map.remove(i); i += 1 }
   }
 }
+
+@State(Scope.Thread)
+class MapCollidingKeysBenchmark {
+
+  class Key(val value: Int) {
+    override def equals(other: Any) = other.asInstanceOf[Key].value == this.value
+    override def hashCode = value % 100
+  }
+
+  val keys = {
+    val keys = new Array[Key](10000)
+    0 until keys.size foreach (i => keys(i) = new Key(i))
+    keys
+  }
+
+  @Benchmark
+  def put = {
+    val map = new Map[Key, Int]
+    val size = keys.size
+    var i = 0
+    while (i < size) {
+      map.put(keys(i), i)
+      i += 1
+    }
+  }
+
+  @Benchmark
+  def putStdlibLinked = {
+    val map = StdlibMap[Key, Int]()
+    val size = keys.size
+    var i = 0
+    while (i < size) {
+      map.put(keys(i), i)
+      i += 1
+    }
+  }
+
+  @Benchmark
+  def putStdlibOpenAddressing = {
+    val map = collection.mutable.OpenHashMap[Key, Int]()
+    val size = keys.size
+    var i = 0
+    while (i < size) {
+      map.put(keys(i), i)
+      i += 1
+    }
+  }
+}
