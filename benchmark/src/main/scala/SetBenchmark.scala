@@ -5,7 +5,7 @@ import offheap.collection._
 import org.openjdk.jmh.infra.Blackhole
 
 import scala.util.Random
-import scala.collection.mutable.{ HashSet => StdlibSet }
+import scala.collection.mutable.{HashSet => StdlibSet}
 
 @State(Scope.Thread)
 class SetBenchmark {
@@ -54,7 +54,8 @@ class SetBenchmark {
   def foreach(blackhole: Blackhole) = set foreach (blackhole.consume(_))
 
   @Benchmark
-  def foreachStdlib(blackhole: Blackhole) = stdSet foreach (blackhole.consume(_))
+  def foreachStdlib(blackhole: Blackhole) =
+    stdSet foreach (blackhole.consume(_))
 }
 
 @State(Scope.Thread)
@@ -77,7 +78,7 @@ class SetRemoveBenchmark {
 }
 
 @State(Scope.Thread)
-class SetStdlibRemoveBenchmark {
+class SetRemoveStdlibBenchmark {
 
   var set: StdlibSet[Int] = _
 

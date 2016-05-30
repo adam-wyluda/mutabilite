@@ -5,7 +5,7 @@ import offheap.collection._
 import org.openjdk.jmh.infra.Blackhole
 
 import scala.util.Random
-import scala.collection.mutable.{ ArrayBuffer => StdlibSeq }
+import scala.collection.mutable.{ArrayBuffer => StdlibSeq}
 
 @State(Scope.Thread)
 class SeqBenchmark {
@@ -122,7 +122,8 @@ class SeqBenchmark {
   def foreach(blackhole: Blackhole) = seq foreach (blackhole.consume(_))
 
   @Benchmark
-  def foreachStdlib(blackhole: Blackhole) = stdSeq foreach (blackhole.consume(_))
+  def foreachStdlib(blackhole: Blackhole) =
+    stdSeq foreach (blackhole.consume(_))
 
   @Benchmark
   def prepend() = {
@@ -162,7 +163,6 @@ class SeqRemoveBenchmark {
     seq.append(origin)
   }
 
-
   @Benchmark
   def benchmark = {
     while (seq.nonEmpty) seq.remove(0)
@@ -170,7 +170,7 @@ class SeqRemoveBenchmark {
 }
 
 @State(Scope.Thread)
-class SeqStdlibRemoveBenchmark {
+class SeqRemoveStdlibBenchmark {
 
   val origin: StdlibSeq[Int] = {
     val seq = StdlibSeq[Int]()
