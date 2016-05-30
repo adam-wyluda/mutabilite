@@ -61,7 +61,6 @@ class SetBenchmark {
 class SetRemoveBenchmark {
 
   var set: Set[Int] = _
-  val random = Random
 
   @Setup(Level.Invocation)
   def setup = {
@@ -81,7 +80,6 @@ class SetRemoveBenchmark {
 class SetStdlibRemoveBenchmark {
 
   var set: StdlibSet[Int] = _
-  val random = Random
 
   @Setup(Level.Invocation)
   def setup = {

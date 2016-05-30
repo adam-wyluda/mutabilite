@@ -125,19 +125,6 @@ class SeqBenchmark {
   def foreachStdlib(blackhole: Blackhole) = stdSeq foreach (blackhole.consume(_))
 
   @Benchmark
-  def remove() = {
-    val s = new Seq[Int]
-    s.append(seq)
-    while (s.nonEmpty) s.remove(0)
-  }
-
-  @Benchmark
-  def removeStdlib() = {
-    val s = StdlibSeq[Int](stdSeq: _*)
-    while (s.nonEmpty) s.remove(0)
-  }
-
-  @Benchmark
   def prepend() = {
     val s = new Seq[Int]
     var i = 0
@@ -155,5 +142,51 @@ class SeqBenchmark {
       s.insert(0, i)
       i += 1
     }
+  }
+}
+
+@State(Scope.Thread)
+class SeqRemoveBenchmark {
+
+  val origin: Seq[Int] = {
+    val seq = new Seq[Int]
+    1 to 10000 foreach (seq.append(_))
+    seq
+  }
+
+  var seq: Seq[Int] = _
+
+  @Setup(Level.Invocation)
+  def setup = {
+    seq = new Seq[Int]
+    seq.append(origin)
+  }
+
+
+  @Benchmark
+  def benchmark = {
+    while (seq.nonEmpty) seq.remove(0)
+  }
+}
+
+@State(Scope.Thread)
+class SeqStdlibRemoveBenchmark {
+
+  val origin: StdlibSeq[Int] = {
+    val seq = StdlibSeq[Int]()
+    1 to 10000 foreach (seq.append(_))
+    seq
+  }
+
+  var seq: StdlibSeq[Int] = _
+
+  @Setup(Level.Invocation)
+  def setup = {
+    seq = StdlibSeq[Int](origin: _*)
+  }
+
+  @Benchmark
+  def benchmark = {
+    while (seq.nonEmpty) seq.remove(0)
   }
 }
