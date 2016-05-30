@@ -5,7 +5,7 @@ import offheap.collection._
 import org.openjdk.jmh.infra.Blackhole
 
 import scala.util.Random
-import scala.{collection => stdlib}
+import scala.collection.mutable.{ ArrayBuffer => StdlibSeq }
 
 @State(Scope.Thread)
 class SeqBenchmark {
@@ -16,8 +16,8 @@ class SeqBenchmark {
     seq
   }
 
-  val stdSeq: stdlib.mutable.ArrayBuffer[Int] = {
-    val seq = stdlib.mutable.ArrayBuffer[Int]()
+  val stdSeq: StdlibSeq[Int] = {
+    val seq = StdlibSeq[Int]()
     1 to 10000 foreach (seq.append(_))
     seq
   }
@@ -66,7 +66,7 @@ class SeqBenchmark {
 
   @Benchmark
   def appendStdlib() = {
-    val s = stdlib.mutable.ArrayBuffer[Int]()
+    val s = StdlibSeq[Int]()
     var i = 0
     while (i < 100000) {
       s.append(i)
@@ -133,7 +133,7 @@ class SeqBenchmark {
 
   @Benchmark
   def removeStdlib() = {
-    val s = stdlib.mutable.ArrayBuffer[Int](stdSeq: _*)
+    val s = StdlibSeq[Int](stdSeq: _*)
     while (s.nonEmpty) s.remove(0)
   }
 
@@ -149,7 +149,7 @@ class SeqBenchmark {
 
   @Benchmark
   def prependStdlib() = {
-    val s = stdlib.mutable.ArrayBuffer[Int]()
+    val s = StdlibSeq[Int]()
     var i = 0
     while (i < 10000) {
       s.insert(0, i)
