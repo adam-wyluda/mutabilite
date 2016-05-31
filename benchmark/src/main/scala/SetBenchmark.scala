@@ -10,8 +10,8 @@ import scala.collection.mutable.{HashSet => StdlibSet}
 @State(Scope.Thread)
 class SetBenchmark {
 
-  val set: Set[Int] = {
-    val set = new Set[Int]
+  val set: NaiveSet[Int] = {
+    val set = new NaiveSet[Int]
     1 to 10000 foreach (set.add(_))
     set
   }
@@ -32,7 +32,7 @@ class SetBenchmark {
 
   @Benchmark
   def add = {
-    val s = new Set[Int]
+    val s = new NaiveSet[Int]
     var i = 0
     while (i < 10000) {
       s.add(random.nextInt(20000))
@@ -61,11 +61,11 @@ class SetBenchmark {
 @State(Scope.Thread)
 class SetRemoveBenchmark {
 
-  var set: Set[Int] = _
+  var set: NaiveSet[Int] = _
 
   @Setup(Level.Invocation)
   def setup = {
-    set = new Set[Int]
+    set = new NaiveSet[Int]
     var i = 0
     while (i < 10000) { set.add(i); i += 1 }
   }

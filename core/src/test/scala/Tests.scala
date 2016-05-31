@@ -36,13 +36,13 @@ class SeqTest extends FunSuite with BeforeAndAfter {
   var seq: Seq[Int] = _
 
   before {
-    seq = new Seq[Int]
+    seq = new NaiveSeq[Int]
     1 to 10 foreach (seq.append(_))
   }
 
   test("isEmpty") {
     assert(seq.nonEmpty)
-    assert(new Seq[Int].isEmpty)
+    assert(new NaiveSeq[Int].isEmpty)
   }
 
   test("size") {
@@ -64,7 +64,7 @@ class SeqTest extends FunSuite with BeforeAndAfter {
   }
 
   test("append") {
-    val seq = new Seq[Int]
+    val seq = new NaiveSeq[Int]
 
     assert(seq.isEmpty)
     seq.append(1, 2, 3)
@@ -118,14 +118,14 @@ class SetTest extends FunSuite with BeforeAndAfter {
   var set: Set[Int] = _
 
   before {
-    set = new Set[Int]
+    set = new NaiveSet[Int]
     1 to 7 foreach (set.add(_))
     5 to 10 foreach (set.add(_))
   }
 
   test("isEmpty") {
     assert(set.nonEmpty)
-    assert(new Set[Int].isEmpty)
+    assert(new NaiveSet[Int].isEmpty)
   }
 
   test("size") {
@@ -167,7 +167,7 @@ class SetTest extends FunSuite with BeforeAndAfter {
   }
 
   test("intersect") {
-    val other = new Set[Int]
+    val other = new NaiveSet[Int]
     5 to 15 foreach (other.add(_))
 
     val intersect = set intersect other
@@ -178,7 +178,7 @@ class SetTest extends FunSuite with BeforeAndAfter {
   }
 
   test("union") {
-    val other = new Set[Int]
+    val other = new NaiveSet[Int]
     5 to 15 foreach (other.add(_))
 
     val union = set union other
@@ -187,7 +187,7 @@ class SetTest extends FunSuite with BeforeAndAfter {
   }
 
   test("diff") {
-    val other = new Set[Int]
+    val other = new NaiveSet[Int]
     5 to 15 foreach (set.add(_))
     5 to 10 foreach (other.add(_))
 
@@ -208,7 +208,7 @@ class MapTest extends FunSuite with BeforeAndAfter {
   var map: Map[Int, String] = _
 
   before {
-    map = new Map[Int, String]
+    map = new NaiveMap[Int, String]
     map.put(1, "one")
     map.put(2, "too")
     map.put(3, "tree")
@@ -224,7 +224,7 @@ class MapTest extends FunSuite with BeforeAndAfter {
 
   test("isEmpty") {
     assert(map.nonEmpty)
-    assert(new Map[Int, String].isEmpty)
+    assert(new NaiveMap[Int, String].isEmpty)
   }
 
   test("size") {

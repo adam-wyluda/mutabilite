@@ -10,8 +10,8 @@ import scala.collection.mutable.{ArrayBuffer => StdlibSeq}
 @State(Scope.Thread)
 class SeqBenchmark {
 
-  val seq: Seq[Int] = {
-    val seq = new Seq[Int]
+  val seq: NaiveSeq[Int] = {
+    val seq = new NaiveSeq[Int]
     1 to 10000 foreach (seq.append(_))
     seq
   }
@@ -56,7 +56,7 @@ class SeqBenchmark {
 
   @Benchmark
   def append() = {
-    val s = new Seq[Int](initialSize = 16)
+    val s = new NaiveSeq[Int](initialSize = 16)
     var i = 0
     while (i < 100000) {
       s.append(i)
@@ -127,7 +127,7 @@ class SeqBenchmark {
 
   @Benchmark
   def prepend() = {
-    val s = new Seq[Int]
+    val s = new NaiveSeq[Int]
     var i = 0
     while (i < 10000) {
       s.insert(0, i)
@@ -149,17 +149,17 @@ class SeqBenchmark {
 @State(Scope.Thread)
 class SeqRemoveBenchmark {
 
-  val origin: Seq[Int] = {
-    val seq = new Seq[Int]
+  val origin: NaiveSeq[Int] = {
+    val seq = new NaiveSeq[Int]
     1 to 10000 foreach (seq.append(_))
     seq
   }
 
-  var seq: Seq[Int] = _
+  var seq: NaiveSeq[Int] = _
 
   @Setup(Level.Invocation)
   def setup = {
-    seq = new Seq[Int]
+    seq = new NaiveSeq[Int]
     seq.append(origin)
   }
 
