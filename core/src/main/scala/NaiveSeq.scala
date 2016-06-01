@@ -3,8 +3,7 @@ package offheap.collection
 import scala.reflect.ClassTag
 
 class NaiveSeq[A](initialSize: Int = 1)(implicit tag: ClassTag[A])
-  extends Collection
-    with Seq[A] {
+    extends Seq[A] {
 
   private[this] var array: Array[A] = new Array[A](initialSize)
   private[this] var _size = 0

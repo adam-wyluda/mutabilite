@@ -2,9 +2,10 @@ package offheap.collection
 
 import scala.reflect.ClassTag
 
-class NaiveMap[K, V](implicit tag: ClassTag[(K, V)], tagKeys: ClassTag[K], tagValues: ClassTag[V])
-  extends Collection
-    with Map[K, V] {
+class NaiveMap[K, V](implicit tag: ClassTag[(K, V)],
+                     tagKeys: ClassTag[K],
+                     tagValues: ClassTag[V])
+    extends Map[K, V] {
 
   private[this] val seq = new NaiveSeq[(K, V)]
 

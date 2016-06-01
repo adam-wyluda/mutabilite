@@ -107,11 +107,6 @@ class SeqTest extends FunSuite with BeforeAndAfter {
       assert(seq(i) == i)
     }
   }
-
-  test("to list") {
-    val list = seq.to[List]
-    assert(list sameElements (1 to 10 toList))
-  }
 }
 
 class SetTest extends FunSuite with BeforeAndAfter {
@@ -196,11 +191,6 @@ class SetTest extends FunSuite with BeforeAndAfter {
     1 to 4 foreach (i => assert(diff(i)))
     5 to 10 foreach (i => assert(!diff(i)))
     11 to 15 foreach (i => assert(diff(i)))
-  }
-
-  test("to set") {
-    val stdSet = set.to[stdlib.Set]
-    assert(stdSet == (1 to 10 toSet))
   }
 }
 
@@ -290,11 +280,5 @@ class MapTest extends FunSuite with BeforeAndAfter {
   test("contains") {
     1 to 3 foreach (i => assert(map.contains(i)))
     4 to 6 foreach (i => assert(!map.contains(i)))
-  }
-
-  test("to seq") {
-    val stdMap = map.to[stdlib.Seq]
-    val exp = (1 to 3) map (i => (i, expected(i)))
-    assert(stdMap == exp)
   }
 }
