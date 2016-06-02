@@ -45,7 +45,6 @@ class NaiveMap[K, V](implicit tag: ClassTag[(K, V)],
     result
   }
 
-  // May be redundant since apply returns an option
   def contains(key: K): Boolean = this(key).nonEmpty
 
   private def keyIndex(key: K) = {

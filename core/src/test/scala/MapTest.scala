@@ -5,10 +5,10 @@ import org.scalatest.{BeforeAndAfter, FunSuite}
 import offheap.collection._
 
 class MapTest extends FunSuite with BeforeAndAfter {
-  var map: Map[Int, String] = _
+  var map: HashMap[Int, String] = _
 
   before {
-    map = new NaiveMap[Int, String]
+    map = new HashMap[Int, String]
     map.put(1, "one")
     map.put(2, "too")
     map.put(3, "tree")
