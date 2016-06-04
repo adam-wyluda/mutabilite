@@ -10,49 +10,62 @@ import scala.collection.mutable.{OpenHashMap => StdlibMap}
 @State(Scope.Thread)
 class MapBenchmark {
 
+  val keys: Array[String] = {
+    val keys = new Array[String](10000)
+    0 until 10000 foreach (i => keys(i) = i toString)
+    keys
+  }
+
   val map: HashMap[String, Int] = {
     val map = new HashMap[String, Int]()
-    1 to 10000 foreach (i => map.put(i toString, i * i))
+    0 until 1000 foreach (i => map.put(keys(i), i * i))
     map
   }
 
   val stdMap: StdlibMap[String, Int] = {
     val map = StdlibMap[String, Int]()
-    1 to 10000 foreach (i => map.put(i toString, i * i))
+    0 until 1000 foreach (i => map.put(keys(i), i * i))
     map
   }
 
   val random = Random
   var randKey: String = _
+  var nonexistingKey: String = _
 
   @Setup(Level.Invocation)
   def setup = {
-    randKey = random.nextInt(10000).toString
+    randKey = keys(random.nextInt(10000))
+    nonexistingKey = (random.nextInt(10000) + 10000) toString
   }
 
   @Benchmark
-  def get(blackhole: Blackhole) = blackhole.consume(map(randKey))
+  def get = map(randKey)
 
   @Benchmark
-  def getStdlib(blackhole: Blackhole) =
-    blackhole.consume(stdMap.get(randKey))
+  def getStdlib = stdMap.get(randKey)
+
+  @Benchmark
+  def getNonExisting = map(nonexistingKey)
+
+  @Benchmark
+  def getNonExistingStdlib = map(nonexistingKey)
 
   @Benchmark
   def put = {
-    val m = new HashMap[Int, Int]
+    val m = new HashMap[String, Int]
     var i = 0
-    while (i < 1000) {
-      m.put(i, i)
+    while (i < 10000) {
+      m.put(keys(i), i)
       i += 1
     }
   }
 
   @Benchmark
   def putStdlib = {
-    val m = StdlibMap[Int, Int]()
+    val m = StdlibMap[String, Int]()
     var i = 0
-    while (i < 1000) {
-      m.put(i, i)
+    while (i < 10000) {
+      m.put(keys(i), i)
       i += 1
     }
   }
@@ -63,6 +76,24 @@ class MapBenchmark {
   @Benchmark
   def foreachStdlib(blackhole: Blackhole) =
     stdMap foreach (blackhole.consume(_))
+
+  @Benchmark
+  def putRemoveRead(blackhole: Blackhole) = {
+    val map = new HashMap[String, Int]()
+    var i = 0
+    while (i < 10000) { map.put(keys(i), i); i += 1 }
+    while (i < 1000) { map.remove(keys(i * 10)); i += 1 }
+    while (i < 10000) { blackhole.consume(map(keys(i))); i += 1 }
+  }
+
+  @Benchmark
+  def putRemoveReadStdlib(blackhole: Blackhole) = {
+    val map = new StdlibMap[String, Int]()
+    var i = 0
+    while (i < 10000) { map.put(keys(i), i); i += 1 }
+    while (i < 1000) { map.remove(keys(i * 10)); i += 1 }
+    while (i < 10000) { blackhole.consume(map(keys(i))); i += 1 }
+  }
 }
 
 @State(Scope.Thread)

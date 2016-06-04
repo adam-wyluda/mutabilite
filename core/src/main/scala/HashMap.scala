@@ -7,11 +7,9 @@ import scala.reflect.ClassTag
 // http://sebastiansylvan.com/post/robin-hood-hashing-should-be-your-default-hash-table-implementation/
 // http://codecapsule.com/2013/11/11/robin-hood-hashing/
 // http://codecapsule.com/2013/11/17/robin-hood-hashing-backward-shift-deletion/
-class HashMap[K, V](initialSize: Int = 16)(
+class HashMap[K, V](initialSize: Int = 8)(
     implicit tagK: ClassTag[K], tagV: ClassTag[V])
     extends Map[K, V] {
-
-  private[this] val loadFactor = 0.9
 
   private[this] var hashes: Array[Int] = new Array[Int](initialSize)
   private[this] var _keys: Array[K] = new Array[K](initialSize)
@@ -137,7 +135,8 @@ class HashMap[K, V](initialSize: Int = 16)(
 
   def contains(key: K): Boolean = this(key).nonEmpty
 
-  private[this] def shouldGrow = _size > capacity * loadFactor
+  @inline
+  private[this] def shouldGrow = _size > capacity * 3 / 4
 
   private[this] def growIfNecessary: Unit = {
     if (shouldGrow) {
@@ -169,6 +168,7 @@ class HashMap[K, V](initialSize: Int = 16)(
     hash
   }
 
+  @inline
   private[this] def isInit(hash: Int) = hash == 0
 
   private[this] def init(pos: Int, hash: Int, key: K, value: V) = {
