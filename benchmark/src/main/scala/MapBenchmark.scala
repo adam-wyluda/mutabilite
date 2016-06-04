@@ -10,8 +10,8 @@ import scala.collection.mutable.{HashMap => StdlibMap}
 @State(Scope.Thread)
 class MapBenchmark {
 
-  val map: NaiveMap[Int, Int] = {
-    val map = new NaiveMap[Int, Int]()
+  val map: HashMap[Int, Int] = {
+    val map = new HashMap[Int, Int]()
     1 to 10000 foreach (i => map.put(i, i * i))
     map
   }
@@ -33,7 +33,7 @@ class MapBenchmark {
 
   @Benchmark
   def put = {
-    val m = new NaiveMap[Int, Int]
+    val m = new HashMap[Int, Int]
     var i = 0
     while (i < 1000) {
       m.put(i, i)
@@ -62,11 +62,11 @@ class MapBenchmark {
 @State(Scope.Thread)
 class MapRemoveBenchmark {
 
-  var map: NaiveMap[Int, Int] = _
+  var map: HashMap[Int, Int] = _
 
   @Setup(Level.Invocation)
   def setup = {
-    map = new NaiveMap[Int, Int]
+    map = new HashMap[Int, Int]
     1 to 1000 foreach (i => map.put(i, i * i))
   }
 
@@ -111,7 +111,7 @@ class MapCollidingKeysBenchmark {
 
   @Benchmark
   def put = {
-    val map = new NaiveMap[Key, Int]
+    val map = new HashMap[Key, Int]
     val size = keys.size
     var i = 0
     while (i < size) {

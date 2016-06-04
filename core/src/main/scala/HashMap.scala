@@ -11,9 +11,11 @@ class HashMap[K, V](initialSize: Int = 16)(
     implicit tagK: ClassTag[K], tagV: ClassTag[V])
     extends Map[K, V] {
 
-  private[this] val hashes: Array[Int] = new Array[Int](initialSize)
-  private[this] val _keys: Array[K] = new Array[K](initialSize)
-  private[this] val _values: Array[V] = new Array[V](initialSize)
+  private[this] val loadFactor = 0.9
+
+  private[this] var hashes: Array[Int] = new Array[Int](initialSize)
+  private[this] var _keys: Array[K] = new Array[K](initialSize)
+  private[this] var _values: Array[V] = new Array[V](initialSize)
   private[this] var _size = 0
   private[this] var capacity = initialSize
 
@@ -65,6 +67,7 @@ class HashMap[K, V](initialSize: Int = 16)(
       if (isInit(nextHash)) {
         init(pos, hash, key, value)
         _size += 1
+        growIfNecessary
         false
       } else if (nextHash == originalHash && _keys(pos) == key) {
         previous = new Opt[V](_values(pos))
@@ -132,6 +135,31 @@ class HashMap[K, V](initialSize: Int = 16)(
   }
 
   def contains(key: K): Boolean = this(key).nonEmpty
+
+  private[this] def shouldGrow = _size > capacity * loadFactor
+
+  private[this] def growIfNecessary: Unit = {
+    if (shouldGrow) {
+      val oldCapacity = capacity
+      val oldHashes = hashes
+      val oldKeys = _keys
+      val oldValues = _values
+      capacity *= 2
+      hashes = new Array[Int](capacity)
+      _keys = new Array[K](capacity)
+      _values = new Array[V](capacity)
+      var i = 0
+      while (i < oldCapacity) {
+        val hash = oldHashes(i)
+        if (!isInit(hash)) {
+          val key = oldKeys(i)
+          val value = oldValues(i)
+          put(key, value)
+        }
+        i += 1
+      }
+    }
+  }
 
   private[this] def hashCode(key: K) = {
     var hash = key.hashCode() % capacity
