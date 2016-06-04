@@ -18,9 +18,18 @@ class HashMap[K, V](initialSize: Int = 16)(
   private[this] var capacity = initialSize
 
   def apply(key: K): Opt[V] = {
+    val index = indexOf(key)
+    if (index == -1) {
+      new Opt[V]()
+    } else {
+      new Opt[V](_values(index))
+    }
+  }
+
+  private[this] def indexOf(key: K): Int = {
     var hash = hashCode(key)
     var pos = hash
-    var result = new Opt[V]()
+    var result = -1
     while ({
       val nextHash = hashes(pos)
       if (!isInit(nextHash)) {
@@ -28,7 +37,7 @@ class HashMap[K, V](initialSize: Int = 16)(
         val nextDis = (capacity + pos - nextHash) % capacity
         if (nextDis >= dis) {
           if (_keys(pos) == key) {
-            result = new Opt[V](_values(pos))
+            result = pos
             false
           } else {
             pos = (pos + 1) % capacity
@@ -82,12 +91,45 @@ class HashMap[K, V](initialSize: Int = 16)(
   }
 
   def remove(key: K): Opt[V] = {
-    new Opt[V]()
+    var index = indexOf(key)
+    if (index != -1) {
+      val previous = new Opt[V](_values(index))
+      while ({
+        val nextIndex = index + 1
+        val nextHash = hashes(nextIndex)
+        if (!isInit(nextHash)) {
+          val nextDis = (capacity + nextIndex - nextHash)
+          if (nextDis != 0) {
+            hashes(index) = hashes(nextIndex)
+            _keys(index) = _keys(nextIndex)
+            _values(index) = _values(nextIndex)
+            index = (index + 1) % capacity
+            true
+          } else {
+            false
+          }
+        } else {
+          false
+        }
+      }) ()
+      _size -= 1
+      previous
+    } else {
+      new Opt[V]()
+    }
   }
 
-  def keys: NaiveSet[K] = ???
+  def keys: Set[K] = {
+    val result = new NaiveSet[K]
+    foreach { case (k, _) => result.add(k) }
+    result
+  }
 
-  def values: NaiveSeq[V] = ???
+  def values: Seq[V] = {
+    val result = new NaiveSeq[V]
+    foreach { case (_, v) => result.append(v) }
+    result
+  }
 
   def contains(key: K): Boolean = this(key).nonEmpty
 
