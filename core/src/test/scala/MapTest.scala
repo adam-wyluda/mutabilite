@@ -24,7 +24,7 @@ class MapTest extends FunSuite with BeforeAndAfter {
 
   test("isEmpty") {
     assert(map.nonEmpty)
-    assert(new NaiveMap[Int, String].isEmpty)
+    assert(new HashMap[Int, String].isEmpty)
   }
 
   test("size") {
