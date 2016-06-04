@@ -18,6 +18,7 @@ class HashMap[K, V](initialSize: Int = 16)(
   private[this] var _values: Array[V] = new Array[V](initialSize)
   private[this] var _size = 0
   private[this] var capacity = initialSize
+  private[this] var mask = capacity - 1
 
   def apply(key: K): Opt[V] = {
     val index = indexOf(key)
@@ -35,14 +36,14 @@ class HashMap[K, V](initialSize: Int = 16)(
     while ({
       val nextHash = hashes(pos)
       if (!isInit(nextHash)) {
-        val dis = (capacity + pos - hash) % capacity
-        val nextDis = (capacity + pos - nextHash) % capacity
+        val dis = (capacity + pos - hash) & mask
+        val nextDis = (capacity + pos - nextHash) & mask
         if (nextDis >= dis) {
           if (_keys(pos) == key) {
             result = pos
             false
           } else {
-            pos = (pos + 1) % capacity
+            pos = (pos + 1) & mask
             true
           }
         } else {
@@ -74,8 +75,8 @@ class HashMap[K, V](initialSize: Int = 16)(
         _values(pos) = value
         false
       } else {
-        val dis = (capacity + pos - hash) % capacity
-        val nextDis = (capacity + pos - nextHash) % capacity
+        val dis = (capacity + pos - hash) & mask
+        val nextDis = (capacity + pos - nextHash) & mask
         if (nextDis < dis) {
           val nextKey = _keys(pos)
           val nextVal = _values(pos)
@@ -86,7 +87,7 @@ class HashMap[K, V](initialSize: Int = 16)(
           _key = nextKey
           _value = nextVal
         }
-        pos = (pos + 1) % capacity
+        pos = (pos + 1) & mask
         true
       }
     }) ()
@@ -106,7 +107,7 @@ class HashMap[K, V](initialSize: Int = 16)(
             hashes(index) = hashes(nextIndex)
             _keys(index) = _keys(nextIndex)
             _values(index) = _values(nextIndex)
-            index = (index + 1) % capacity
+            index = (index + 1) & mask
             true
           } else {
             false
@@ -145,6 +146,7 @@ class HashMap[K, V](initialSize: Int = 16)(
       val oldKeys = _keys
       val oldValues = _values
       capacity *= 2
+      mask = capacity - 1
       hashes = new Array[Int](capacity)
       _keys = new Array[K](capacity)
       _values = new Array[V](capacity)
@@ -162,7 +164,7 @@ class HashMap[K, V](initialSize: Int = 16)(
   }
 
   private[this] def hashCode(key: K) = {
-    var hash = key.hashCode() % capacity
+    var hash = key.hashCode() & mask
     hash |= (if (hash == 0) 1 else 0)
     hash
   }
