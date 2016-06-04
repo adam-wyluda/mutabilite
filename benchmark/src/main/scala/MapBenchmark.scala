@@ -5,31 +5,37 @@ import offheap.collection._
 import org.openjdk.jmh.infra.Blackhole
 
 import scala.util.Random
-import scala.collection.mutable.{HashMap => StdlibMap}
+import scala.collection.mutable.{OpenHashMap => StdlibMap}
 
 @State(Scope.Thread)
 class MapBenchmark {
 
-  val map: HashMap[Int, Int] = {
-    val map = new HashMap[Int, Int]()
-    1 to 10000 foreach (i => map.put(i, i * i))
+  val map: HashMap[String, Int] = {
+    val map = new HashMap[String, Int]()
+    1 to 10000 foreach (i => map.put(i toString, i * i))
     map
   }
 
-  val stdMap: StdlibMap[Int, Int] = {
-    val map = StdlibMap[Int, Int]()
-    1 to 10000 foreach (i => map.put(i, i * i))
+  val stdMap: StdlibMap[String, Int] = {
+    val map = StdlibMap[String, Int]()
+    1 to 10000 foreach (i => map.put(i toString, i * i))
     map
   }
 
   val random = Random
+  var randKey: String = _
+
+  @Setup(Level.Invocation)
+  def setup = {
+    randKey = random.nextInt(10000).toString
+  }
 
   @Benchmark
-  def get(blackhole: Blackhole) = blackhole.consume(map(random.nextInt(20000)))
+  def get(blackhole: Blackhole) = blackhole.consume(map(randKey))
 
   @Benchmark
   def getStdlib(blackhole: Blackhole) =
-    blackhole.consume(stdMap.get(random.nextInt(20000)))
+    blackhole.consume(stdMap.get(randKey))
 
   @Benchmark
   def put = {
@@ -62,41 +68,51 @@ class MapBenchmark {
 @State(Scope.Thread)
 class MapRemoveBenchmark {
 
-  var map: HashMap[Int, Int] = _
+  var map: HashMap[String, Int] = _
+  val keys: Array[String] = {
+    val keys = new Array[String](1000)
+    0 until 1000 foreach (i => keys(i) = i toString)
+    keys
+  }
 
   @Setup(Level.Invocation)
   def setup = {
-    map = new HashMap[Int, Int]
-    1 to 1000 foreach (i => map.put(i, i * i))
+    map = new HashMap[String, Int]
+    0 until 1000 foreach (i => map.put(keys(i), i * i))
   }
 
   @Benchmark
   def benchmark = {
     var i = 0
-    while (i < 1000) { map.remove(i); i += 1 }
+    while (i < 1000) { map.remove(keys(i)); i += 1 }
   }
 }
 
 @State(Scope.Thread)
 class MapRemoveStdlibBenchmark {
 
-  var map: StdlibMap[Int, Int] = _
+  var map: StdlibMap[String, Int] = _
+  val keys: Array[String] = {
+    val keys = new Array[String](1000)
+    0 until 1000 foreach (i => keys(i) = i toString)
+    keys
+  }
 
   @Setup(Level.Invocation)
   def setup = {
-    map = StdlibMap[Int, Int]()
-    1 to 1000 foreach (i => map.put(i, i * i))
+    map = StdlibMap[String, Int]()
+    0 until 1000 foreach (i => map.put(keys(i), i * i))
   }
 
   @Benchmark
   def benchmark = {
     var i = 0
-    while (i < 1000) { map.remove(i); i += 1 }
+    while (i < 1000) { map.remove(keys(i)); i += 1 }
   }
 }
 
 @State(Scope.Thread)
-class MapCollidingKeysBenchmark {
+trait MapCollidingKeysBenchmark {
 
   class Key(val value: Int) {
     override def equals(other: Any) = other.asInstanceOf[Key].value == this.value
