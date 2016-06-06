@@ -5,17 +5,17 @@ import org.scalatest.{BeforeAndAfter, FunSuite}
 import offheap.collection._
 
 class SetTest extends FunSuite with BeforeAndAfter {
-  var set: Set[Int] = _
+  var set: MapSet[Int] = _
 
   before {
-    set = new NaiveSet[Int]
+    set = new MapSet[Int]
     1 to 7 foreach (set.add(_))
     5 to 10 foreach (set.add(_))
   }
 
   test("isEmpty") {
     assert(set.nonEmpty)
-    assert(new NaiveSet[Int].isEmpty)
+    assert(new MapSet[Int].isEmpty)
   }
 
   test("size") {
@@ -57,7 +57,7 @@ class SetTest extends FunSuite with BeforeAndAfter {
   }
 
   test("intersect") {
-    val other = new NaiveSet[Int]
+    val other = new MapSet[Int]
     5 to 15 foreach (other.add(_))
 
     val intersect = set intersect other
@@ -68,7 +68,7 @@ class SetTest extends FunSuite with BeforeAndAfter {
   }
 
   test("union") {
-    val other = new NaiveSet[Int]
+    val other = new MapSet[Int]
     5 to 15 foreach (other.add(_))
 
     val union = set union other
@@ -77,7 +77,7 @@ class SetTest extends FunSuite with BeforeAndAfter {
   }
 
   test("diff") {
-    val other = new NaiveSet[Int]
+    val other = new MapSet[Int]
     5 to 15 foreach (set.add(_))
     5 to 10 foreach (other.add(_))
 
