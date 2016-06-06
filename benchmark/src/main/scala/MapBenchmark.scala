@@ -34,7 +34,7 @@ object MapBenchmark {
   val initialMapSize = {
     var size = 1
     while (size < mapSize) size *= 2
-    size
+    size * 2
   }
 }
 
@@ -65,10 +65,10 @@ class MapBenchmark {
   }
 
   @Benchmark
-  def get = map(randKey)
+  def getRandom = map(randKey)
 
   @Benchmark
-  def getStdlib = stdMap.get(randKey)
+  def getRandomStdlib = stdMap.get(randKey)
 
   @Benchmark
   def getNonExisting = map(nonExistingKey)
@@ -77,7 +77,7 @@ class MapBenchmark {
   def getNonExistingStdlib = stdMap.get(nonExistingKey)
 
   @Benchmark
-  def put = {
+  def putAll = {
     val m = new HashMap[Key, Int](initialSize = initialMapSize)
     var i = 0
     while (i < mapSize) {
@@ -87,7 +87,7 @@ class MapBenchmark {
   }
 
   @Benchmark
-  def putStdlib = {
+  def putAllStdlib = {
     val m = new StdlibMap[Key, Int](initialSize = initialMapSize)
     var i = 0
     while (i < mapSize) {
