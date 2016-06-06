@@ -27,14 +27,18 @@ object MapBenchmark {
 
   val keys: Array[Key] = {
     val keys = new Array[Key](mapSize)
-    0 until mapSize foreach (keys(_) = Key.generate)
+    var i = 0
+    while (i < mapSize) {
+      keys(i) = Key.generate
+      i += 1
+    }
     keys
   }
 
   val initialMapSize = {
     var size = 1
     while (size < mapSize) size *= 2
-    size * 2
+    size
   }
 }
 
@@ -45,13 +49,21 @@ class MapBenchmark {
 
   val map: HashMap[Key, Int] = {
     val map = new HashMap[Key, Int](initialSize = initialMapSize)
-    0 until mapSize foreach (i => map.put(keys(i), i * i))
+    var i = 0
+    while (i < mapSize) {
+      map.put(keys(i), i * i)
+      i += 1
+    }
     map
   }
 
   val stdMap: StdlibMap[Key, Int] = {
     val map = new StdlibMap[Key, Int](initialSize = initialMapSize)
-    0 until mapSize foreach (i => map.put(keys(i), i * i))
+    var i = 0
+    while (i < mapSize) {
+      map.put(keys(i), i * i)
+      i += 1
+    }
     map
   }
 
