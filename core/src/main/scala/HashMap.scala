@@ -30,17 +30,18 @@ class HashMap[K, V](initialSize: Int = 8)(
   private[this] def indexOf(key: K): Int = {
     var hash = hashCode(key)
     var pos = hash
+    var dis = 0
     var result = -1
     while ({
       val nextHash = hashes(pos)
       if (!isInit(nextHash)) {
-        val dis = (capacity + pos - hash) & mask
         val nextDis = (capacity + pos - nextHash) & mask
         if (nextDis >= dis) {
-          if (_keys(pos) == key) {
+          if (hash == nextHash && _keys(pos) == key) {
             result = pos
             false
           } else {
+            dis += 1
             pos = (pos + 1) & mask
             true
           }
@@ -85,9 +86,8 @@ class HashMap[K, V](initialSize: Int = 8)(
           _key = nextKey
           _value = nextVal
           dis = nextDis
-        } else {
-          dis += 1
         }
+        dis += 1
         pos = (pos + 1) & mask
         true
       }
@@ -103,7 +103,7 @@ class HashMap[K, V](initialSize: Int = 8)(
         val nextIndex = (index + 1) & mask
         val nextHash = hashes(nextIndex)
         if (!isInit(nextHash)) {
-          val nextDis = (capacity + nextIndex - nextHash)
+          val nextDis = (capacity + nextIndex - nextHash) & mask
           if (nextDis != 0) {
             hashes(index) = hashes(nextIndex)
             _keys(index) = _keys(nextIndex)
@@ -117,6 +117,7 @@ class HashMap[K, V](initialSize: Int = 8)(
           false
         }
       }) ()
+      hashes(index) = 0
       _size -= 1
       previous
     } else {

@@ -10,21 +10,23 @@ import scala.collection.mutable.{OpenHashMap => StdlibMap}
 @State(Scope.Thread)
 class MapBenchmark {
 
+  val mapSize = 100000
+
   val keys: Array[String] = {
-    val keys = new Array[String](10000)
-    0 until 10000 foreach (i => keys(i) = i toString)
+    val keys = new Array[String](mapSize)
+    0 until mapSize foreach (i => keys(i) = i toString)
     keys
   }
 
   val map: HashMap[String, Int] = {
     val map = new HashMap[String, Int]()
-    0 until 1000 foreach (i => map.put(keys(i), i * i))
+    0 until mapSize foreach (i => map.put(keys(i), i * i))
     map
   }
 
   val stdMap: StdlibMap[String, Int] = {
     val map = StdlibMap[String, Int]()
-    0 until 1000 foreach (i => map.put(keys(i), i * i))
+    0 until mapSize foreach (i => map.put(keys(i), i * i))
     map
   }
 
@@ -34,8 +36,8 @@ class MapBenchmark {
 
   @Setup(Level.Invocation)
   def setup = {
-    randKey = keys(random.nextInt(10000))
-    nonexistingKey = (random.nextInt(10000) + 10000) toString
+    randKey = keys(random.nextInt(mapSize))
+    nonexistingKey = (random.nextInt(mapSize) + mapSize) toString
   }
 
   @Benchmark
@@ -54,7 +56,7 @@ class MapBenchmark {
   def put = {
     val m = new HashMap[String, Int]
     var i = 0
-    while (i < 10000) {
+    while (i < mapSize) {
       m.put(keys(i), i)
       i += 1
     }
@@ -64,7 +66,7 @@ class MapBenchmark {
   def putStdlib = {
     val m = StdlibMap[String, Int]()
     var i = 0
-    while (i < 10000) {
+    while (i < mapSize) {
       m.put(keys(i), i)
       i += 1
     }
@@ -143,53 +145,5 @@ class MapRemoveStdlibBenchmark {
   def benchmark = {
     var i = 0
     while (i < 1000) { map.remove(keys(i)); i += 1 }
-  }
-}
-
-@State(Scope.Thread)
-trait MapCollidingKeysBenchmark {
-
-  class Key(val value: Int) {
-    override def equals(other: Any) = other.asInstanceOf[Key].value == this.value
-    override def hashCode = value % 100
-  }
-
-  val keys = {
-    val keys = new Array[Key](10000)
-    0 until keys.size foreach (i => keys(i) = new Key(i))
-    keys
-  }
-
-  @Benchmark
-  def put = {
-    val map = new HashMap[Key, Int]
-    val size = keys.size
-    var i = 0
-    while (i < size) {
-      map.put(keys(i), i)
-      i += 1
-    }
-  }
-
-  @Benchmark
-  def putStdlibLinked = {
-    val map = StdlibMap[Key, Int]()
-    val size = keys.size
-    var i = 0
-    while (i < size) {
-      map.put(keys(i), i)
-      i += 1
-    }
-  }
-
-  @Benchmark
-  def putStdlibOpenAddressing = {
-    val map = collection.mutable.OpenHashMap[Key, Int]()
-    val size = keys.size
-    var i = 0
-    while (i < size) {
-      map.put(keys(i), i)
-      i += 1
-    }
   }
 }
