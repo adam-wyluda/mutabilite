@@ -22,7 +22,8 @@ object MapBenchmark {
 
   object Key {
     @inline
-    def generate = new Key(random.nextInt(), random.nextInt(), random.nextInt())
+    def generate =
+      new Key(random.nextInt(), random.nextInt(), random.nextInt())
   }
 
   val keys: Array[Key] = {
