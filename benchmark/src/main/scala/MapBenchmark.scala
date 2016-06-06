@@ -11,10 +11,11 @@ import scala.collection.mutable.{OpenHashMap => StdlibMap}
 class MapBenchmark {
 
   val mapSize = 100000
+  val random = Random
 
   val keys: Array[String] = {
     val keys = new Array[String](mapSize)
-    0 until mapSize foreach (i => keys(i) = i toString)
+    0 until mapSize foreach (keys(_) = random.nextString(10))
     keys
   }
 
@@ -30,14 +31,13 @@ class MapBenchmark {
     map
   }
 
-  val random = Random
   var randKey: String = _
   var nonexistingKey: String = _
 
   @Setup(Level.Invocation)
   def setup = {
     randKey = keys(random.nextInt(mapSize))
-    nonexistingKey = (random.nextInt(mapSize) + mapSize) toString
+    nonexistingKey = random.nextString(11)
   }
 
   @Benchmark
