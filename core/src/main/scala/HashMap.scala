@@ -60,11 +60,12 @@ class HashMap[K, V](initialSize: Int = 8)(
     var originalHash = hashCode(key)
     var hash = originalHash
     var pos = hash
+    var dis = 0
     var previous = new Opt[V]()
     while ({
       val nextHash = hashes(pos)
       if (isInit(nextHash)) {
-        init(pos, hash, key, value)
+        init(pos, hash, _key, _value)
         _size += 1
         growIfNecessary
         false
@@ -73,7 +74,6 @@ class HashMap[K, V](initialSize: Int = 8)(
         _values(pos) = value
         false
       } else {
-        val dis = (capacity + pos - hash) & mask
         val nextDis = (capacity + pos - nextHash) & mask
         if (nextDis < dis) {
           val nextKey = _keys(pos)
@@ -84,6 +84,9 @@ class HashMap[K, V](initialSize: Int = 8)(
           hash = nextHash
           _key = nextKey
           _value = nextVal
+          dis = nextDis
+        } else {
+          dis += 1
         }
         pos = (pos + 1) & mask
         true
@@ -97,7 +100,7 @@ class HashMap[K, V](initialSize: Int = 8)(
     if (index != -1) {
       val previous = new Opt[V](_values(index))
       while ({
-        val nextIndex = index + 1
+        val nextIndex = (index + 1) & mask
         val nextHash = hashes(nextIndex)
         if (!isInit(nextHash)) {
           val nextDis = (capacity + nextIndex - nextHash)
@@ -105,7 +108,7 @@ class HashMap[K, V](initialSize: Int = 8)(
             hashes(index) = hashes(nextIndex)
             _keys(index) = _keys(nextIndex)
             _values(index) = _values(nextIndex)
-            index = (index + 1) & mask
+            index = nextIndex
             true
           } else {
             false
@@ -136,7 +139,7 @@ class HashMap[K, V](initialSize: Int = 8)(
   def contains(key: K): Boolean = this(key).nonEmpty
 
   @inline
-  private[this] def shouldGrow = _size > capacity * 3 / 4
+  private[this] def shouldGrow = _size > capacity * 9 / 10
 
   private[this] def growIfNecessary: Unit = {
     if (shouldGrow) {
@@ -149,6 +152,7 @@ class HashMap[K, V](initialSize: Int = 8)(
       hashes = new Array[Int](capacity)
       _keys = new Array[K](capacity)
       _values = new Array[V](capacity)
+      _size = 0
       var i = 0
       while (i < oldCapacity) {
         val hash = oldHashes(i)

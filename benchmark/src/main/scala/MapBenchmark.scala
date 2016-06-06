@@ -48,7 +48,7 @@ class MapBenchmark {
   def getNonExisting = map(nonexistingKey)
 
   @Benchmark
-  def getNonExistingStdlib = map(nonexistingKey)
+  def getNonExistingStdlib = stdMap.get(nonexistingKey)
 
   @Benchmark
   def put = {
@@ -82,7 +82,9 @@ class MapBenchmark {
     val map = new HashMap[String, Int]()
     var i = 0
     while (i < 10000) { map.put(keys(i), i); i += 1 }
+    i = 0
     while (i < 1000) { map.remove(keys(i * 10)); i += 1 }
+    i = 0
     while (i < 10000) { blackhole.consume(map(keys(i))); i += 1 }
   }
 
@@ -91,8 +93,10 @@ class MapBenchmark {
     val map = new StdlibMap[String, Int]()
     var i = 0
     while (i < 10000) { map.put(keys(i), i); i += 1 }
+    i = 0
     while (i < 1000) { map.remove(keys(i * 10)); i += 1 }
-    while (i < 10000) { blackhole.consume(map(keys(i))); i += 1 }
+    i = 0
+    while (i < 10000) { blackhole.consume(map.get(keys(i))); i += 1 }
   }
 }
 
