@@ -12,18 +12,20 @@ class HashMap[K, V](initialSize: Int = 8)(
     extends Map[K, V] {
 
   private[this] var hashes: Array[Int] = new Array[Int](initialSize)
-  private[this] var _keys: Array[K] = new Array[K](initialSize)
-  private[this] var _values: Array[V] = new Array[V](initialSize)
+  private[this] var _keys: Array[AnyRef] = new Array[AnyRef](initialSize)
+  private[this] var _values: Array[AnyRef] = new Array[AnyRef](initialSize)
   private[this] var _size = 0
   private[this] var capacity = initialSize
   private[this] var mask = capacity - 1
 
+  private[this] val emptyOpt = new Opt[V]()
+
   def apply(key: K): Opt[V] = {
     val index = indexOf(key)
     if (index == -1) {
-      new Opt[V]()
+      emptyOpt
     } else {
-      new Opt[V](_values(index))
+      new Opt[V](_values(index).asInstanceOf[V])
     }
   }
 
@@ -56,8 +58,8 @@ class HashMap[K, V](initialSize: Int = 8)(
   }
 
   def put(key: K, value: V): Opt[V] = {
-    var _key = key
-    var _value = value
+    var _key = key.asInstanceOf[AnyRef]
+    var _value = value.asInstanceOf[AnyRef]
     var originalHash = hashCode(key)
     var hash = originalHash
     var pos = hash
@@ -71,8 +73,8 @@ class HashMap[K, V](initialSize: Int = 8)(
         growIfNecessary
         false
       } else if (nextHash == originalHash && _keys(pos) == key) {
-        previous = new Opt[V](_values(pos))
-        _values(pos) = value
+        previous = new Opt[V](_values(pos).asInstanceOf[V])
+        _values(pos) = value.asInstanceOf[AnyRef]
         false
       } else {
         val nextDis = (capacity + pos - nextHash) & mask
@@ -98,7 +100,7 @@ class HashMap[K, V](initialSize: Int = 8)(
   def remove(key: K): Opt[V] = {
     var index = indexOf(key)
     if (index != -1) {
-      val previous = new Opt[V](_values(index))
+      val previous = new Opt[V](_values(index).asInstanceOf[V])
       while ({
         val nextIndex = (index + 1) & mask
         val nextHash = hashes(nextIndex)
@@ -129,7 +131,7 @@ class HashMap[K, V](initialSize: Int = 8)(
     val result = new MapSet[K]
     var i = 0
     while (i < capacity) {
-      if (!isInit(hashes(i))) result.add(_keys(i))
+      if (!isInit(hashes(i))) result.add(_keys(i).asInstanceOf[K])
       i += 1
     }
     result
@@ -139,7 +141,7 @@ class HashMap[K, V](initialSize: Int = 8)(
     val result = new BufferSeq[V]
     var i = 0
     while (i < capacity) {
-      if (!isInit(hashes(i))) result.append(_values(i))
+      if (!isInit(hashes(i))) result.append(_values(i).asInstanceOf[V])
       i += 1
     }
     result
@@ -159,8 +161,8 @@ class HashMap[K, V](initialSize: Int = 8)(
       capacity *= 2
       mask = capacity - 1
       hashes = new Array[Int](capacity)
-      _keys = new Array[K](capacity)
-      _values = new Array[V](capacity)
+      _keys = new Array[AnyRef](capacity)
+      _values = new Array[AnyRef](capacity)
       _size = 0
       var i = 0
       while (i < oldCapacity) {
@@ -168,7 +170,7 @@ class HashMap[K, V](initialSize: Int = 8)(
         if (!isInit(hash)) {
           val key = oldKeys(i)
           val value = oldValues(i)
-          put(key, value)
+          put(key.asInstanceOf[K], value.asInstanceOf[V])
         }
         i += 1
       }
@@ -184,7 +186,7 @@ class HashMap[K, V](initialSize: Int = 8)(
   @inline
   private[this] def isInit(hash: Int) = hash == 0
 
-  private[this] def init(pos: Int, hash: Int, key: K, value: V) = {
+  private[this] def init(pos: Int, hash: Int, key: AnyRef, value: AnyRef) = {
     hashes(pos) = hash
     _keys(pos) = key
     _values(pos) = value
@@ -199,8 +201,8 @@ class HashMap[K, V](initialSize: Int = 8)(
     while (i < capacity) {
       val hash = hashes(i)
       if (!isInit(hash)) {
-        val key = _keys(i)
-        val value = _values(i)
+        val key = _keys(i).asInstanceOf[K]
+        val value = _values(i).asInstanceOf[V]
         f((key, value))
       }
       i += 1
