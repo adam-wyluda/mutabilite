@@ -8,7 +8,7 @@ class SeqTest extends FunSuite with BeforeAndAfter {
   var seq: BufferSeq[Int] = _
 
   before {
-    seq = new BufferSeq[Int]
+    seq = new BufferSeq[Int](initialSize = 1)
     1 to 10 foreach (seq.append(_))
   }
 
