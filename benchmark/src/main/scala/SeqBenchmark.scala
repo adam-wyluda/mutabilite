@@ -10,15 +10,17 @@ import scala.collection.mutable.{ArrayBuffer => StdlibSeq}
 @State(Scope.Thread)
 class SeqBenchmark {
 
+  val seqSize = 10000
+
   val seq: BufferSeq[Int] = {
     val seq = new BufferSeq[Int]
-    1 to 10000 foreach (seq.append(_))
+    1 to seqSize foreach (seq.append(_))
     seq
   }
 
   val stdSeq: StdlibSeq[Int] = {
     val seq = StdlibSeq[Int]()
-    1 to 10000 foreach (seq.append(_))
+    1 to seqSize foreach (seq.append(_))
     seq
   }
 
@@ -27,8 +29,7 @@ class SeqBenchmark {
   @Benchmark
   def readSequential(blackhole: Blackhole) = {
     var i = 0
-    val size = seq.size
-    while (i < size) {
+    while (i < seqSize) {
       blackhole.consume(seq(i))
       i += 1
     }
@@ -37,8 +38,7 @@ class SeqBenchmark {
   @Benchmark
   def readSequentialStdlib(blackhole: Blackhole) = {
     var i = 0
-    val size = stdSeq.size
-    while (i < size) {
+    while (i < seqSize) {
       blackhole.consume(stdSeq(i))
       i += 1
     }
@@ -46,19 +46,19 @@ class SeqBenchmark {
 
   @Benchmark
   def readRandom(blackhole: Blackhole) = {
-    blackhole.consume(seq(random.nextInt(seq.size)))
+    blackhole.consume(seq(random.nextInt(seqSize)))
   }
 
   @Benchmark
   def readRandomStdlib(blackhole: Blackhole) = {
-    blackhole.consume(stdSeq(random.nextInt(stdSeq.size)))
+    blackhole.consume(stdSeq(random.nextInt(seqSize)))
   }
 
   @Benchmark
   def append() = {
     val s = new BufferSeq[Int](initialSize = 16)
     var i = 0
-    while (i < 100000) {
+    while (i < seqSize) {
       s.append(i)
       i += 1
     }
@@ -68,7 +68,7 @@ class SeqBenchmark {
   def appendStdlib() = {
     val s = new StdlibSeq[Int](initialSize = 16)
     var i = 0
-    while (i < 100000) {
+    while (i < seqSize) {
       s.append(i)
       i += 1
     }
@@ -77,9 +77,8 @@ class SeqBenchmark {
   @Benchmark
   def updateSequential() = {
     val s = seq
-    val size = s.size
     var i = 0
-    while (i < size) {
+    while (i < seqSize) {
       s(i) = i * 2
       i += 1
     }
@@ -88,9 +87,8 @@ class SeqBenchmark {
   @Benchmark
   def updateSequentialStdlib() = {
     val s = stdSeq
-    val size = s.size
     var i = 0
-    while (i < size) {
+    while (i < seqSize) {
       s(i) = i * 2
       i += 1
     }
@@ -99,10 +97,9 @@ class SeqBenchmark {
   @Benchmark
   def updateRandom() = {
     val s = seq
-    val size = s.size
     var i = 0
-    while (i < size) {
-      s(random.nextInt(size)) = i * 2
+    while (i < seqSize) {
+      s(random.nextInt(seqSize)) = i * 2
       i += 1
     }
   }
@@ -110,10 +107,9 @@ class SeqBenchmark {
   @Benchmark
   def updateRandomStdlib() = {
     val s = stdSeq
-    val size = s.size
     var i = 0
-    while (i < size) {
-      s(random.nextInt(size)) = i * 2
+    while (i < seqSize) {
+      s(random.nextInt(seqSize)) = i * 2
       i += 1
     }
   }
@@ -129,7 +125,7 @@ class SeqBenchmark {
   def prepend() = {
     val s = new BufferSeq[Int](initialSize = 16)
     var i = 0
-    while (i < 10000) {
+    while (i < seqSize) {
       s.insert(0, i)
       i += 1
     }
@@ -139,7 +135,7 @@ class SeqBenchmark {
   def prependStdlib() = {
     val s = new StdlibSeq[Int](initialSize = 16)
     var i = 0
-    while (i < 10000) {
+    while (i < seqSize) {
       s.insert(0, i)
       i += 1
     }
