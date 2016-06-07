@@ -5,16 +5,16 @@ import org.scalatest.{BeforeAndAfter, FunSuite}
 import offheap.collection._
 
 class SeqTest extends FunSuite with BeforeAndAfter {
-  var seq: Seq[Int] = _
+  var seq: BufferSeq[Int] = _
 
   before {
-    seq = new NaiveSeq[Int]
+    seq = new BufferSeq[Int]
     1 to 10 foreach (seq.append(_))
   }
 
   test("isEmpty") {
     assert(seq.nonEmpty)
-    assert(new NaiveSeq[Int].isEmpty)
+    assert(new BufferSeq[Int].isEmpty)
   }
 
   test("size") {
@@ -36,7 +36,7 @@ class SeqTest extends FunSuite with BeforeAndAfter {
   }
 
   test("append") {
-    val seq = new NaiveSeq[Int]
+    val seq = new BufferSeq[Int]
 
     assert(seq.isEmpty)
     seq.append(1, 2, 3)
