@@ -114,7 +114,7 @@ class MapTest extends FunSuite with BeforeAndAfter {
     val keys = map.keys
 
     assert(keys.size == 3)
-    1 to 3 foreach (i => keys(i))
+    1 to 3 foreach (i => assert(keys(i)))
   }
 
   test("values") {

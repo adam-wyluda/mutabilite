@@ -126,14 +126,22 @@ class HashMap[K, V](initialSize: Int = 8)(
   }
 
   def keys: Set[K] = {
-    val result = new NaiveSet[K]
-    foreach { case (k, _) => result.add(k) }
+    val result = new MapSet[K]
+    var i = 0
+    while (i < capacity) {
+      if (!isInit(hashes(i))) result.add(_keys(i))
+      i += 1
+    }
     result
   }
 
   def values: Seq[V] = {
-    val result = new NaiveSeq[V]
-    foreach { case (_, v) => result.append(v) }
+    val result = new BufferSeq[V]
+    var i = 0
+    while (i < capacity) {
+      if (!isInit(hashes(i))) result.append(_values(i))
+      i += 1
+    }
     result
   }
 
