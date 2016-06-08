@@ -4,8 +4,16 @@ name := "scala-offheap-collections"
 version := "0.1-SNAPSHOT"
 val scalaVer = "2.11.8"
 
+lazy val codegen = project
+  .in(file("codegen"))
+  .settings(
+    moduleName := "codegen",
+    scalaVersion := scalaVer
+  )
+
 lazy val core = project
   .in(file("core"))
+  .dependsOn(codegen)
   .settings(
     moduleName := "core",
     libraryDependencies ++= Seq(
