@@ -10,13 +10,11 @@ class NaiveSeq[A](initialSize: Int = 1)(implicit tag: ClassTag[A])
 
   def apply(index: Int): A = array(index)
 
-  def append(elems: A*): Unit = {
-    val newSize = _size + elems.size
+  def append(elem: A): Unit = {
+    val newSize = _size + 1
     growTo(newSize)
-    elems.foreach { e =>
-      array(_size) = e
-      _size += 1
-    }
+    array(_size) = elem
+    _size += 1
   }
 
   def append(that: Traversable[A]): Unit = {

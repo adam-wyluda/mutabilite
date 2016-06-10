@@ -40,7 +40,7 @@ class SeqTest extends FunSuite with BeforeAndAfter {
     val seq = new BufferSeq[Int]
 
     assert(seq.isEmpty)
-    seq.append(1, 2, 3)
+    1 to 3 foreach (seq.append(_))
     assert(seq.nonEmpty)
     assert(seq.size == 3)
   }

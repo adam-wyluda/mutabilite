@@ -11,7 +11,7 @@ import scala.reflect.ClassTag
 
 trait ${T}Seq extends Seq[${T}]  {
   def apply(index: Int): ${T}
-  def append(elems: ${T}*): Unit
+  def append(elem: ${T}): Unit
   def append(that: Traversable[${T}]): Unit
   def update(index: Int, value: ${T}): Unit
   def remove(n: Int): ${T}
@@ -28,13 +28,11 @@ class ${T}BufferSeq(initialSize: Int = 16)//(implicit tag: ClassTag[A])
 
   def apply(index: Int): ${T} = array(index)
 
-  def append(elems: ${T}*): Unit = {
-    val newSize = _size + elems.size
+  def append(elem: ${T}): Unit = {
+    val newSize = _size + 1
     growTo(newSize)
-    elems.foreach { e =>
-      array(_size) = e
-      _size += 1
-    }
+    array(_size) = elem
+    _size += 1
   }
 
   def append(that: Traversable[${T}]): Unit = {
@@ -102,3 +100,5 @@ class ${T}BufferSeq(initialSize: Int = 16)//(implicit tag: ClassTag[A])
     }
   }
 }
+
+% end

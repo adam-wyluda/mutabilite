@@ -10,13 +10,11 @@ class BufferSeq[A](initialSize: Int = 16)(implicit tag: ClassTag[A])
 
   def apply(index: Int): A = array(index).asInstanceOf[A]
 
-  def append(elems: A*): Unit = {
-    val newSize = _size + elems.size
+  def append(elem: A): Unit = {
+    val newSize = _size + 1
     growTo(newSize)
-    elems.foreach { e =>
-      array(_size) = e.asInstanceOf[AnyRef]
-      _size += 1
-    }
+    array(_size) = elem.asInstanceOf[AnyRef]
+    _size += 1
   }
 
   def append(that: Traversable[A]): Unit = {
