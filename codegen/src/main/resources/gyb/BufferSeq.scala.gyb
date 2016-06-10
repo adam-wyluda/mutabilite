@@ -5,8 +5,6 @@ types = ['Boolean', 'Char', 'Byte', 'Short',
   'Int', 'Long', 'Float', 'Double', 'Object']
 }%
 
-import scala.reflect.ClassTag
-
 % for T in types:
 
 trait ${T}Seq extends Seq[${T}]  {
@@ -20,7 +18,7 @@ trait ${T}Seq extends Seq[${T}]  {
   def foreach[U](f: ${T} => U)
 }
 
-class ${T}BufferSeq(initialSize: Int = 16)//(implicit tag: ClassTag[A])
+class ${T}BufferSeq(initialSize: Int = 16)
   extends ${T}Seq {
 
   private[this] var array: Array[${T}] = new Array[${T}](initialSize)

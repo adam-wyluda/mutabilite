@@ -1,7 +1,7 @@
 package benchmark
 
 import org.openjdk.jmh.annotations._
-import offheap.collection._
+import offheap.collection.{IntBufferSeq, _}
 import org.openjdk.jmh.infra.Blackhole
 
 import scala.util.Random
@@ -12,8 +12,8 @@ class SeqBenchmark {
 
   val seqSize = 10000
 
-  val seq: BufferSeq[Int] = {
-    val seq = new BufferSeq[Int]
+  val seq: IntBufferSeq = {
+    val seq = new IntBufferSeq
     1 to seqSize foreach (seq.append(_))
     seq
   }
@@ -56,7 +56,7 @@ class SeqBenchmark {
 
   @Benchmark
   def append() = {
-    val s = new BufferSeq[Int](initialSize = 16)
+    val s = new IntBufferSeq(initialSize = 16)
     var i = 0
     while (i < seqSize) {
       s.append(i)
@@ -123,7 +123,7 @@ class SeqBenchmark {
 
   @Benchmark
   def prepend() = {
-    val s = new BufferSeq[Int](initialSize = 16)
+    val s = new IntBufferSeq(initialSize = 16)
     var i = 0
     while (i < seqSize) {
       s.insert(0, i)
@@ -145,17 +145,17 @@ class SeqBenchmark {
 @State(Scope.Thread)
 class SeqRemoveBenchmark {
 
-  val origin: BufferSeq[Int] = {
-    val seq = new BufferSeq[Int]
+  val origin: IntBufferSeq = {
+    val seq = new IntBufferSeq
     1 to 10000 foreach (seq.append(_))
     seq
   }
 
-  var seq: BufferSeq[Int] = _
+  var seq: IntBufferSeq = _
 
   @Setup(Level.Invocation)
   def setup = {
-    seq = new BufferSeq[Int]
+    seq = new IntBufferSeq
     seq.append(origin)
   }
 
