@@ -5,10 +5,11 @@ import org.scalatest.{BeforeAndAfter, FunSuite}
 import offheap.collection._
 
 class SeqTest extends FunSuite with BeforeAndAfter {
-  var seq: BufferSeq[Int] = _
+  var seq: IntSeq = _
 
   before {
-    seq = new BufferSeq[Int](initialSize = 1)
+//    seq = new BufferSeq[Int](initialSize = 1)
+    seq = new IntBufferSeq(initialSize = 1)
     1 to 10 foreach (seq.append(_))
   }
 

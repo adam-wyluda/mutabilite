@@ -13,6 +13,7 @@ lazy val api = project
 
 lazy val codegen = project
   .in(file("codegen"))
+  .dependsOn(api)
   .settings(
     moduleName := "codegen",
     scalaVersion := scalaVer
@@ -20,7 +21,7 @@ lazy val codegen = project
 
 lazy val core = project
   .in(file("core"))
-  .dependsOn(api)
+  .dependsOn(api, codegen)
   .settings(
     moduleName := "core",
     libraryDependencies ++= Seq(
