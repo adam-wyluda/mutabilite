@@ -26,6 +26,15 @@ class SeqBenchmark {
 
   val random = Random
 
+  var randIndex: Int = _
+  var randVal: Int = _
+
+  @Setup(Level.Invocation)
+  def setup = {
+    randIndex = random.nextInt(seqSize)
+    randVal = random.nextInt
+  }
+
   @Benchmark
   def readSequential(blackhole: Blackhole) = {
     var i = 0
@@ -45,14 +54,10 @@ class SeqBenchmark {
   }
 
   @Benchmark
-  def readRandom(blackhole: Blackhole) = {
-    blackhole.consume(seq(random.nextInt(seqSize)))
-  }
+  def readRandom = seq(randIndex)
 
   @Benchmark
-  def readRandomStdlib(blackhole: Blackhole) = {
-    blackhole.consume(stdSeq(random.nextInt(seqSize)))
-  }
+  def readRandomStdlib = stdSeq(randIndex)
 
   @Benchmark
   def append() = {
@@ -95,31 +100,24 @@ class SeqBenchmark {
   }
 
   @Benchmark
-  def updateRandom() = {
-    val s = seq
-    var i = 0
-    while (i < seqSize) {
-      s(random.nextInt(seqSize)) = i * 2
-      i += 1
-    }
+  def updateRandom = seq(randIndex) = randVal
+
+  @Benchmark
+  def updateRandomStdlib = stdSeq(randIndex) = randVal
+
+  @Benchmark
+  def foreach = {
+    var sum = 0
+    seq foreach (sum += _)
+    sum
   }
 
   @Benchmark
-  def updateRandomStdlib() = {
-    val s = stdSeq
-    var i = 0
-    while (i < seqSize) {
-      s(random.nextInt(seqSize)) = i * 2
-      i += 1
-    }
+  def foreachStdlib = {
+    var sum = 0
+    stdSeq foreach (sum += _)
+    sum
   }
-
-  @Benchmark
-  def foreach(blackhole: Blackhole) = seq foreach (blackhole.consume(_))
-
-  @Benchmark
-  def foreachStdlib(blackhole: Blackhole) =
-    stdSeq foreach (blackhole.consume(_))
 
   @Benchmark
   def prepend() = {
