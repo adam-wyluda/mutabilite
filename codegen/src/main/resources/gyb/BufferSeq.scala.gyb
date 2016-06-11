@@ -7,7 +7,7 @@ types = ['Boolean', 'Char', 'Byte', 'Short',
 
 % for T in types:
 
-trait ${T}Seq extends Seq[${T}]  {
+trait ${T}Seq extends Seq[${T}] {
   def apply(index: Int): ${T}
   def append(elem: ${T}): Unit
   def append(that: Traversable[${T}]): Unit
