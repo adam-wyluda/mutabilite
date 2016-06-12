@@ -4,54 +4,17 @@ import org.openjdk.jmh.annotations._
 import offheap.collection._
 import org.openjdk.jmh.infra.Blackhole
 
-import scala.util.Random
 import scala.collection.mutable.{HashSet => StdlibSet}
-
-object SetBenchmark {
-
-  val setSize = 10000
-  val random = Random
-
-  class Key(val x: Int, val y: Int, val z: Int) {
-    override def equals(that: Any) = {
-      val t = that.asInstanceOf[Key]
-      x == t.x && y == t.y && z == t.z
-    }
-    override def hashCode = (x * 31 + y) * 31 + z
-  }
-
-  object Key {
-    @inline
-    def generate =
-      new Key(random.nextInt(), random.nextInt(), random.nextInt())
-  }
-
-  val keys: Array[Key] = {
-    val keys = new Array[Key](setSize)
-    var i = 0
-    while (i < setSize) {
-      keys(i) = Key.generate
-      i += 1
-    }
-    keys
-  }
-
-  val initialSetSize = {
-    var size = 1
-    while (size < setSize) size *= 2
-    size
-  }
-}
 
 @State(Scope.Thread)
 class SetBenchmark {
 
-  import SetBenchmark._
+  import Benchmark._
 
   val set: MapSet[Key] = {
-    val set = new MapSet[Key](initialSetSize)
+    val set = new MapSet[Key](initialSize)
     var i = 0
-    while (i < setSize) {
+    while (i < size) {
       set.add(keys(i))
       i += 1
     }
@@ -61,7 +24,7 @@ class SetBenchmark {
   val stdSet: StdlibSet[Key] = {
     val set = StdlibSet[Key]()
     var i = 0
-    while (i < setSize) {
+    while (i < size) {
       set.add(keys(i))
       i += 1
     }
@@ -73,7 +36,7 @@ class SetBenchmark {
 
   @Setup(Level.Invocation)
   def setup = {
-    randKey = keys(random.nextInt(setSize))
+    randKey = keys(random.nextInt(size))
     nonExistingKey = Key.generate
   }
 
@@ -91,9 +54,9 @@ class SetBenchmark {
 
   @Benchmark
   def add = {
-    val s = new MapSet[Key](initialSetSize)
+    val s = new MapSet[Key](initialSize)
     var i = 0
-    while (i < setSize) {
+    while (i < size) {
       s.add(keys(i))
       i += 1
     }
@@ -103,7 +66,7 @@ class SetBenchmark {
   def addStdlib = {
     val s = StdlibSet[Key]()
     var i = 0
-    while (i < setSize) {
+    while (i < size) {
       s.add(keys(i))
       i += 1
     }
@@ -120,15 +83,15 @@ class SetBenchmark {
 @State(Scope.Thread)
 class SetRemoveBenchmark {
 
-  import SetBenchmark._
+  import Benchmark._
 
   var set: MapSet[Key] = _
 
   @Setup(Level.Invocation)
   def setup = {
-    set = new MapSet[Key](initialSetSize)
+    set = new MapSet[Key](initialSize)
     var i = 0
-    while (i < setSize) {
+    while (i < size) {
       set.add(keys(i))
       i += 1
     }
@@ -137,14 +100,14 @@ class SetRemoveBenchmark {
   @Benchmark
   def benchmark = {
     var i = 0
-    while (i < setSize / 10) { set.remove(keys(i * 10)); i += 1 }
+    while (i < size / 10) { set.remove(keys(i * 10)); i += 1 }
   }
 }
 
 @State(Scope.Thread)
 class SetRemoveStdlibBenchmark {
 
-  import SetBenchmark._
+  import Benchmark._
 
   var set: StdlibSet[Key] = _
 
@@ -152,7 +115,7 @@ class SetRemoveStdlibBenchmark {
   def setup = {
     set = StdlibSet[Key]()
     var i = 0
-    while (i < setSize) {
+    while (i < size) {
       set.add(keys(i))
       i += 1
     }
@@ -161,6 +124,6 @@ class SetRemoveStdlibBenchmark {
   @Benchmark
   def benchmark = {
     var i = 0
-    while (i < setSize / 10) { set.remove(keys(i * 10)); i += 1 }
+    while (i < size / 10) { set.remove(keys(i * 10)); i += 1 }
   }
 }
