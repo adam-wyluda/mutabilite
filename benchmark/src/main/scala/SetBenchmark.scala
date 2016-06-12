@@ -11,8 +11,8 @@ class SetBenchmark {
 
   import Benchmark._
 
-  val set: MapSet[Key] = {
-    val set = new MapSet[Key](initialSize)
+  val set: HashSet[Key] = {
+    val set = new HashSet[Key](initialSize)
     var i = 0
     while (i < size) {
       set.add(keys(i))
@@ -54,7 +54,7 @@ class SetBenchmark {
 
   @Benchmark
   def add = {
-    val s = new MapSet[Key](initialSize)
+    val s = new HashSet[Key](initialSize)
     var i = 0
     while (i < size) {
       s.add(keys(i))
@@ -85,11 +85,11 @@ class SetRemoveBenchmark {
 
   import Benchmark._
 
-  var set: MapSet[Key] = _
+  var set: HashSet[Key] = _
 
   @Setup(Level.Invocation)
   def setup = {
-    set = new MapSet[Key](initialSize)
+    set = new HashSet[Key](initialSize)
     var i = 0
     while (i < size) {
       set.add(keys(i))
