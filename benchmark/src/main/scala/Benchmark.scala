@@ -4,7 +4,7 @@ import scala.util.Random
 
 object Benchmark {
 
-  val size = 1000000
+  val size = 100000
 
   val random = Random
 
