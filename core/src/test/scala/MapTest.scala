@@ -5,6 +5,9 @@ import org.scalatest.{BeforeAndAfter, FunSuite}
 import offheap.collection._
 
 class MapTest extends FunSuite with BeforeAndAfter {
+
+  import HashEq.Implicits._
+
   var map: HashMap_Int_Object = _
 
   before {

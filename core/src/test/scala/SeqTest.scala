@@ -5,6 +5,9 @@ import org.scalatest.{BeforeAndAfter, FunSuite}
 import offheap.collection._
 
 class SeqTest extends FunSuite with BeforeAndAfter {
+
+  import HashEq.Implicits._
+
   var seq: IntSeq = _
 
   before {

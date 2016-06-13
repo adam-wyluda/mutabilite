@@ -1,5 +1,7 @@
 package offheap.collection
 
+import HashEq._
+
 %{
 types = ['Boolean', 'Char', 'Byte', 'Short',
   'Int', 'Long', 'Float', 'Double', 'Object']
@@ -18,7 +20,7 @@ trait ${T}Seq extends Seq[${T}] {
   def foreach[U](f: ${T} => U)
 }
 
-class ${T}BufferSeq(initialSize: Int = 16)
+class ${T}BufferSeq(initialSize: Int = 16)(implicit eq: Eq_${T})
   extends ${T}Seq {
 
   private[this] var array: Array[${T}] = new Array[${T}](initialSize)
@@ -56,7 +58,7 @@ class ${T}BufferSeq(initialSize: Int = 16)
     var i = 0
     while ({
       if (i < _size) {
-        if (array(i) == elem) {
+        if (eq.eqv(array(i), elem)) {
           result = i
           false
         } else {

@@ -1,0 +1,28 @@
+package offheap.collection
+
+%{
+types = ['Boolean', 'Char', 'Byte', 'Short',
+'Int', 'Long', 'Float', 'Double', 'Object']
+}%
+
+object HashEq {
+
+  % for T in types:
+
+  trait Eq_${T} extends Eq[${T}] {
+    def eqv(a: ${T}, b: ${T}): Boolean = a == b
+  }
+
+  trait Hash_${T} extends Eq_${T} with Hash[${T}] {
+    def hash(value: ${T}): Int = value.hashCode
+  }
+
+  % end
+
+
+  object Implicits {
+  % for T in types:
+    implicit object ${T}Hash extends Hash_${T}
+  % end
+  }
+}

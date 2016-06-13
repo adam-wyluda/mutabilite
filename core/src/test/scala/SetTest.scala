@@ -5,6 +5,9 @@ import org.scalatest.{BeforeAndAfter, FunSuite}
 import offheap.collection._
 
 class SetTest extends FunSuite with BeforeAndAfter {
+
+  import HashEq.Implicits._
+
   var set: IntHashSet = _
 
   before {

@@ -1,5 +1,7 @@
 package offheap.collection
 
+import HashEq._
+
 %{
 types = ['Boolean', 'Char', 'Byte', 'Short',
 'Int', 'Long', 'Float', 'Double', 'Object']
@@ -16,7 +18,7 @@ trait ${T}Set extends Set[${T}] {
   def diff(that: Set[${T}]): Set[${T}]
 }
 
-class ${T}HashSet(initialSize: Int = 8) extends ${T}Set {
+class ${T}HashSet(initialSize: Int = 8)(implicit hashK: Hash_${T}) extends ${T}Set {
 
   private[this] var hashes: Array[Int] = new Array[Int](initialSize)
   private[this] var _keys: Array[${T}] = new Array[${T}](initialSize)
@@ -36,7 +38,7 @@ class ${T}HashSet(initialSize: Int = 8) extends ${T}Set {
       if (!isInit(nextHash)) {
         val nextDis = (capacity + pos - nextHash) & mask
         if (nextDis >= dis) {
-          if (hash == nextHash && _keys(pos) == key) {
+          if (hash == nextHash && hashK.eqv(_keys(pos), key)) {
             result = pos
             false
           } else {
@@ -70,7 +72,7 @@ class ${T}HashSet(initialSize: Int = 8) extends ${T}Set {
         growIfNecessary
         result = true
         false
-      } else if (nextHash == originalHash && _keys(pos) == key) {
+      } else if (nextHash == originalHash && hashK.eqv(_keys(pos), key)) {
         result = false
         false
       } else {
@@ -168,7 +170,7 @@ class ${T}HashSet(initialSize: Int = 8) extends ${T}Set {
   }
 
   private[this] def hashCode(key: ${T}) = {
-    var hash = key.hashCode() & mask
+    var hash = hashK.hash(key) & mask
     hash |= (if (hash == 0) 1 else 0)
     hash
   }
