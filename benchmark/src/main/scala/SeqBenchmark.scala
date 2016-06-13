@@ -11,7 +11,7 @@ import scala.collection.mutable.{ArrayBuffer => StdlibSeq}
 @State(Scope.Thread)
 class SeqBenchmark {
 
-  val seqSize = 10000
+  val seqSize = Benchmark.size
 
   val seq: IntBufferSeq = {
     val seq = new IntBufferSeq
