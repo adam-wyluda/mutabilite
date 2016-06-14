@@ -8,17 +8,16 @@ class SeqTest extends FunSuite with BeforeAndAfter {
 
   import HashEq.Implicits._
 
-  var seq: IntSeq = _
+  var seq: Seq_Int = _
 
   before {
-//    seq = new BufferSeq[Int](initialSize = 1)
-    seq = new IntBufferSeq(initialSize = 1)
+    seq = new BufferSeq_Int(initialSize = 1)
     1 to 10 foreach (seq.append(_))
   }
 
   test("isEmpty") {
     assert(seq.nonEmpty)
-    assert(new BufferSeq[Int].isEmpty)
+    assert(new BufferSeq_Int().isEmpty)
   }
 
   test("size") {
@@ -40,7 +39,7 @@ class SeqTest extends FunSuite with BeforeAndAfter {
   }
 
   test("append") {
-    val seq = new BufferSeq[Int]
+    val seq = new BufferSeq_Int
 
     assert(seq.isEmpty)
     1 to 3 foreach (seq.append(_))

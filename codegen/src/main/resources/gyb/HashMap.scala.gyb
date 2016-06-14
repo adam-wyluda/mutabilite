@@ -144,7 +144,7 @@ class HashMap_${K}_${V}(initialSize: Int = 8)
   }
 
   def keys: Set[${K}] = {
-    val result = new ${K}HashSet
+    val result = new HashSet_${K}
     var i = 0
     while (i < capacity) {
       if (!isInit(hashes(i))) result.add(_keys(i))
@@ -154,7 +154,7 @@ class HashMap_${K}_${V}(initialSize: Int = 8)
   }
 
   def values: Seq[${V}] = {
-    val result = new ${V}BufferSeq
+    val result = new BufferSeq_${V}
     var i = 0
     while (i < capacity) {
       if (!isInit(hashes(i))) result.append(_values(i))

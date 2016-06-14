@@ -13,8 +13,8 @@ class SeqBenchmark {
 
   val seqSize = Benchmark.size
 
-  val seq: IntBufferSeq = {
-    val seq = new IntBufferSeq
+  val seq: BufferSeq_Int = {
+    val seq = new BufferSeq_Int
     1 to seqSize foreach (seq.append(_))
     seq
   }
@@ -62,7 +62,7 @@ class SeqBenchmark {
 
   @Benchmark
   def append() = {
-    val s = new IntBufferSeq(initialSize = 16)
+    val s = new BufferSeq_Int(initialSize = 16)
     var i = 0
     while (i < seqSize) {
       s.append(i)
@@ -122,7 +122,7 @@ class SeqBenchmark {
 
   @Benchmark
   def prepend() = {
-    val s = new IntBufferSeq(initialSize = 16)
+    val s = new BufferSeq_Int(initialSize = 16)
     var i = 0
     while (i < seqSize) {
       s.insert(0, i)
@@ -144,17 +144,17 @@ class SeqBenchmark {
 @State(Scope.Thread)
 class SeqRemoveBenchmark {
 
-  val origin: IntBufferSeq = {
-    val seq = new IntBufferSeq
+  val origin: BufferSeq_Int = {
+    val seq = new BufferSeq_Int
     1 to 10000 foreach (seq.append(_))
     seq
   }
 
-  var seq: IntBufferSeq = _
+  var seq: BufferSeq_Int = _
 
   @Setup(Level.Invocation)
   def setup = {
-    seq = new IntBufferSeq
+    seq = new BufferSeq_Int
     seq.append(origin)
   }
 

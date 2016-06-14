@@ -12,8 +12,8 @@ class IntSetBenchmark {
 
   import Benchmark._
 
-  val set: IntHashSet = {
-    val set = new IntHashSet(initialSize)
+  val set: HashSet_Int = {
+    val set = new HashSet_Int(initialSize)
     var i = 0
     while (i < size) {
       set.add(i)
@@ -55,7 +55,7 @@ class IntSetBenchmark {
 
   @Benchmark
   def add = {
-    val s = new IntHashSet(initialSize)
+    val s = new HashSet_Int(initialSize)
     var i = 0
     while (i < size) {
       s.add(i)
@@ -86,11 +86,11 @@ class IntSetRemoveBenchmark {
 
   import Benchmark._
 
-  var set: IntHashSet = _
+  var set: HashSet_Int = _
 
   @Setup(Level.Invocation)
   def setup = {
-    set = new IntHashSet(initialSize)
+    set = new HashSet_Int(initialSize)
     var i = 0
     while (i < size) {
       set.add(i)

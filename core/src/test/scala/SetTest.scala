@@ -8,17 +8,17 @@ class SetTest extends FunSuite with BeforeAndAfter {
 
   import HashEq.Implicits._
 
-  var set: IntHashSet = _
+  var set: Set_Int = _
 
   before {
-    set = new IntHashSet
+    set = new HashSet_Int
     1 to 7 foreach (set.add(_))
     5 to 10 foreach (set.add(_))
   }
 
   test("isEmpty") {
     assert(set.nonEmpty)
-    assert(new IntHashSet().isEmpty)
+    assert(new HashSet_Int().isEmpty)
   }
 
   test("size") {
@@ -60,7 +60,7 @@ class SetTest extends FunSuite with BeforeAndAfter {
   }
 
   test("intersect") {
-    val other = new IntHashSet
+    val other = new HashSet_Int
     5 to 15 foreach (other.add(_))
 
     val intersect = set intersect other
@@ -71,7 +71,7 @@ class SetTest extends FunSuite with BeforeAndAfter {
   }
 
   test("union") {
-    val other = new IntHashSet
+    val other = new HashSet_Int
     5 to 15 foreach (other.add(_))
 
     val union = set union other
@@ -80,7 +80,7 @@ class SetTest extends FunSuite with BeforeAndAfter {
   }
 
   test("diff") {
-    val other = new IntHashSet
+    val other = new HashSet_Int
     5 to 15 foreach (set.add(_))
     5 to 10 foreach (other.add(_))
 
