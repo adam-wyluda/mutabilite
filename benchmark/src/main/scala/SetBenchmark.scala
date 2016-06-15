@@ -22,6 +22,16 @@ class SetBenchmark {
     set
   }
 
+  val genericSet: HashSet[Object] = {
+    val set = new HashSet[Object](initialSize)
+    var i = 0
+    while (i < size) {
+      set.add(keys(i))
+      i += 1
+    }
+    set
+  }
+
   val stdSet: StdlibSet[Key] = {
     val set = StdlibSet[Key]()
     var i = 0
@@ -45,10 +55,16 @@ class SetBenchmark {
   def containsExisting = set(randKey)
 
   @Benchmark
+  def containsExistingGeneric = genericSet(randKey)
+
+  @Benchmark
   def containsExistingStdlib = stdSet(randKey)
 
   @Benchmark
   def containsNonExisting = set(nonExistingKey)
+
+  @Benchmark
+  def containsNonExistingGeneric = genericSet(nonExistingKey)
 
   @Benchmark
   def containsNonExistingStdlib = stdSet(nonExistingKey)
@@ -56,6 +72,16 @@ class SetBenchmark {
   @Benchmark
   def add = {
     val s = new HashSet_Object(initialSize)
+    var i = 0
+    while (i < size) {
+      s.add(keys(i))
+      i += 1
+    }
+  }
+
+  @Benchmark
+  def addGeneric = {
+    val s = new HashSet[Object](initialSize)
     var i = 0
     while (i < size) {
       s.add(keys(i))
@@ -77,6 +103,9 @@ class SetBenchmark {
   def foreach(blackhole: Blackhole) = set foreach (blackhole.consume(_))
 
   @Benchmark
+  def foreachGeneric(blackhole: Blackhole) = genericSet foreach (blackhole.consume(_))
+
+  @Benchmark
   def foreachStdlib(blackhole: Blackhole) =
     stdSet foreach (blackhole.consume(_))
 }
@@ -91,6 +120,30 @@ class SetRemoveBenchmark {
   @Setup(Level.Invocation)
   def setup = {
     set = new HashSet_Object(initialSize)
+    var i = 0
+    while (i < size) {
+      set.add(keys(i))
+      i += 1
+    }
+  }
+
+  @Benchmark
+  def benchmark = {
+    var i = 0
+    while (i < size / 10) { set.remove(keys(i * 10)); i += 1 }
+  }
+}
+
+@State(Scope.Thread)
+class SetRemoveGenericBenchmark {
+
+  import Benchmark._
+
+  var set: HashSet[Object] = _
+
+  @Setup(Level.Invocation)
+  def setup = {
+    set = new HashSet[Object](initialSize)
     var i = 0
     while (i < size) {
       set.add(keys(i))

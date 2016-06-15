@@ -19,6 +19,12 @@ class SeqBenchmark {
     seq
   }
 
+  val genericSeq: BufferSeq[Int] = {
+    val seq = new BufferSeq[Int]
+    1 to seqSize foreach (seq.append(_))
+    seq
+  }
+
   val stdSeq: StdlibSeq[Int] = {
     val seq = StdlibSeq[Int]()
     1 to seqSize foreach (seq.append(_))
@@ -46,6 +52,15 @@ class SeqBenchmark {
   }
 
   @Benchmark
+  def readSequentialGeneric(blackhole: Blackhole) = {
+    var i = 0
+    while (i < seqSize) {
+      blackhole.consume(genericSeq(i))
+      i += 1
+    }
+  }
+
+  @Benchmark
   def readSequentialStdlib(blackhole: Blackhole) = {
     var i = 0
     while (i < seqSize) {
@@ -58,11 +73,24 @@ class SeqBenchmark {
   def readRandom = seq(randIndex)
 
   @Benchmark
+  def readRandomGeneric = genericSeq(randIndex)
+
+  @Benchmark
   def readRandomStdlib = stdSeq(randIndex)
 
   @Benchmark
   def append() = {
     val s = new BufferSeq_Int(initialSize = 16)
+    var i = 0
+    while (i < seqSize) {
+      s.append(i)
+      i += 1
+    }
+  }
+
+  @Benchmark
+  def appendGeneric() = {
+    val s = new BufferSeq[Int](initialSize = 16)
     var i = 0
     while (i < seqSize) {
       s.append(i)
@@ -91,6 +119,16 @@ class SeqBenchmark {
   }
 
   @Benchmark
+  def updateSequentialGeneric() = {
+    val s = genericSeq
+    var i = 0
+    while (i < seqSize) {
+      s(i) = i * 2
+      i += 1
+    }
+  }
+
+  @Benchmark
   def updateSequentialStdlib() = {
     val s = stdSeq
     var i = 0
@@ -104,12 +142,22 @@ class SeqBenchmark {
   def updateRandom = seq(randIndex) = randVal
 
   @Benchmark
+  def updateRandomGeneric = genericSeq(randIndex) = randVal
+
+  @Benchmark
   def updateRandomStdlib = stdSeq(randIndex) = randVal
 
   @Benchmark
   def foreach = {
     var sum = 0
     seq foreach (sum += _)
+    sum
+  }
+
+  @Benchmark
+  def foreachGeneric = {
+    var sum = 0
+    genericSeq foreach (sum += _)
     sum
   }
 
@@ -123,6 +171,16 @@ class SeqBenchmark {
   @Benchmark
   def prepend() = {
     val s = new BufferSeq_Int(initialSize = 16)
+    var i = 0
+    while (i < seqSize) {
+      s.insert(0, i)
+      i += 1
+    }
+  }
+
+  @Benchmark
+  def prependGeneric() = {
+    val s = new BufferSeq[Int](initialSize = 16)
     var i = 0
     while (i < seqSize) {
       s.insert(0, i)
@@ -155,6 +213,29 @@ class SeqRemoveBenchmark {
   @Setup(Level.Invocation)
   def setup = {
     seq = new BufferSeq_Int
+    seq.append(origin)
+  }
+
+  @Benchmark
+  def benchmark = {
+    while (seq.nonEmpty) seq.remove(0)
+  }
+}
+
+@State(Scope.Thread)
+class SeqRemoveGenericBenchmark {
+
+  val origin: BufferSeq[Int] = {
+    val seq = new BufferSeq[Int]
+    1 to 10000 foreach (seq.append(_))
+    seq
+  }
+
+  var seq: BufferSeq[Int] = _
+
+  @Setup(Level.Invocation)
+  def setup = {
+    seq = new BufferSeq[Int]
     seq.append(origin)
   }
 
