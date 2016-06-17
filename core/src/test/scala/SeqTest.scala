@@ -7,6 +7,7 @@ import offheap.collection._
 class SeqTest extends FunSuite with BeforeAndAfter {
 
   import HashEq.Implicits._
+  import SeqBuilders._
 
   var seq: Seq_Int = _
 
@@ -81,5 +82,42 @@ class SeqTest extends FunSuite with BeforeAndAfter {
     for (i <- 2 until 10) {
       assert(seq(i) == i)
     }
+  }
+
+  test("map") {
+    val seq: Seq_Int = new BufferSeq_Int
+    1 to 3 foreach (seq.append(_))
+
+    val mapped = seq.map(i => i * 2.0f)
+    val test: Seq_Float = mapped
+    assert(mapped.size == 3)
+    1 to 3 foreach (i => assert(mapped(i - 1) == i * 2.0f))
+  }
+
+  test("flatMap") {
+    val seq: Seq_Int = new BufferSeq_Int
+    1 to 5 by 2 foreach (seq.append(_))
+
+    val mapped = seq flatMap (i => {
+      val r = new BufferSeq_Float
+      r.append(i)
+      r.append(i + 1)
+      r
+    })
+    val test: Seq_Float = mapped
+
+    assert(mapped.size == 6)
+    1 to 6 foreach (i => assert(mapped(i - 1) == i))
+  }
+
+  test("filter") {
+    val seq: Seq_Int = new BufferSeq_Int
+    1 to 10 foreach (seq.append(_))
+
+    val filtered = seq filter (i => i % 2 == 0)
+    val test: Seq_Int = filtered
+
+    assert(filtered.size == 5)
+    2 to 10 by 2 foreach (i => assert(filtered((i - 1) / 2) == i))
   }
 }

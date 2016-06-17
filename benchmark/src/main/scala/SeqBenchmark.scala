@@ -213,7 +213,7 @@ class SeqRemoveBenchmark {
   @Setup(Level.Invocation)
   def setup = {
     seq = new BufferSeq_Int
-    seq.append(origin)
+    origin.foreach(seq.append(_))
   }
 
   @Benchmark
