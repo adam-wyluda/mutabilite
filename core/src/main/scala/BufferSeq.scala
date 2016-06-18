@@ -62,6 +62,39 @@ class BufferSeq[A](initialSize: Int = 16)(implicit tag: ClassTag[A])
     _size += 1
   }
 
+  def map[B: ClassTag](f: A => B): BufferSeq[B] = {
+    val builder = new BufferSeq[B]
+    var i = 0
+    while (i < _size) {
+      builder.append(f(array(i).asInstanceOf[A]))
+      i += 1
+    }
+    builder
+  }
+
+  def flatMap[B: ClassTag](f: A => Traversable[B]): BufferSeq[B] = {
+    val builder = new BufferSeq[B]
+    var i = 0
+    while (i < _size) {
+      val el = array(i)
+      val result = f(el.asInstanceOf[A])
+      result foreach (builder.append(_))
+      i += 1
+    }
+    builder
+  }
+
+  def filter(f: A => Boolean): BufferSeq[A] = {
+    val result = new BufferSeq[A]
+    var i = 0
+    while (i < _size) {
+      val el = array(i).asInstanceOf[A]
+      if (f(el)) result.append(el)
+      i += 1
+    }
+    result
+  }
+
   private def copy(src: Int, dest: Int, len: Int) = System.arraycopy(array, src, array, dest, len)
 
   private def shouldGrow(newSize: Int) = newSize > array.size
@@ -71,6 +104,12 @@ class BufferSeq[A](initialSize: Int = 16)(implicit tag: ClassTag[A])
     this.array = newArray
   }
   private def growTo(size: Int) = while (shouldGrow(size)) grow
+
+  private def lowestPowOf2GreaterThan(min: Int) = {
+    var result = 1
+    while (result <= min) result *= 2
+    result
+  }
 
   override def isEmpty = _size == 0
   override def size: Int = _size

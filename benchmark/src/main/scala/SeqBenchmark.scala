@@ -2,6 +2,7 @@ package benchmark
 
 import org.openjdk.jmh.annotations._
 import offheap.collection._
+import SeqBuilders._
 import HashEq.Implicits._
 import org.openjdk.jmh.infra.Blackhole
 
@@ -197,6 +198,45 @@ class SeqBenchmark {
       i += 1
     }
   }
+
+  @Benchmark
+  def map = seq map (_ + 1)
+
+  @Benchmark
+  def mapGeneric = genericSeq map (_ + 1)
+
+  @Benchmark
+  def mapStdlib = stdSeq map (_ + 1)
+
+  @Benchmark
+  def flatMap = seq flatMap { i =>
+    val r = new BufferSeq_Double
+    1 to 5 foreach (j => r.append(i + j))
+    r
+  }
+
+  @Benchmark
+  def flatMapGeneric = genericSeq flatMap { i =>
+    val r = new BufferSeq[Double]
+    1 to 5 foreach (j => r.append(i + j))
+    r
+  }
+
+  @Benchmark
+  def flatMapStdlib = stdSeq flatMap { i =>
+    val r = StdlibSeq[Double]()
+    1 to 5 foreach (j => r.append(i + j))
+    r
+  }
+
+  @Benchmark
+  def filter = seq filter (_ % 2 == 0)
+
+  @Benchmark
+  def filterGeneric = genericSeq filter (_ % 2 == 0)
+
+  @Benchmark
+  def filterStdlib = stdSeq filter (_ % 2 == 0)
 }
 
 @State(Scope.Thread)
