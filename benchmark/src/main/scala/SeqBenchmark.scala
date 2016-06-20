@@ -200,7 +200,7 @@ class SeqBenchmark {
   }
 
   @Benchmark
-  def map = seq map (_ + 1)
+  def map = seq map_Int (_ + 1)
 
   @Benchmark
   def mapGeneric = genericSeq map (_ + 1)
@@ -209,23 +209,26 @@ class SeqBenchmark {
   def mapStdlib = stdSeq map (_ + 1)
 
   @Benchmark
-  def flatMap = seq flatMap { i =>
-    val r = new BufferSeq_Double
-    1 to 5 foreach (j => r.append(i + j))
+  def flatMap = seq flatMap_Int { i =>
+    val r = new BufferSeq_Int
+    var j = 0
+    while (j < 5) { r.append(i + j); j += 1 }
     r
   }
 
   @Benchmark
   def flatMapGeneric = genericSeq flatMap { i =>
-    val r = new BufferSeq[Double]
-    1 to 5 foreach (j => r.append(i + j))
+    val r = new BufferSeq[Int]
+    var j = 0
+    while (j < 5) { r.append(i + j); j += 1 }
     r
   }
 
   @Benchmark
   def flatMapStdlib = stdSeq flatMap { i =>
-    val r = StdlibSeq[Double]()
-    1 to 5 foreach (j => r.append(i + j))
+    val r = StdlibSeq[Int]()
+    var j = 0
+    while (j < 5) { r.append(i + j); j += 1 }
     r
   }
 

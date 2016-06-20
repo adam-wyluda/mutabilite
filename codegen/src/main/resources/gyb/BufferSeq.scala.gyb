@@ -26,7 +26,9 @@ trait Seq_${T} extends Seq[${T}] {
   def foreach[U](f: ${T} => U)
 
   def map[B, S <: Seq[B]](f: ${T} => B)(implicit builder: S): S
+  def map_${T}(f: ${T} => ${T}): Seq_${T}
   def flatMap[B, S <: Seq[B]](f: ${T} => Traversable[B])(implicit builder: S): S
+  def flatMap_${T}(f: ${T} => Seq_${T}): Seq_${T}
   def filter(f: ${T} => Boolean): Seq_${T}
 }
 
@@ -90,12 +92,39 @@ class BufferSeq_${T}(initialSize: Int = 16)(implicit eq: Eq_${T})
     builder
   }
 
+  def map_${T}(f: ${T} => ${T}): BufferSeq_${T} = {
+    val builder = new BufferSeq_${T}(initialSize = array.size)
+    var i = 0
+    while (i < _size) {
+      builder.append(f(array(i)))
+      i += 1
+    }
+    builder
+  }
+
   def flatMap[B, S <: Seq[B]](f: ${T} => Traversable[B])(implicit builder: S): S = {
     var i = 0
     while (i < _size) {
       val el = array(i)
       val result = f(el)
       result foreach (builder.append(_))
+      i += 1
+    }
+    builder
+  }
+
+  def flatMap_${T}(f: ${T} => Seq_${T}): Seq_${T} = {
+    val builder = new BufferSeq_${T}
+    var i = 0
+    while (i < _size) {
+      val el = array(i)
+      val result = f(el)
+      val resultSize = result.size
+      var j = 0
+      while (j < resultSize) {
+        result.append(result(j))
+        j += 1
+      }
       i += 1
     }
     builder
