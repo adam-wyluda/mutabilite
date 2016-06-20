@@ -4,3 +4,4 @@ python project/gyb.py ./codegen/src/main/resources/gyb/BufferSeq.scala.gyb > ./c
 python project/gyb.py ./codegen/src/main/resources/gyb/HashMap.scala.gyb > ./codegen/src/main/scala/codegen/GenHashMap.scala
 python project/gyb.py ./codegen/src/main/resources/gyb/HashSet.scala.gyb > ./codegen/src/main/scala/codegen/GenHashSet.scala
 python project/gyb.py ./codegen/src/main/resources/gyb/HashEq.scala.gyb > ./codegen/src/main/scala/codegen/GenHashEq.scala
+python project/gyb.py ./codegen/src/main/resources/gyb/Opt.scala.gyb > ./codegen/src/main/scala/codegen/GenOpt.scala

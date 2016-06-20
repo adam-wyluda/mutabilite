@@ -11,11 +11,11 @@ types = ['Boolean', 'Char', 'Byte', 'Short',
 % for V in types:
 
 trait Map_${K}_${V} extends Map[${K}, ${V}] {
-  def apply(key: ${K}): Opt[${V}]
-  def put(key: ${K}, value: ${V}): Opt[${V}]
-  def remove(key: ${K}): Opt[${V}]
-  def keys: Set[${K}]
-  def values: Seq[${V}]
+  def apply(key: ${K}): Opt_${V}
+  def put(key: ${K}, value: ${V}): Opt_${V}
+  def remove(key: ${K}): Opt_${V}
+  def keys: Set_${K}
+  def values: Seq_${V}
   def contains(key: ${K}): Boolean
 }
 
@@ -34,14 +34,12 @@ class HashMap_${K}_${V}(initialSize: Int = 8)
   private[this] var capacity = initialSize
   private[this] var mask = capacity - 1
 
-  private[this] val emptyOpt = new Opt[${V}]()
-
-  def apply(key: ${K}): Opt[${V}] = {
+  def apply(key: ${K}): Opt_${V} = {
     val index = indexOf(key)
     if (index == -1) {
-      emptyOpt
+      None_${V}
     } else {
-      new Opt[${V}](_values(index))
+      new Opt_${V}(_values(index))
     }
   }
 
@@ -73,14 +71,14 @@ class HashMap_${K}_${V}(initialSize: Int = 8)
     result
   }
 
-  def put(key: ${K}, value: ${V}): Opt[${V}] = {
+  def put(key: ${K}, value: ${V}): Opt_${V} = {
     var _key = key
     var _value = value
     var originalHash = hashCode(key)
     var hash = originalHash
     var pos = hash
     var dis = 0
-    var previous = new Opt[${V}]()
+    var previous = new Opt_${V}()
     while ({
       val nextHash = hashes(pos)
       if (isInit(nextHash)) {
@@ -89,7 +87,7 @@ class HashMap_${K}_${V}(initialSize: Int = 8)
         growIfNecessary
         false
       } else if (nextHash == originalHash && hashK.eqv(_keys(pos), key)) {
-        previous = new Opt[${V}](_values(pos))
+        previous = new Opt_${V}(_values(pos))
         _values(pos) = value
         false
       } else {
@@ -113,10 +111,10 @@ class HashMap_${K}_${V}(initialSize: Int = 8)
     previous
   }
 
-  def remove(key: ${K}): Opt[${V}] = {
+  def remove(key: ${K}): Opt_${V} = {
     var index = indexOf(key)
     if (index != -1) {
-      val previous = new Opt[${V}](_values(index))
+      val previous = new Opt_${V}(_values(index))
       while ({
         val nextIndex = (index + 1) & mask
         val nextHash = hashes(nextIndex)
@@ -139,11 +137,11 @@ class HashMap_${K}_${V}(initialSize: Int = 8)
       _size -= 1
       previous
     } else {
-      new Opt[${V}]()
+      new Opt_${V}()
     }
   }
 
-  def keys: Set[${K}] = {
+  def keys: Set_${K} = {
     val result = new HashSet_${K}
     var i = 0
     while (i < capacity) {
@@ -153,7 +151,7 @@ class HashMap_${K}_${V}(initialSize: Int = 8)
     result
   }
 
-  def values: Seq[${V}] = {
+  def values: Seq_${V} = {
     val result = new BufferSeq_${V}
     var i = 0
     while (i < capacity) {
