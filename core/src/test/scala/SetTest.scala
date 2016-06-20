@@ -63,7 +63,7 @@ class SetTest extends FunSuite with BeforeAndAfter {
     val other = new HashSet_Int
     5 to 15 foreach (other.add(_))
 
-    val intersect = set intersect other
+    val intersect = set intersect_Int other
     assert(intersect.size == 6)
     1 to 4 foreach (i => assert(!intersect(i)))
     5 to 10 foreach (i => assert(intersect(i)))
@@ -74,7 +74,7 @@ class SetTest extends FunSuite with BeforeAndAfter {
     val other = new HashSet_Int
     5 to 15 foreach (other.add(_))
 
-    val union = set union other
+    val union = set union_Int other
     assert(union.size == 15)
     1 to 15 foreach (i => assert(union(i)))
   }
@@ -84,7 +84,7 @@ class SetTest extends FunSuite with BeforeAndAfter {
     5 to 15 foreach (set.add(_))
     5 to 10 foreach (other.add(_))
 
-    val diff = set diff other
+    val diff = set diff_Int other
     assert(diff.size == 9)
     1 to 4 foreach (i => assert(diff(i)))
     5 to 10 foreach (i => assert(!diff(i)))
