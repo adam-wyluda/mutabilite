@@ -1,6 +1,6 @@
 package offheap.collection
 
-trait Set[A] extends Traversable[A] {
+trait Set[A] extends Traversable1[A] {
   def apply(elem: A): Boolean
   def add(elem: A): Boolean
   def remove(elem: A): Boolean

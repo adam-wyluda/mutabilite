@@ -196,7 +196,20 @@ class HashMap[K, V](initialSize: Int = 8)(
 
   override def size: Int = _size
 
-  override def foreach[U](f: ((K, V)) => U): Unit = {
+  override def foreach(f: (K, V) => Unit): Unit = {
+    var i = 0
+    while (i < capacity) {
+      val hash = hashes(i)
+      if (!isInit(hash)) {
+        val key = _keys(i).asInstanceOf[K]
+        val value = _values(i).asInstanceOf[V]
+        f(key, value)
+      }
+      i += 1
+    }
+  }
+
+  def foreachGeneric[U](f: ((K, V)) => U): Unit = {
     var i = 0
     while (i < capacity) {
       val hash = hashes(i)

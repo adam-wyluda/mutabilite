@@ -17,7 +17,7 @@ class NaiveSeq[A](initialSize: Int = 1)(implicit tag: ClassTag[A])
     _size += 1
   }
 
-  def append(that: Traversable[A]): Unit = {
+  def append(that: Traversable1[A]): Unit = {
     val newSize = _size + that.size
     growTo(newSize)
     that foreach { e =>
@@ -67,6 +67,6 @@ class NaiveSeq[A](initialSize: Int = 1)(implicit tag: ClassTag[A])
 
   override def isEmpty = _size == 0
   override def size: Int = _size
-  override def foreach[U](f: (A) => U): Unit =
+  override def foreach(f: (A) => Unit): Unit =
     0 until _size foreach (a => f(array(a)))
 }

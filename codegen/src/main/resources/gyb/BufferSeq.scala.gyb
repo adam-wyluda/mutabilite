@@ -23,11 +23,11 @@ trait Seq_${T} extends Seq[${T}] {
   def remove(n: Int): ${T}
   def index(elem: ${T}): Int
   def insert(index: Int, elem: ${T}): Unit
-  def foreach[U](f: ${T} => U)
+  def foreach(f: ${T} => Unit)
 
   def map[B, S <: Seq[B]](f: ${T} => B)(implicit builder: S): S
   def map_${T}(f: ${T} => ${T}): Seq_${T}
-  def flatMap[B, S <: Seq[B]](f: ${T} => Traversable[B])(implicit builder: S): S
+  def flatMap[B, S <: Seq[B]](f: ${T} => Traversable1[B])(implicit builder: S): S
   def flatMap_${T}(f: ${T} => Seq_${T}): Seq_${T}
   def filter(f: ${T} => Boolean): Seq_${T}
 }
@@ -102,7 +102,7 @@ class BufferSeq_${T}(initialSize: Int = 16)(implicit eq: Eq_${T})
     builder
   }
 
-  def flatMap[B, S <: Seq[B]](f: ${T} => Traversable[B])(implicit builder: S): S = {
+  def flatMap[B, S <: Seq[B]](f: ${T} => Traversable1[B])(implicit builder: S): S = {
     var i = 0
     while (i < _size) {
       val el = array(i)
@@ -159,7 +159,7 @@ class BufferSeq_${T}(initialSize: Int = 16)(implicit eq: Eq_${T})
 
   override def isEmpty = _size == 0
   override def size: Int = _size
-  override def foreach[U](f: (${T}) => U): Unit = {
+  override def foreach(f: ${T} => Unit): Unit = {
     var i = 0
     while (i < _size) {
       f(array(i))

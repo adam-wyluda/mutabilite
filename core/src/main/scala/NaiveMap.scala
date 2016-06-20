@@ -56,5 +56,5 @@ class NaiveMap[K, V](implicit tag: ClassTag[(K, V)],
 
   override def isEmpty = seq.isEmpty
   override def size: Int = seq.size
-  override def foreach[U](f: ((K, V)) => U): Unit = seq foreach f
+  override def foreach(f: (K, V) => Unit): Unit = seq foreach f.tupled
 }

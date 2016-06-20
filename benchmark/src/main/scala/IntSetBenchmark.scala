@@ -103,7 +103,7 @@ class IntSetBenchmark {
   def foreach(blackhole: Blackhole) = set foreach (blackhole.consume(_))
 
   @Benchmark
-  def foreachGeneric(blackhole: Blackhole) = genericSet foreach (blackhole.consume(_))
+  def foreachGeneric(blackhole: Blackhole) = genericSet foreachGeneric (blackhole.consume(_))
 
   @Benchmark
   def foreachStdlib(blackhole: Blackhole) =

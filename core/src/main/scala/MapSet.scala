@@ -38,5 +38,5 @@ class MapSet[A](initialSize: Int = 8)(implicit tag: ClassTag[A])
 
   override def isEmpty = map.isEmpty
   override def size: Int = map.size
-  override def foreach[U](f: (A) => U): Unit = map foreach (p => f(p._1))
+  override def foreach(f: A => Unit): Unit = map foreach ((k, _) => f(k))
 }

@@ -182,7 +182,7 @@ class HashSet_${T}(initialSize: Int = 8)(implicit hashK: Hash_${T}) extends Set_
 
   override def size: Int = _size
 
-  override def foreach[U](f: (${T}) => U): Unit = {
+  override def foreach(f: ${T} => Unit): Unit = {
     var i = 0
     while (i < capacity) {
       val hash = hashes(i)

@@ -212,14 +212,14 @@ class HashMap_${K}_${V}(initialSize: Int = 8)
 
   override def size: Int = _size
 
-  override def foreach[U](f: ((${K}, ${V})) => U): Unit = {
+  override def foreach(f: (${K}, ${V}) => Unit): Unit = {
     var i = 0
     while (i < capacity) {
       val hash = hashes(i)
       if (!isInit(hash)) {
         val key = _keys(i)
         val value = _values(i)
-        f((key, value))
+        f(key, value)
       }
       i += 1
     }

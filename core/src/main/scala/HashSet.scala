@@ -172,7 +172,19 @@ class HashSet[A](initialSize: Int = 8)(implicit tag: ClassTag[A])
 
   override def size: Int = _size
 
-  override def foreach[U](f: (A) => U): Unit = {
+  override def foreach(f: A => Unit): Unit = {
+    var i = 0
+    while (i < capacity) {
+      val hash = hashes(i)
+      if (!isInit(hash)) {
+        val key = _keys(i).asInstanceOf[A]
+        f(key)
+      }
+      i += 1
+    }
+  }
+
+  def foreachGeneric[U](f: A => U): Unit = {
     var i = 0
     while (i < capacity) {
       val hash = hashes(i)

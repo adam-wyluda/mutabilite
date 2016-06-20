@@ -17,7 +17,7 @@ class BufferSeq[A](initialSize: Int = 16)(implicit tag: ClassTag[A])
     _size += 1
   }
 
-  def append(that: Traversable[A]): Unit = {
+  def append(that: Traversable1[A]): Unit = {
     val newSize = _size + that.size
     growTo(newSize)
     that foreach { e =>
@@ -72,7 +72,7 @@ class BufferSeq[A](initialSize: Int = 16)(implicit tag: ClassTag[A])
     builder
   }
 
-  def flatMap[B: ClassTag](f: A => Traversable[B]): BufferSeq[B] = {
+  def flatMap[B: ClassTag](f: A => Traversable1[B]): BufferSeq[B] = {
     val builder = new BufferSeq[B]
     var i = 0
     while (i < _size) {
@@ -113,7 +113,14 @@ class BufferSeq[A](initialSize: Int = 16)(implicit tag: ClassTag[A])
 
   override def isEmpty = _size == 0
   override def size: Int = _size
-  override def foreach[U](f: (A) => U): Unit = {
+  override def foreach(f: (A) => Unit): Unit = {
+    var i = 0
+    while (i < _size) {
+      f(array(i).asInstanceOf[A])
+      i += 1
+    }
+  }
+  def foreachGeneric[U](f: (A) => Unit): Unit = {
     var i = 0
     while (i < _size) {
       f(array(i).asInstanceOf[A])

@@ -100,10 +100,10 @@ class MapBenchmark {
   }
 
   @Benchmark
-  def foreach(blackhole: Blackhole) = map foreach (blackhole.consume(_))
+  def foreach(blackhole: Blackhole) = map foreach ((k, v) => blackhole.consume(k))
 
   @Benchmark
-  def foreachGeneric(blackhole: Blackhole) = genericMap foreach (blackhole.consume(_))
+  def foreachGeneric(blackhole: Blackhole) = genericMap foreachGeneric (blackhole.consume(_))
 
   @Benchmark
   def foreachStdlib(blackhole: Blackhole) =

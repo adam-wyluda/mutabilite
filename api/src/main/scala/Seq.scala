@@ -1,6 +1,6 @@
 package offheap.collection
 
-trait Seq[A] extends Traversable[A] {
+trait Seq[A] extends Traversable1[A] {
   def apply(index: Int): A
   def append(elem: A): Unit
   def update(index: Int, value: A): Unit

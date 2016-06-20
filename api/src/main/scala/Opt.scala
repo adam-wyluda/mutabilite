@@ -1,6 +1,6 @@
 package offheap.collection
 
-class Opt[A] extends Traversable[A] {
+class Opt[A] extends Traversable1[A] {
 
   private[this] var value: A = _
   private[this] var empty: Boolean = true
@@ -17,5 +17,5 @@ class Opt[A] extends Traversable[A] {
 
   override def isEmpty: Boolean = empty
   override def size: Int = if (nonEmpty) 1 else 0
-  override def foreach[U](f: (A) => U): Unit = if (nonEmpty) f(get())
+  override def foreach(f: A => Unit): Unit = if (nonEmpty) f(get())
 }

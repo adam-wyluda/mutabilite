@@ -158,7 +158,7 @@ class SeqBenchmark {
   @Benchmark
   def foreachGeneric = {
     var sum = 0
-    genericSeq foreach (sum += _)
+    genericSeq foreachGeneric (sum += _)
     sum
   }
 

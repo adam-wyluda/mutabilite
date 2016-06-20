@@ -51,5 +51,5 @@ class NaiveSet[A](implicit tag: ClassTag[A]) extends Set[A] {
 
   override def isEmpty = seq.isEmpty
   override def size: Int = seq.size
-  override def foreach[U](f: (A) => U): Unit = seq foreach f
+  override def foreach(f: A => Unit): Unit = seq foreach f
 }
