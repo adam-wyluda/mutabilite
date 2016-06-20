@@ -94,18 +94,41 @@ class SeqTest extends FunSuite with BeforeAndAfter {
     1 to 3 foreach (i => assert(mapped(i - 1) == i * 2.0f))
   }
 
+  test("map_Int") {
+    val seq: BufferSeq_Int = new BufferSeq_Int
+    1 to 3 foreach (seq.append(_))
+
+    val mapped: BufferSeq_Int = seq map_Int (_ * 2)
+    assert(mapped.size == 3)
+    1 to 3 foreach (i => assert(mapped(i - 1) == i * 2))
+  }
+
   test("flatMap") {
     val seq: Seq_Int = new BufferSeq_Int
     1 to 5 by 2 foreach (seq.append(_))
 
-    val mapped = seq flatMap (i => {
+    val mapped = seq flatMap { i =>
       val r = new BufferSeq_Float
       r.append(i)
       r.append(i + 1)
       r
-    })
+    }
     val test: Seq_Float = mapped
 
+    assert(mapped.size == 6)
+    1 to 6 foreach (i => assert(mapped(i - 1) == i))
+  }
+
+  test("flatMap_Int") {
+    val seq: BufferSeq_Int = new BufferSeq_Int
+    1 to 5 by 2 foreach (seq.append(_))
+
+    val mapped: BufferSeq_Int = seq flatMap_Int { i =>
+      val r = new BufferSeq_Int
+      r.append(i)
+      r.append(i + 1)
+      r
+    }
     assert(mapped.size == 6)
     1 to 6 foreach (i => assert(mapped(i - 1) == i))
   }

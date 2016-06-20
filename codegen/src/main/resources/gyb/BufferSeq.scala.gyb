@@ -113,7 +113,7 @@ class BufferSeq_${T}(initialSize: Int = 16)(implicit eq: Eq_${T})
     builder
   }
 
-  def flatMap_${T}(f: ${T} => Seq_${T}): Seq_${T} = {
+  def flatMap_${T}(f: ${T} => Seq_${T}): BufferSeq_${T} = {
     val builder = new BufferSeq_${T}
     var i = 0
     while (i < _size) {
@@ -122,7 +122,7 @@ class BufferSeq_${T}(initialSize: Int = 16)(implicit eq: Eq_${T})
       val resultSize = result.size
       var j = 0
       while (j < resultSize) {
-        result.append(result(j))
+        builder.append(result(j))
         j += 1
       }
       i += 1

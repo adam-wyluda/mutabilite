@@ -63,7 +63,7 @@ class BufferSeq[A](initialSize: Int = 16)(implicit tag: ClassTag[A])
   }
 
   def map[B: ClassTag](f: A => B): BufferSeq[B] = {
-    val builder = new BufferSeq[B]
+    val builder = new BufferSeq[B](initialSize = array.size)
     var i = 0
     while (i < _size) {
       builder.append(f(array(i).asInstanceOf[A]))
