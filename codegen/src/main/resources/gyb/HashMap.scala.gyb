@@ -78,7 +78,7 @@ class HashMap_${K}_${V}(initialSize: Int = 8)
     var hash = originalHash
     var pos = hash
     var dis = 0
-    var previous = new Opt_${V}()
+    var previous: Opt_${V} = None_${V}
     while ({
       val nextHash = hashes(pos)
       if (isInit(nextHash)) {
@@ -137,7 +137,7 @@ class HashMap_${K}_${V}(initialSize: Int = 8)
       _size -= 1
       previous
     } else {
-      new Opt_${V}()
+      None_${V}
     }
   }
 
