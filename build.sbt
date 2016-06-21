@@ -8,6 +8,9 @@ lazy val api = project
   .in(file("api"))
   .settings(
     moduleName := "api",
+    libraryDependencies ++= Seq(
+      "sh.den" % "scala-offheap_2.11" % "0.1"
+    ),
     scalaVersion := scalaVer
   )
 
