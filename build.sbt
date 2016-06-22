@@ -14,9 +14,21 @@ lazy val api = project
     scalaVersion := scalaVer
   )
 
+lazy val tests = project
+  .in(file("tests"))
+  .dependsOn(api)
+  .settings(
+    moduleName := "tests",
+    libraryDependencies ++= Seq(
+      "org.scalatest" % "scalatest_2.11" % "2.2.4",
+      "org.scalacheck" %% "scalacheck" % "1.12.2"
+    ),
+    scalaVersion := scalaVer
+  )
+
 lazy val naive = project
   .in(file("naive"))
-  .dependsOn(api)
+  .dependsOn(api, tests % "test")
   .settings(
     moduleName := "naive",
     scalaVersion := scalaVer
@@ -24,25 +36,17 @@ lazy val naive = project
 
 lazy val specialized = project
   .in(file("specialized"))
-  .dependsOn(api)
+  .dependsOn(api, tests % "test")
   .settings(
     moduleName := "specialized",
-    libraryDependencies ++= Seq(
-      "org.scalatest" % "scalatest_2.11" % "2.2.4" % "test",
-      "org.scalacheck" %% "scalacheck" % "1.12.2" % "test"
-    ),
     scalaVersion := scalaVer
   )
 
 lazy val generic = project
   .in(file("generic"))
-  .dependsOn(api)
+  .dependsOn(api, tests % "test")
   .settings(
     moduleName := "generic",
-    libraryDependencies ++= Seq(
-      "org.scalatest" % "scalatest_2.11" % "2.2.4" % "test",
-      "org.scalacheck" %% "scalacheck" % "1.12.2" % "test"
-    ),
     scalaVersion := scalaVer
   )
 

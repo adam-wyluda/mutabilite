@@ -1,22 +1,25 @@
 package test
 
-import scala.{collection => stdlib}
-import org.scalatest.{BeforeAndAfter, FunSuite}
 import offheap.collection._
+import org.scalatest.{BeforeAndAfter, FunSuite}
 
-class SetTest extends FunSuite with BeforeAndAfter {
+import scala.{collection => stdlib}
+
+trait SetTest { this: FunSuite with BeforeAndAfter =>
+
+  def provideSet_Int: Set[Int]
 
   var set: Set[Int] = _
 
   before {
-    set = new HashSet[Int]
+    set = provideSet_Int
     1 to 7 foreach (set.add(_))
     5 to 10 foreach (set.add(_))
   }
 
   test("isEmpty") {
     assert(set.nonEmpty)
-    assert(new HashSet[Int]().isEmpty)
+    assert(provideSet_Int.isEmpty)
   }
 
   test("size") {
@@ -58,7 +61,7 @@ class SetTest extends FunSuite with BeforeAndAfter {
   }
 
   test("intersect") {
-    val other = new HashSet[Int]
+    val other = provideSet_Int
     5 to 15 foreach (other.add(_))
 
     val intersect = set intersect other
@@ -69,7 +72,7 @@ class SetTest extends FunSuite with BeforeAndAfter {
   }
 
   test("union") {
-    val other = new HashSet[Int]
+    val other = provideSet_Int
     5 to 15 foreach (other.add(_))
 
     val union = set union other
@@ -78,7 +81,7 @@ class SetTest extends FunSuite with BeforeAndAfter {
   }
 
   test("diff") {
-    val other = new HashSet[Int]
+    val other = provideSet_Int
     5 to 15 foreach (set.add(_))
     5 to 10 foreach (other.add(_))
 

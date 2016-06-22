@@ -1,17 +1,19 @@
 package test
 
-import scala.{collection => stdlib}
-import org.scalatest.{BeforeAndAfter, FunSuite}
 import offheap.collection._
+import org.scalatest.{BeforeAndAfter, FunSuite}
 
-class MapTest extends FunSuite with BeforeAndAfter {
+import scala.{collection => stdlib}
 
-  import HashEq.Implicits._
+trait MapTest { this: FunSuite with BeforeAndAfter =>
 
-  var map: HashMap_Int_Object = _
+  def provideMap_Int_Object: Map[Int, Object]
+  def provideMap_Object_Int: Map[Object, Int]
+
+  var map: Map[Int, Object] = _
 
   before {
-    map = new HashMap_Int_Object
+    map = provideMap_Int_Object
     map.put(1, "one")
     map.put(2, "too")
     map.put(3, "tree")
@@ -27,7 +29,7 @@ class MapTest extends FunSuite with BeforeAndAfter {
 
   test("isEmpty") {
     assert(map.nonEmpty)
-    assert(new HashMap_Int_Object().isEmpty)
+    assert(provideMap_Int_Object.isEmpty)
   }
 
   test("size") {
@@ -65,7 +67,7 @@ class MapTest extends FunSuite with BeforeAndAfter {
   }
 
   test("put and apply") {
-    val map = new HashMap_Object_Int()
+    val map = provideMap_Object_Int
     1 to 100 foreach { i =>
       map.put(i toString, i)
     }
@@ -89,7 +91,7 @@ class MapTest extends FunSuite with BeforeAndAfter {
   }
 
   test("put and remove") {
-    val map = new HashMap_Object_Int()
+    val map = provideMap_Object_Int
     1 to 100 foreach { i =>
       map.put(i toString, i)
     }

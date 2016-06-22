@@ -1,12 +1,17 @@
 package test
 
-import scala.{collection => stdlib}
-import org.scalatest.{BeforeAndAfter, FunSuite}
 import offheap.collection._
+import org.scalatest.{BeforeAndAfter, FunSuite}
 
-class OptTest extends FunSuite {
-  val opt = new Opt_Int(25)
-  val none = None_Int
+import scala.{collection => stdlib}
+
+trait OptTest { this: FunSuite with BeforeAndAfter =>
+
+  def provideOpt_Int(value: Int): Opt[Int]
+  def provideNone: Opt[Int]
+
+  val opt = provideOpt_Int(25)
+  val none = provideNone
 
   test("isEmpty") {
     assert(opt.nonEmpty)
