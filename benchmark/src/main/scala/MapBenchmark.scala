@@ -12,7 +12,7 @@ class MapBenchmark {
 
   import Benchmark._
 
-  val map: HashMap_Object_Int = {
+  val specMap: HashMap_Object_Int = {
     val map = new HashMap_Object_Int(initialSize)
     var i = 0
     while (i < size) {
@@ -52,7 +52,7 @@ class MapBenchmark {
   }
 
   @Benchmark
-  def getRandom = map(randKey)
+  def getRandomSpecialized = specMap(randKey)
 
   @Benchmark
   def getRandomGeneric = genericMap(randKey)
@@ -61,7 +61,7 @@ class MapBenchmark {
   def getRandomStdlib = stdMap.get(randKey)
 
   @Benchmark
-  def getNonExisting = map(nonExistingKey)
+  def getNonExistingSpecialized = specMap(nonExistingKey)
 
   @Benchmark
   def getNonExistingGeneric = genericMap(nonExistingKey)
@@ -70,7 +70,7 @@ class MapBenchmark {
   def getNonExistingStdlib = stdMap.get(nonExistingKey)
 
   @Benchmark
-  def putAll = {
+  def putAllSpecialized = {
     val m = new HashMap_Object_Int(initialSize)
     var i = 0
     while (i < size) {
@@ -100,7 +100,7 @@ class MapBenchmark {
   }
 
   @Benchmark
-  def foreach(blackhole: Blackhole) = map foreach ((k, v) => blackhole.consume(k))
+  def foreachSpecialized(blackhole: Blackhole) = specMap foreach ((k, v) => blackhole.consume(k))
 
   @Benchmark
   def foreachGeneric(blackhole: Blackhole) = genericMap foreachGeneric (blackhole.consume(_))
@@ -110,7 +110,7 @@ class MapBenchmark {
     stdMap foreach (blackhole.consume(_))
 
   @Benchmark
-  def putRemoveRead(blackhole: Blackhole) = {
+  def putRemoveReadSpecialized(blackhole: Blackhole) = {
     val map = new HashMap_Object_Int(initialSize)
     var i = 0
     while (i < size) { map.put(keys(i), i); i += 1 }
@@ -144,7 +144,7 @@ class MapBenchmark {
 }
 
 @State(Scope.Thread)
-class MapRemoveBenchmark {
+class MapRemoveSpecializedBenchmark {
 
   import Benchmark._
 

@@ -14,7 +14,7 @@ class SeqBenchmark {
 
   val seqSize = Benchmark.size
 
-  val seq: BufferSeq_Int = {
+  val specSeq: BufferSeq_Int = {
     val seq = new BufferSeq_Int
     1 to seqSize foreach (seq.append(_))
     seq
@@ -44,10 +44,10 @@ class SeqBenchmark {
   }
 
   @Benchmark
-  def readSequential(blackhole: Blackhole) = {
+  def readSequentialSpecialized(blackhole: Blackhole) = {
     var i = 0
     while (i < seqSize) {
-      blackhole.consume(seq(i))
+      blackhole.consume(specSeq(i))
       i += 1
     }
   }
@@ -71,7 +71,7 @@ class SeqBenchmark {
   }
 
   @Benchmark
-  def readRandom = seq(randIndex)
+  def readRandomSpecialized = specSeq(randIndex)
 
   @Benchmark
   def readRandomGeneric = genericSeq(randIndex)
@@ -80,7 +80,7 @@ class SeqBenchmark {
   def readRandomStdlib = stdSeq(randIndex)
 
   @Benchmark
-  def append() = {
+  def appendSpecialized = {
     val s = new BufferSeq_Int(initialSize = 16)
     var i = 0
     while (i < seqSize) {
@@ -90,7 +90,7 @@ class SeqBenchmark {
   }
 
   @Benchmark
-  def appendGeneric() = {
+  def appendGeneric = {
     val s = new BufferSeq[Int](initialSize = 16)
     var i = 0
     while (i < seqSize) {
@@ -100,7 +100,7 @@ class SeqBenchmark {
   }
 
   @Benchmark
-  def appendStdlib() = {
+  def appendStdlib = {
     val s = new StdlibSeq[Int](initialSize = 16)
     var i = 0
     while (i < seqSize) {
@@ -110,8 +110,8 @@ class SeqBenchmark {
   }
 
   @Benchmark
-  def updateSequential() = {
-    val s = seq
+  def updateSequentialSpecialized = {
+    val s = specSeq
     var i = 0
     while (i < seqSize) {
       s(i) = i * 2
@@ -120,7 +120,7 @@ class SeqBenchmark {
   }
 
   @Benchmark
-  def updateSequentialGeneric() = {
+  def updateSequentialGeneric = {
     val s = genericSeq
     var i = 0
     while (i < seqSize) {
@@ -130,7 +130,7 @@ class SeqBenchmark {
   }
 
   @Benchmark
-  def updateSequentialStdlib() = {
+  def updateSequentialStdlib = {
     val s = stdSeq
     var i = 0
     while (i < seqSize) {
@@ -140,7 +140,7 @@ class SeqBenchmark {
   }
 
   @Benchmark
-  def updateRandom = seq(randIndex) = randVal
+  def updateRandomSpecialized = specSeq(randIndex) = randVal
 
   @Benchmark
   def updateRandomGeneric = genericSeq(randIndex) = randVal
@@ -149,9 +149,9 @@ class SeqBenchmark {
   def updateRandomStdlib = stdSeq(randIndex) = randVal
 
   @Benchmark
-  def foreach = {
+  def foreachSpecialized = {
     var sum = 0
-    seq foreach (sum += _)
+    specSeq foreach (sum += _)
     sum
   }
 
@@ -170,7 +170,7 @@ class SeqBenchmark {
   }
 
   @Benchmark
-  def prepend() = {
+  def prependSpecialized = {
     val s = new BufferSeq_Int(initialSize = 16)
     var i = 0
     while (i < seqSize) {
@@ -180,7 +180,7 @@ class SeqBenchmark {
   }
 
   @Benchmark
-  def prependGeneric() = {
+  def prependGeneric = {
     val s = new BufferSeq[Int](initialSize = 16)
     var i = 0
     while (i < seqSize) {
@@ -190,7 +190,7 @@ class SeqBenchmark {
   }
 
   @Benchmark
-  def prependStdlib() = {
+  def prependStdlib = {
     val s = new StdlibSeq[Int](initialSize = 16)
     var i = 0
     while (i < seqSize) {
@@ -200,7 +200,7 @@ class SeqBenchmark {
   }
 
   @Benchmark
-  def map = seq map_Int (_ + 1)
+  def mapSpecialized = specSeq map_Int (_ + 1)
 
   @Benchmark
   def mapGeneric = genericSeq map (_ + 1)
@@ -209,7 +209,7 @@ class SeqBenchmark {
   def mapStdlib = stdSeq map (_ + 1)
 
   @Benchmark
-  def flatMap = seq flatMap_Int { i =>
+  def flatMapSpecialized = specSeq flatMap_Int { i =>
     val r = new BufferSeq_Int
     var j = 0
     while (j < 5) { r.append(i + j); j += 1 }
@@ -233,7 +233,7 @@ class SeqBenchmark {
   }
 
   @Benchmark
-  def filter = seq filter (_ % 2 == 0)
+  def filterSpecialized = specSeq filter (_ % 2 == 0)
 
   @Benchmark
   def filterGeneric = genericSeq filter (_ % 2 == 0)
@@ -243,7 +243,7 @@ class SeqBenchmark {
 }
 
 @State(Scope.Thread)
-class SeqRemoveBenchmark {
+class SeqRemoveSpecializedBenchmark {
 
   val origin: BufferSeq_Int = {
     val seq = new BufferSeq_Int

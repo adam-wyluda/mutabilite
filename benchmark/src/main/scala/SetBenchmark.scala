@@ -12,7 +12,7 @@ class SetBenchmark {
 
   import Benchmark._
 
-  val set: HashSet_Object = {
+  val specSet: HashSet_Object = {
     val set = new HashSet_Object(initialSize)
     var i = 0
     while (i < size) {
@@ -52,7 +52,7 @@ class SetBenchmark {
   }
 
   @Benchmark
-  def containsExisting = set(randKey)
+  def containsExistingSpecialized = specSet(randKey)
 
   @Benchmark
   def containsExistingGeneric = genericSet(randKey)
@@ -61,7 +61,7 @@ class SetBenchmark {
   def containsExistingStdlib = stdSet(randKey)
 
   @Benchmark
-  def containsNonExisting = set(nonExistingKey)
+  def containsNonExistingSpecialized = specSet(nonExistingKey)
 
   @Benchmark
   def containsNonExistingGeneric = genericSet(nonExistingKey)
@@ -70,7 +70,7 @@ class SetBenchmark {
   def containsNonExistingStdlib = stdSet(nonExistingKey)
 
   @Benchmark
-  def add = {
+  def addSpecialized = {
     val s = new HashSet_Object(initialSize)
     var i = 0
     while (i < size) {
@@ -100,7 +100,7 @@ class SetBenchmark {
   }
 
   @Benchmark
-  def foreach(blackhole: Blackhole) = set foreach (blackhole.consume(_))
+  def foreachSpecialized(blackhole: Blackhole) = specSet foreach (blackhole.consume(_))
 
   @Benchmark
   def foreachGeneric(blackhole: Blackhole) = genericSet foreachGeneric (blackhole.consume(_))
@@ -111,7 +111,7 @@ class SetBenchmark {
 }
 
 @State(Scope.Thread)
-class SetRemoveBenchmark {
+class SetRemoveSpecializedBenchmark {
 
   import Benchmark._
 
