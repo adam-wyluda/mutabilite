@@ -14,19 +14,31 @@ lazy val api = project
     scalaVersion := scalaVer
   )
 
-lazy val codegen = project
-  .in(file("codegen"))
+lazy val naive = project
+  .in(file("naive"))
   .dependsOn(api)
   .settings(
-    moduleName := "codegen",
+    moduleName := "naive",
     scalaVersion := scalaVer
   )
 
-lazy val core = project
-  .in(file("core"))
-  .dependsOn(api, codegen)
+lazy val specialized = project
+  .in(file("specialized"))
+  .dependsOn(api)
   .settings(
-    moduleName := "core",
+    moduleName := "specialized",
+    libraryDependencies ++= Seq(
+      "org.scalatest" % "scalatest_2.11" % "2.2.4" % "test",
+      "org.scalacheck" %% "scalacheck" % "1.12.2" % "test"
+    ),
+    scalaVersion := scalaVer
+  )
+
+lazy val generic = project
+  .in(file("generic"))
+  .dependsOn(api)
+  .settings(
+    moduleName := "generic",
     libraryDependencies ++= Seq(
       "org.scalatest" % "scalatest_2.11" % "2.2.4" % "test",
       "org.scalacheck" %% "scalacheck" % "1.12.2" % "test"
@@ -36,7 +48,7 @@ lazy val core = project
 
 lazy val benchmark = project
   .in(file("benchmark"))
-  .dependsOn(core)
+  .dependsOn(generic, specialized)
   .enablePlugins(JmhPlugin)
   .settings(
     moduleName := "benchmark",
