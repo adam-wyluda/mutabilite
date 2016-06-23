@@ -112,7 +112,7 @@ class OffheapHashSet_${T}(initialSize: Int = 8)(implicit hashK: Hash_${T}) exten
     }
   }
 
-  def intersect(that: Set[${T}]): Set[${T}] = {
+  def intersect(that: Set[${T}]): OffheapHashSet_${T} = {
     val result = new OffheapHashSet_${T}
     foreach { a =>
       if (that(a)) result.add(a)
@@ -128,7 +128,7 @@ class OffheapHashSet_${T}(initialSize: Int = 8)(implicit hashK: Hash_${T}) exten
     result
   }
 
-  def union(that: Set[${T}]): Set[${T}] = {
+  def union(that: Set[${T}]): OffheapHashSet_${T} = {
     val result = new OffheapHashSet_${T}
     this foreach (result.add(_))
     that foreach (result.add(_))
@@ -142,7 +142,7 @@ class OffheapHashSet_${T}(initialSize: Int = 8)(implicit hashK: Hash_${T}) exten
     result
   }
 
-  def diff(that: Set[${T}]): Set[${T}] = {
+  def diff(that: Set[${T}]): OffheapHashSet_${T} = {
     val result = new OffheapHashSet_${T}
     foreach { a =>
       if (!that(a)) result.add(a)

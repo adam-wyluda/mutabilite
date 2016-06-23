@@ -87,7 +87,7 @@ class OffheapBufferSeq_${T}(initialSize: Int = 16)(implicit eq: Eq_${T})
     builder
   }
 
-  def filter(f: ${T} => Boolean): Seq_${T} = {
+  def filter(f: ${T} => Boolean): OffheapBufferSeq_${T} = {
     val result = new OffheapBufferSeq_${T}
     var i = 0
     while (i < _size) {

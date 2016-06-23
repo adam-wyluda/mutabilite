@@ -7,7 +7,7 @@ types = ['Boolean', 'Char', 'Byte', 'Short',
 
 % for T in types:
 
-class OffheapOpt_${T} extends Opt[${T}] {
+class OffheapOpt_${T} extends Opt_${T} {
 
   private[this] var value: ${T} = _
   private[this] var empty: Boolean = true
