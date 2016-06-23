@@ -14,6 +14,12 @@ class SeqBenchmark {
 
   val seqSize = Benchmark.size
 
+  val offheapSeq: OffheapBufferSeq_Int = {
+    val seq = new OffheapBufferSeq_Int
+    1 to seqSize foreach (seq.append(_))
+    seq
+  }
+
   val specSeq: BufferSeq_Int = {
     val seq = new BufferSeq_Int
     1 to seqSize foreach (seq.append(_))
@@ -44,6 +50,15 @@ class SeqBenchmark {
   }
 
   @Benchmark
+  def readSequentialOffheap(blackhole: Blackhole) = {
+    var i = 0
+    while (i < seqSize) {
+      blackhole.consume(offheapSeq(i))
+      i += 1
+    }
+  }
+
+  @Benchmark
   def readSequentialSpecialized(blackhole: Blackhole) = {
     var i = 0
     while (i < seqSize) {
@@ -71,6 +86,9 @@ class SeqBenchmark {
   }
 
   @Benchmark
+  def readRandomOffheap = offheapSeq(randIndex)
+
+  @Benchmark
   def readRandomSpecialized = specSeq(randIndex)
 
   @Benchmark
@@ -78,6 +96,16 @@ class SeqBenchmark {
 
   @Benchmark
   def readRandomStdlib = stdSeq(randIndex)
+
+  @Benchmark
+  def appendOffheap = {
+    val s = new OffheapBufferSeq_Int(initialSize = 16)
+    var i = 0
+    while (i < seqSize) {
+      s.append(i)
+      i += 1
+    }
+  }
 
   @Benchmark
   def appendSpecialized = {
@@ -105,6 +133,16 @@ class SeqBenchmark {
     var i = 0
     while (i < seqSize) {
       s.append(i)
+      i += 1
+    }
+  }
+
+  @Benchmark
+  def updateSequentialOffheap = {
+    val s = offheapSeq
+    var i = 0
+    while (i < seqSize) {
+      s(i) = i * 2
       i += 1
     }
   }
@@ -140,6 +178,9 @@ class SeqBenchmark {
   }
 
   @Benchmark
+  def updateRandomOffheap = offheapSeq(randIndex) = randVal
+
+  @Benchmark
   def updateRandomSpecialized = specSeq(randIndex) = randVal
 
   @Benchmark
@@ -147,6 +188,13 @@ class SeqBenchmark {
 
   @Benchmark
   def updateRandomStdlib = stdSeq(randIndex) = randVal
+
+  @Benchmark
+  def foreachOffheap = {
+    var sum = 0
+    offheapSeq foreach (sum += _)
+    sum
+  }
 
   @Benchmark
   def foreachSpecialized = {
@@ -167,6 +215,15 @@ class SeqBenchmark {
     var sum = 0
     stdSeq foreach (sum += _)
     sum
+  }
+  @Benchmark
+  def prependOffheap = {
+    val s = new OffheapBufferSeq_Int(initialSize = 16)
+    var i = 0
+    while (i < seqSize) {
+      s.insert(0, i)
+      i += 1
+    }
   }
 
   @Benchmark
@@ -200,6 +257,9 @@ class SeqBenchmark {
   }
 
   @Benchmark
+  def mapOffheap = offheapSeq map_Int (_ + 1)
+
+  @Benchmark
   def mapSpecialized = specSeq map_Int (_ + 1)
 
   @Benchmark
@@ -207,6 +267,14 @@ class SeqBenchmark {
 
   @Benchmark
   def mapStdlib = stdSeq map (_ + 1)
+
+  @Benchmark
+  def flatMapOffheap = offheapSeq flatMap_Int { i =>
+    val r = new OffheapBufferSeq_Int
+    var j = 0
+    while (j < 5) { r.append(i + j); j += 1 }
+    r
+  }
 
   @Benchmark
   def flatMapSpecialized = specSeq flatMap_Int { i =>
@@ -233,6 +301,9 @@ class SeqBenchmark {
   }
 
   @Benchmark
+  def filterOffheap = offheapSeq filter (_ % 2 == 0)
+
+  @Benchmark
   def filterSpecialized = specSeq filter (_ % 2 == 0)
 
   @Benchmark
@@ -240,6 +311,29 @@ class SeqBenchmark {
 
   @Benchmark
   def filterStdlib = stdSeq filter (_ % 2 == 0)
+}
+
+@State(Scope.Thread)
+class SeqRemoveOffheapBenchmark {
+
+  val origin: OffheapBufferSeq_Int = {
+    val seq = new OffheapBufferSeq_Int
+    1 to 10000 foreach (seq.append(_))
+    seq
+  }
+
+  var seq: OffheapBufferSeq_Int = _
+
+  @Setup(Level.Invocation)
+  def setup = {
+    seq = new OffheapBufferSeq_Int
+    origin.foreach(seq.append(_))
+  }
+
+  @Benchmark
+  def benchmark = {
+    while (seq.nonEmpty) seq.remove(0)
+  }
 }
 
 @State(Scope.Thread)

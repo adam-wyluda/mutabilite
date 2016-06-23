@@ -60,7 +60,7 @@ lazy val offheap = project
 
 lazy val benchmark = project
   .in(file("benchmark"))
-  .dependsOn(generic, specialized)
+  .dependsOn(generic, specialized, offheap)
   .enablePlugins(JmhPlugin)
   .settings(
     moduleName := "benchmark",

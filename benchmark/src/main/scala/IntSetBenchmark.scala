@@ -12,6 +12,16 @@ class IntSetBenchmark {
 
   import Benchmark._
 
+  val offheapSet: OffheapHashSet_Int = {
+    val set = new OffheapHashSet_Int(initialSize)
+    var i = 0
+    while (i < size) {
+      set.add(i)
+      i += 1
+    }
+    set
+  }
+
   val specSet: HashSet_Int = {
     val set = new HashSet_Int(initialSize)
     var i = 0
@@ -52,6 +62,9 @@ class IntSetBenchmark {
   }
 
   @Benchmark
+  def containsExistingOffheap = offheapSet(randKey)
+
+  @Benchmark
   def containsExistingSpecialized = specSet(randKey)
 
   @Benchmark
@@ -61,6 +74,9 @@ class IntSetBenchmark {
   def containsExistingStdlib = stdSet(randKey)
 
   @Benchmark
+  def containsNonExistingOffheap = offheapSet(nonExistingKey)
+
+  @Benchmark
   def containsNonExistingSpecialized = specSet(nonExistingKey)
 
   @Benchmark
@@ -68,6 +84,16 @@ class IntSetBenchmark {
 
   @Benchmark
   def containsNonExistingStdlib = stdSet(nonExistingKey)
+
+  @Benchmark
+  def addOffheap = {
+    val s = new OffheapHashSet_Int(initialSize)
+    var i = 0
+    while (i < size) {
+      s.add(i)
+      i += 1
+    }
+  }
 
   @Benchmark
   def addSpecialized = {
@@ -100,14 +126,44 @@ class IntSetBenchmark {
   }
 
   @Benchmark
-  def foreachSpecialized(blackhole: Blackhole) = specSet foreach (blackhole.consume(_))
+  def foreachOffheap(blackhole: Blackhole) =
+    offheapSet foreach (blackhole.consume(_))
 
   @Benchmark
-  def foreachGeneric(blackhole: Blackhole) = genericSet foreachGeneric (blackhole.consume(_))
+  def foreachSpecialized(blackhole: Blackhole) =
+    specSet foreach (blackhole.consume(_))
+
+  @Benchmark
+  def foreachGeneric(blackhole: Blackhole) =
+    genericSet foreachGeneric (blackhole.consume(_))
 
   @Benchmark
   def foreachStdlib(blackhole: Blackhole) =
     stdSet foreach (blackhole.consume(_))
+}
+
+@State(Scope.Thread)
+class IntSetRemoveOffheapBenchmark {
+
+  import Benchmark._
+
+  var set: OffheapHashSet_Int = _
+
+  @Setup(Level.Invocation)
+  def setup = {
+    set = new OffheapHashSet_Int(initialSize)
+    var i = 0
+    while (i < size) {
+      set.add(i)
+      i += 1
+    }
+  }
+
+  @Benchmark
+  def benchmark = {
+    var i = 0
+    while (i < size / 10) { set.remove(i * 10); i += 1 }
+  }
 }
 
 @State(Scope.Thread)

@@ -12,6 +12,16 @@ class IntMapBenchmark {
 
   import Benchmark._
 
+  val offheapMap: OffheapHashMap_Int_Int = {
+    val map = new OffheapHashMap_Int_Int(initialSize)
+    var i = 0
+    while (i < size) {
+      map.put(i, i * i)
+      i += 1
+    }
+    map
+  }
+
   val specMap: HashMap_Int_Int = {
     val map = new HashMap_Int_Int(initialSize)
     var i = 0
@@ -52,6 +62,9 @@ class IntMapBenchmark {
   }
 
   @Benchmark
+  def getRandomOffheap = offheapMap(randKey)
+
+  @Benchmark
   def getRandomSpecialized = specMap(randKey)
 
   @Benchmark
@@ -61,6 +74,9 @@ class IntMapBenchmark {
   def getRandomStdlib = stdMap.get(randKey)
 
   @Benchmark
+  def getNonExistingOffheap = offheapMap(nonExistingKey)
+
+  @Benchmark
   def getNonExistingSpecialized = specMap(nonExistingKey)
 
   @Benchmark
@@ -68,6 +84,16 @@ class IntMapBenchmark {
 
   @Benchmark
   def getNonExistingStdlib = stdMap.get(nonExistingKey)
+
+  @Benchmark
+  def putAllOffheap = {
+    val m = new OffheapHashMap_Int_Int(initialSize)
+    var i = 0
+    while (i < size) {
+      m.put(i, i)
+      i += 1
+    }
+  }
 
   @Benchmark
   def putAllSpecialized = {
@@ -100,14 +126,31 @@ class IntMapBenchmark {
   }
 
   @Benchmark
-  def foreachSpecialized(blackhole: Blackhole) = specMap foreach ((k, v) => blackhole.consume(k))
+  def foreachOffheap(blackhole: Blackhole) =
+    offheapMap foreach ((k, v) => blackhole.consume(k))
 
   @Benchmark
-  def foreachGeneric(blackhole: Blackhole) = genericMap foreachGeneric (blackhole.consume(_))
+  def foreachSpecialized(blackhole: Blackhole) =
+    specMap foreach ((k, v) => blackhole.consume(k))
+
+  @Benchmark
+  def foreachGeneric(blackhole: Blackhole) =
+    genericMap foreachGeneric (blackhole.consume(_))
 
   @Benchmark
   def foreachStdlib(blackhole: Blackhole) =
     stdMap foreach (blackhole.consume(_))
+
+  @Benchmark
+  def putRemoveReadOffheap(blackhole: Blackhole) = {
+    val map = new OffheapHashMap_Int_Int(initialSize)
+    var i = 0
+    while (i < size) { map.put(i, i); i += 1 }
+    i = 0
+    while (i < size / 10) { map.remove(i * 10); i += 1 }
+    i = 0
+    while (i < size) { blackhole.consume(map(i)); i += 1 }
+  }
 
   @Benchmark
   def putRemoveReadSpecialized(blackhole: Blackhole) = {
@@ -140,6 +183,26 @@ class IntMapBenchmark {
     while (i < size / 10) { map.remove(i * 10); i += 1 }
     i = 0
     while (i < size) { blackhole.consume(map.get(i)); i += 1 }
+  }
+}
+
+@State(Scope.Thread)
+class IntMapRemoveOffheapBenchmark {
+
+  import Benchmark._
+
+  var map: OffheapHashMap_Int_Int = _
+
+  @Setup(Level.Invocation)
+  def setup = {
+    map = new OffheapHashMap_Int_Int
+    0 until size foreach (i => map.put(i, i * i))
+  }
+
+  @Benchmark
+  def benchmark = {
+    var i = 0
+    while (i < size / 10) { map.remove(i * 10); i += 1 }
   }
 }
 
