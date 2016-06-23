@@ -7,32 +7,9 @@ types = ['Boolean', 'Char', 'Byte', 'Short',
   'Int', 'Long', 'Float', 'Double', 'Object']
 }%
 
-object SeqBuilders {
-
-  % for T in types:
-  implicit def provideSeq_${T}(implicit hash: Hash_${T}): Seq_${T} = new BufferSeq_${T}
-  % end
-}
-
 % for T in types:
 
-trait Seq_${T} extends Seq[${T}] {
-  def apply(index: Int): ${T}
-  def append(elem: ${T}): Unit
-  def update(index: Int, value: ${T}): Unit
-  def remove(n: Int): ${T}
-  def index(elem: ${T}): Int
-  def insert(index: Int, elem: ${T}): Unit
-  def foreach(f: ${T} => Unit)
-
-//  def map[B, S <: Seq[B]](f: ${T} => B)(implicit builder: S): S
-  def map_${T}(f: ${T} => ${T}): Seq_${T}
-//  def flatMap[B, S <: Seq[B]](f: ${T} => Traversable1[B])(implicit builder: S): S
-  def flatMap_${T}(f: ${T} => Seq_${T}): Seq_${T}
-  def filter(f: ${T} => Boolean): Seq_${T}
-}
-
-class BufferSeq_${T}(initialSize: Int = 16)(implicit eq: Eq_${T})
+class OffheapBufferSeq_${T}(initialSize: Int = 16)(implicit eq: Eq_${T})
   extends Seq_${T} {
 
   private[this] var array: Array[${T}] = new Array[${T}](initialSize)
@@ -83,7 +60,8 @@ class BufferSeq_${T}(initialSize: Int = 16)(implicit eq: Eq_${T})
     _size += 1
   }
 
-  def map[B, S <: Seq[B]](f: ${T} => B)(implicit builder: S): S = {
+  def map_${T}(f: ${T} => ${T}): OffheapBufferSeq_${T} = {
+    val builder = new OffheapBufferSeq_${T}(initialSize = array.size)
     var i = 0
     while (i < _size) {
       builder.append(f(array(i)))
@@ -92,29 +70,8 @@ class BufferSeq_${T}(initialSize: Int = 16)(implicit eq: Eq_${T})
     builder
   }
 
-  def map_${T}(f: ${T} => ${T}): BufferSeq_${T} = {
-    val builder = new BufferSeq_${T}(initialSize = array.size)
-    var i = 0
-    while (i < _size) {
-      builder.append(f(array(i)))
-      i += 1
-    }
-    builder
-  }
-
-  def flatMap[B, S <: Seq[B]](f: ${T} => Traversable1[B])(implicit builder: S): S = {
-    var i = 0
-    while (i < _size) {
-      val el = array(i)
-      val result = f(el)
-      result foreach (builder.append(_))
-      i += 1
-    }
-    builder
-  }
-
-  def flatMap_${T}(f: ${T} => Seq_${T}): BufferSeq_${T} = {
-    val builder = new BufferSeq_${T}
+  def flatMap_${T}(f: ${T} => Seq_${T}): OffheapBufferSeq_${T} = {
+    val builder = new OffheapBufferSeq_${T}
     var i = 0
     while (i < _size) {
       val el = array(i)
@@ -131,7 +88,7 @@ class BufferSeq_${T}(initialSize: Int = 16)(implicit eq: Eq_${T})
   }
 
   def filter(f: ${T} => Boolean): Seq_${T} = {
-    val result = new BufferSeq_${T}
+    val result = new OffheapBufferSeq_${T}
     var i = 0
     while (i < _size) {
       val el = array(i)

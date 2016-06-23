@@ -3,8 +3,6 @@ package test
 import offheap.collection._
 import org.scalatest.{BeforeAndAfter, FunSuite}
 
-import scala.{collection => stdlib}
-
 trait OptTest { this: FunSuite with BeforeAndAfter =>
 
   def provideOpt_Int(value: Int): Opt[Int]

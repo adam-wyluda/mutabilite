@@ -8,9 +8,6 @@ lazy val api = project
   .in(file("api"))
   .settings(
     moduleName := "api",
-    libraryDependencies ++= Seq(
-      "sh.den" % "scala-offheap_2.11" % "0.1"
-    ),
     scalaVersion := scalaVer
   )
 
@@ -34,6 +31,14 @@ lazy val naive = project
     scalaVersion := scalaVer
   )
 
+lazy val generic = project
+  .in(file("generic"))
+  .dependsOn(api, tests % "test")
+  .settings(
+    moduleName := "generic",
+    scalaVersion := scalaVer
+  )
+
 lazy val specialized = project
   .in(file("specialized"))
   .dependsOn(api, tests % "test")
@@ -42,11 +47,14 @@ lazy val specialized = project
     scalaVersion := scalaVer
   )
 
-lazy val generic = project
-  .in(file("generic"))
-  .dependsOn(api, tests % "test")
+lazy val offheap = project
+  .in(file("offheap"))
+  .dependsOn(api, specialized, tests % "test")
   .settings(
-    moduleName := "generic",
+    moduleName := "offheap",
+    libraryDependencies ++= Seq(
+      "sh.den" % "scala-offheap_2.11" % "0.1"
+    ),
     scalaVersion := scalaVer
   )
 

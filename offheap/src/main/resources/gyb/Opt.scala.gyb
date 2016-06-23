@@ -1,0 +1,32 @@
+package offheap.collection
+
+%{
+types = ['Boolean', 'Char', 'Byte', 'Short',
+'Int', 'Long', 'Float', 'Double', 'Object']
+}%
+
+% for T in types:
+
+class OffheapOpt_${T} extends Opt[${T}] {
+
+  private[this] var value: ${T} = _
+  private[this] var empty: Boolean = true
+
+  def this(elem: ${T}) = {
+    this()
+    this.value = elem
+    this.empty = false
+  }
+
+  // Dereference primitive or cast self to data class
+  override def get(): ${T} =
+    if (nonEmpty) value else throw new NoSuchElementException
+
+  override def isEmpty: Boolean = empty
+  override def size: Int = if (nonEmpty) 1 else 0
+  override def foreach(f: ${T} => Unit): Unit = if (nonEmpty) f(get())
+}
+
+object OffheapNone_${T} extends OffheapOpt_${T}
+
+% end

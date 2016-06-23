@@ -3,8 +3,6 @@ package test
 import offheap.collection._
 import org.scalatest.{BeforeAndAfter, FunSuite}
 
-import scala.{collection => stdlib}
-
 trait SeqTest { this: FunSuite with BeforeAndAfter =>
 
   def provideSeq_Int: Seq[Int]

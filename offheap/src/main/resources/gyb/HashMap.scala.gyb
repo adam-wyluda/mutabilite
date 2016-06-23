@@ -1,0 +1,219 @@
+package offheap.collection
+
+import HashEq._
+
+%{
+types = ['Boolean', 'Char', 'Byte', 'Short',
+'Int', 'Long', 'Float', 'Double', 'Object']
+}%
+
+% for K in types:
+% for V in types:
+
+class OffheapHashMap_${K}_${V}(initialSize: Int = 8)
+  % if K == V:
+    (implicit hashK: Hash_${K})
+  % else:
+    (implicit hashK: Hash_${K}, hashV: Hash_${V})
+  % end
+    extends Map_${K}_${V} {
+
+  private[this] var hashes: Array[Int] = new Array[Int](initialSize)
+  private[this] var _keys: Array[${K}] = new Array[${K}](initialSize)
+  private[this] var _values: Array[${V}] = new Array[${V}](initialSize)
+  private[this] var _size = 0
+  private[this] var capacity = initialSize
+  private[this] var mask = capacity - 1
+
+  def apply(key: ${K}): Opt_${V} = {
+    val index = indexOf(key)
+    if (index == -1) {
+      None_${V}
+    } else {
+      new Opt_${V}(_values(index))
+    }
+  }
+
+  private[this] def indexOf(key: ${K}): Int = {
+    var hash = hashCode(key)
+    var pos = hash
+    var dis = 0
+    var result = -1
+    while ({
+      val nextHash = hashes(pos)
+      if (!isInit(nextHash)) {
+        val nextDis = (capacity + pos - nextHash) & mask
+        if (nextDis >= dis) {
+          if (hash == nextHash && hashK.eqv(_keys(pos), key)) {
+            result = pos
+            false
+          } else {
+            dis += 1
+            pos = (pos + 1) & mask
+            true
+          }
+        } else {
+          false
+        }
+      } else {
+        false
+      }
+    }) ()
+    result
+  }
+
+  def put(key: ${K}, value: ${V}): Opt_${V} = {
+    var _key = key
+    var _value = value
+    var originalHash = hashCode(key)
+    var hash = originalHash
+    var pos = hash
+    var dis = 0
+    var previous: Opt_${V} = None_${V}
+    while ({
+      val nextHash = hashes(pos)
+      if (isInit(nextHash)) {
+        init(pos, hash, _key, _value)
+        _size += 1
+        growIfNecessary
+        false
+      } else if (nextHash == originalHash && hashK.eqv(_keys(pos), key)) {
+        previous = new Opt_${V}(_values(pos))
+        _values(pos) = value
+        false
+      } else {
+        val nextDis = (capacity + pos - nextHash) & mask
+        if (nextDis < dis) {
+          val nextKey = _keys(pos)
+          val nextVal = _values(pos)
+          hashes(pos) = hash
+          _keys(pos) = _key
+          _values(pos) = _value
+          hash = nextHash
+          _key = nextKey
+          _value = nextVal
+          dis = nextDis
+        }
+        dis += 1
+        pos = (pos + 1) & mask
+        true
+      }
+    }) ()
+    previous
+  }
+
+  def remove(key: ${K}): Opt_${V} = {
+    var index = indexOf(key)
+    if (index != -1) {
+      val previous = new Opt_${V}(_values(index))
+      while ({
+        val nextIndex = (index + 1) & mask
+        val nextHash = hashes(nextIndex)
+        if (!isInit(nextHash)) {
+          val nextDis = (capacity + nextIndex - nextHash) & mask
+          if (nextDis != 0) {
+            hashes(index) = hashes(nextIndex)
+            _keys(index) = _keys(nextIndex)
+            _values(index) = _values(nextIndex)
+            index = nextIndex
+            true
+          } else {
+            false
+          }
+        } else {
+          false
+        }
+      }) ()
+      hashes(index) = 0
+      _size -= 1
+      previous
+    } else {
+      None_${V}
+    }
+  }
+
+  def keys: Set_${K} = {
+    val result = new OffheapHashSet_${K}
+    var i = 0
+    while (i < capacity) {
+      if (!isInit(hashes(i))) result.add(_keys(i))
+      i += 1
+    }
+    result
+  }
+
+  def values: Seq_${V} = {
+    val result = new OffheapBufferSeq_${V}
+    var i = 0
+    while (i < capacity) {
+      if (!isInit(hashes(i))) result.append(_values(i))
+      i += 1
+    }
+    result
+  }
+
+  def contains(key: ${K}): Boolean = this(key).nonEmpty
+
+  @inline
+  private[this] def shouldGrow = _size > capacity * 9 / 10
+
+  private[this] def growIfNecessary: Unit = {
+    if (shouldGrow) {
+      val oldCapacity = capacity
+      val oldHashes = hashes
+      val oldKeys = _keys
+      val oldValues = _values
+      capacity *= 2
+      mask = capacity - 1
+      hashes = new Array[Int](capacity)
+      _keys = new Array[${K}](capacity)
+      _values = new Array[${V}](capacity)
+      _size = 0
+      var i = 0
+      while (i < oldCapacity) {
+        val hash = oldHashes(i)
+        if (!isInit(hash)) {
+          val key = oldKeys(i)
+          val value = oldValues(i)
+          put(key, value)
+        }
+        i += 1
+      }
+    }
+  }
+
+  private[this] def hashCode(key: ${K}) = {
+    var hash = hashK.hash(key) & mask
+    hash |= (if (hash == 0) 1 else 0)
+    hash
+  }
+
+  @inline
+  private[this] def isInit(hash: Int) = hash == 0
+
+  private[this] def init(pos: Int, hash: Int, key: ${K}, value: ${V}) = {
+    hashes(pos) = hash
+    _keys(pos) = key
+    _values(pos) = value
+  }
+
+  override def isEmpty = _size == 0
+
+  override def size: Int = _size
+
+  override def foreach(f: (${K}, ${V}) => Unit): Unit = {
+    var i = 0
+    while (i < capacity) {
+      val hash = hashes(i)
+      if (!isInit(hash)) {
+        val key = _keys(i)
+        val value = _values(i)
+        f(key, value)
+      }
+      i += 1
+    }
+  }
+}
+
+% end
+% end

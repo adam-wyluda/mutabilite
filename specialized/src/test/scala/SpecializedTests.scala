@@ -15,7 +15,7 @@ class SpecializedSeqTest extends FunSuite with BeforeAndAfter with SeqTest {
   def provideSeq_Int: Seq[Int] = new BufferSeq_Int
 
   test("map") {
-    val seq: Seq_Int = new BufferSeq_Int
+    val seq = new BufferSeq_Int
     1 to 3 foreach (seq.append(_))
 
     val mapped = seq.map(i => i * 2.0f)
@@ -34,7 +34,7 @@ class SpecializedSeqTest extends FunSuite with BeforeAndAfter with SeqTest {
   }
 
   test("flatMap") {
-    val seq: Seq_Int = new BufferSeq_Int
+    val seq = new BufferSeq_Int
     1 to 5 by 2 foreach (seq.append(_))
 
     val mapped = seq flatMap { i =>
