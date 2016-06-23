@@ -1,21 +1,18 @@
 package offheap.collection
 
-class Opt[A] extends Traversable1[A] {
+trait Opt[A] extends Traversable1[A] {
+  def get: A
+  def size = if (nonEmpty) 1 else 0
+}
 
-  private[this] var value: A = _
-  private[this] var empty: Boolean = true
+class Some[A](value: A) extends Opt[A] {
+  def get = value
+  def isEmpty = false
+  def foreach(f: A => Unit) = f(get)
+}
 
-  def this(elem: A) = {
-    this()
-    this.value = elem
-    this.empty = false
-  }
-
-  // Dereference primitive or cast self to data class
-  def get(): A =
-    if (nonEmpty) value else throw new NoSuchElementException
-
-  override def isEmpty: Boolean = empty
-  override def size: Int = if (nonEmpty) 1 else 0
-  override def foreach(f: A => Unit): Unit = if (nonEmpty) f(get())
+class None[A] extends Opt[A] {
+  def get = throw new NoSuchElementException
+  def isEmpty = true
+  def foreach(f: A => Unit) = ()
 }

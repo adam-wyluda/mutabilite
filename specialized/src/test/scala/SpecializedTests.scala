@@ -7,7 +7,7 @@ import HashEq.Implicits._
 import SeqBuilders._
 
 class SpecializedOptTest extends FunSuite with BeforeAndAfter with OptTest {
-  def provideOpt_Int(value: Int): Opt[Int] = new Opt_Int(value)
+  def provideOpt_Int(value: Int): Opt[Int] = new Some_Int(value)
   def provideNone: Opt[Int] = None_Int
 }
 

@@ -39,7 +39,7 @@ class HashMap_${K}_${V}(initialSize: Int = 8)
     if (index == -1) {
       None_${V}
     } else {
-      new Opt_${V}(_values(index))
+      new Some_${V}(_values(index))
     }
   }
 
@@ -87,7 +87,7 @@ class HashMap_${K}_${V}(initialSize: Int = 8)
         growIfNecessary
         false
       } else if (nextHash == originalHash && hashK.eqv(_keys(pos), key)) {
-        previous = new Opt_${V}(_values(pos))
+        previous = new Some_${V}(_values(pos))
         _values(pos) = value
         false
       } else {
@@ -114,7 +114,7 @@ class HashMap_${K}_${V}(initialSize: Int = 8)
   def remove(key: ${K}): Opt_${V} = {
     var index = indexOf(key)
     if (index != -1) {
-      val previous = new Opt_${V}(_values(index))
+      val previous = new Some_${V}(_values(index))
       while ({
         val nextIndex = (index + 1) & mask
         val nextHash = hashes(nextIndex)

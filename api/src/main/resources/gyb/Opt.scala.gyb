@@ -7,26 +7,20 @@ types = ['Boolean', 'Char', 'Byte', 'Short',
 
 % for T in types:
 
-class Opt_${T} extends Opt[${T}] {
-
-  private[this] var value: ${T} = _
-  private[this] var empty: Boolean = true
-
-  def this(elem: ${T}) = {
-    this()
-    this.value = elem
-    this.empty = false
-  }
-
-  // Dereference primitive or cast self to data class
-  override def get(): ${T} =
-    if (nonEmpty) value else throw new NoSuchElementException
-
-  override def isEmpty: Boolean = empty
-  override def size: Int = if (nonEmpty) 1 else 0
-  override def foreach(f: ${T} => Unit): Unit = if (nonEmpty) f(get())
+trait Opt_${T} extends Opt[${T}] {
+  def get: ${T}
 }
 
-object None_${T} extends Opt_${T}
+class Some_${T}(value: ${T}) extends Opt_${T} {
+  def get: ${T} = value
+  def isEmpty = false
+  def foreach(f: ${T} => Unit) = f(get)
+}
+
+object None_${T} extends Opt_${T} {
+  def get = throw new NoSuchElementException
+  def isEmpty = true
+  def foreach(f: ${T} => Unit) = ()
+}
 
 % end

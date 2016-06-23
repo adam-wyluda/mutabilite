@@ -18,14 +18,14 @@ class HashMap[K, V](initialSize: Int = 8)(
   private[this] var capacity = initialSize
   private[this] var mask = capacity - 1
 
-  private[this] val emptyOpt = new Opt[V]()
+  private[this] val emptyOpt = new None[V]
 
   def apply(key: K): Opt[V] = {
     val index = indexOf(key)
     if (index == -1) {
       emptyOpt
     } else {
-      new Opt[V](_values(index).asInstanceOf[V])
+      new Some[V](_values(index).asInstanceOf[V])
     }
   }
 
@@ -64,7 +64,7 @@ class HashMap[K, V](initialSize: Int = 8)(
     var hash = originalHash
     var pos = hash
     var dis = 0
-    var previous = new Opt[V]()
+    var previous: Opt[V] = new None[V]
     while ({
       val nextHash = hashes(pos)
       if (isInit(nextHash)) {
@@ -73,7 +73,7 @@ class HashMap[K, V](initialSize: Int = 8)(
         growIfNecessary
         false
       } else if (nextHash == originalHash && _keys(pos) == key) {
-        previous = new Opt[V](_values(pos).asInstanceOf[V])
+        previous = new Some[V](_values(pos).asInstanceOf[V])
         _values(pos) = value.asInstanceOf[AnyRef]
         false
       } else {
@@ -100,7 +100,7 @@ class HashMap[K, V](initialSize: Int = 8)(
   def remove(key: K): Opt[V] = {
     var index = indexOf(key)
     if (index != -1) {
-      val previous = new Opt[V](_values(index).asInstanceOf[V])
+      val previous = new Some[V](_values(index).asInstanceOf[V])
       while ({
         val nextIndex = (index + 1) & mask
         val nextHash = hashes(nextIndex)
@@ -123,7 +123,7 @@ class HashMap[K, V](initialSize: Int = 8)(
       _size -= 1
       previous
     } else {
-      new Opt[V]()
+      emptyOpt
     }
   }
 

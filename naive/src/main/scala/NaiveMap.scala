@@ -10,10 +10,10 @@ class NaiveMap[K, V](implicit tag: ClassTag[(K, V)],
   private[this] val seq = new NaiveSeq[(K, V)]
 
   def apply(key: K): Opt[V] = {
-    var result = new Opt[V]
+    var result: Opt[V] = new None[V]
     seq foreach {
       case (k, v) =>
-        if (k == key) result = new Opt[V](v)
+        if (k == key) result = new Some(v)
     }
     result
   }
