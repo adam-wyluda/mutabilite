@@ -9,17 +9,22 @@ types = ['Boolean', 'Char', 'Byte', 'Short',
 
 trait Opt_${T} extends Opt[${T}] {
   def get: ${T}
+  def foreach(f: ${T} => Unit): Unit
 }
 
 class Some_${T}(value: ${T}) extends Opt_${T} {
   def get: ${T} = value
   def isEmpty = false
-  def foreach(f: ${T} => Unit) = f(get)
+
+  def size = 1
+  def foreach(f: ${T} => Unit) = f(value)
 }
 
 object None_${T} extends Opt_${T} {
   def get = throw new NoSuchElementException
   def isEmpty = true
+
+  def size = 0
   def foreach(f: ${T} => Unit) = ()
 }
 

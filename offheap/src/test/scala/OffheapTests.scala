@@ -7,8 +7,8 @@ import HashEq.Implicits._
 import SeqBuilders._
 
 class OffheapOptTest extends FunSuite with BeforeAndAfter with OptTest {
-  def provideOpt_Int(value: Int): Opt[Int] = new OffheapOpt_Int(value)
-  def provideNone: Opt[Int] = OffheapNone_Int
+  def provideOpt_Int(value: Int): Opt[Int] = OffheapOpt_Int(value)
+  def provideNone: Opt[Int] = OffheapOpt_Int.empty
 }
 
 class OffheapSeqTest extends FunSuite with BeforeAndAfter with SeqTest {

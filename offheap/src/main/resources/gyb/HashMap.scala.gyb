@@ -1,6 +1,10 @@
 package offheap.collection
 
+import scala.offheap.data
+
 import HashEq._
+import OffheapOpts._
+
 
 %{
 types = ['Boolean', 'Char', 'Byte', 'Short',
@@ -11,11 +15,15 @@ types = ['Boolean', 'Char', 'Byte', 'Short',
 % for V in types:
 
 class OffheapHashMap_${K}_${V}(initialSize: Int = 8)
+(implicit
   % if K == V:
-    (implicit hashK: Hash_${K})
+    hashK: Hash_${K},
   % else:
-    (implicit hashK: Hash_${K}, hashV: Hash_${V})
+    hashK: Hash_${K},
+    hashV: Hash_${V},
   % end
+    allocator: scala.offheap.Allocator
+)
     extends Map_${K}_${V} {
 
   private[this] var hashes: Array[Int] = new Array[Int](initialSize)
@@ -28,9 +36,9 @@ class OffheapHashMap_${K}_${V}(initialSize: Int = 8)
   def apply(key: ${K}): OffheapOpt_${V} = {
     val index = indexOf(key)
     if (index == -1) {
-      OffheapNone_${V}
+      OffheapOpt_${V}.empty
     } else {
-      new OffheapOpt_${V}(_values(index))
+      OffheapOpt_${V}(_values(index))
     }
   }
 
@@ -69,7 +77,7 @@ class OffheapHashMap_${K}_${V}(initialSize: Int = 8)
     var hash = originalHash
     var pos = hash
     var dis = 0
-    var previous: OffheapOpt_${V} = OffheapNone_${V}
+    var previous: OffheapOpt_${V} = OffheapOpt_${V}.empty
     while ({
       val nextHash = hashes(pos)
       if (isInit(nextHash)) {
@@ -78,7 +86,7 @@ class OffheapHashMap_${K}_${V}(initialSize: Int = 8)
         growIfNecessary
         false
       } else if (nextHash == originalHash && hashK.eqv(_keys(pos), key)) {
-        previous = new OffheapOpt_${V}(_values(pos))
+        previous = OffheapOpt_${V}(_values(pos))
         _values(pos) = value
         false
       } else {
@@ -105,7 +113,7 @@ class OffheapHashMap_${K}_${V}(initialSize: Int = 8)
   def remove(key: ${K}): OffheapOpt_${V} = {
     var index = indexOf(key)
     if (index != -1) {
-      val previous = new OffheapOpt_${V}(_values(index))
+      val previous = OffheapOpt_${V}(_values(index))
       while ({
         val nextIndex = (index + 1) & mask
         val nextHash = hashes(nextIndex)
@@ -128,7 +136,7 @@ class OffheapHashMap_${K}_${V}(initialSize: Int = 8)
       _size -= 1
       previous
     } else {
-      OffheapNone_${V}
+      OffheapOpt_${V}
     }
   }
 
