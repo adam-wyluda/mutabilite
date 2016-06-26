@@ -45,7 +45,7 @@ class NaiveMap[K, V](implicit tag: ClassTag[(K, V)],
     result
   }
 
-  def contains(key: K): Boolean = this(key).nonEmpty
+  def contains(key: K): Boolean = this(key).notEmpty
 
   private def keyIndex(key: K) = {
     var result = -1
@@ -54,7 +54,7 @@ class NaiveMap[K, V](implicit tag: ClassTag[(K, V)],
     result
   }
 
-  override def isEmpty = seq.isEmpty
+  override def empty = seq.empty
   override def size: Int = seq.size
   override def foreach(f: (K, V) => Unit): Unit = seq foreach f.tupled
 }

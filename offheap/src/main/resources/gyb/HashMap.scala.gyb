@@ -20,6 +20,7 @@ def hash(value: Long): Int
 % for T in types:
 % if T != 'Object':
 @data class OffheapOpt_${T}(value: ${T}) extends Opt_${T} {
+  def empty = isEmpty
   def size = if (nonEmpty) 1 else 0
   def foreach(f: ${T} => Unit) = if (nonEmpty) f(value) else ()
 }
@@ -44,8 +45,6 @@ def hash(value: Long): Int
     V_Arg = V
     V_Hash = K
 }%
-
-
 
 class OffheapHashMap_${K}_${V}(initialSize: Int = 8)
 (implicit
@@ -239,7 +238,7 @@ class OffheapHashMap_${K}_${V}(initialSize: Int = 8)
     _values(pos) = value
   }
 
-  override def isEmpty = _size == 0
+  override def empty = _size == 0
 
   override def size: Int = _size
 

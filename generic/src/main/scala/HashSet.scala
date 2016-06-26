@@ -168,7 +168,7 @@ class HashSet[A](initialSize: Int = 8)(implicit tag: ClassTag[A])
   @inline
   private[this] def isInit(hash: Int) = hash == 0
 
-  override def isEmpty = _size == 0
+  override def empty = _size == 0
 
   override def size: Int = _size
 

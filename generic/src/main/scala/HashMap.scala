@@ -147,7 +147,7 @@ class HashMap[K, V](initialSize: Int = 8)(
     result
   }
 
-  def contains(key: K): Boolean = this(key).nonEmpty
+  def contains(key: K): Boolean = this(key).notEmpty
 
   @inline
   private[this] def shouldGrow = _size > capacity * 9 / 10
@@ -192,7 +192,7 @@ class HashMap[K, V](initialSize: Int = 8)(
     _values(pos) = value
   }
 
-  override def isEmpty = _size == 0
+  override def empty = _size == 0
 
   override def size: Int = _size
 

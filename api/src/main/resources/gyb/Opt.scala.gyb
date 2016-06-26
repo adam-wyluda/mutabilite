@@ -14,7 +14,7 @@ trait Opt_${T} extends Any with Opt[${T}] {
 
 class Some_${T}(value: ${T}) extends Opt_${T} {
   def get: ${T} = value
-  def isEmpty = false
+  def empty = false
 
   def size = 1
   def foreach(f: ${T} => Unit) = f(value)
@@ -22,7 +22,7 @@ class Some_${T}(value: ${T}) extends Opt_${T} {
 
 object None_${T} extends Opt_${T} {
   def get = throw new NoSuchElementException
-  def isEmpty = true
+  def empty = true
 
   def size = 0
   def foreach(f: ${T} => Unit) = ()

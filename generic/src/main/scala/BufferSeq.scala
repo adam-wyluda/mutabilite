@@ -111,7 +111,7 @@ class BufferSeq[A](initialSize: Int = 16)(implicit tag: ClassTag[A])
     result
   }
 
-  override def isEmpty = _size == 0
+  override def empty = _size == 0
   override def size: Int = _size
   override def foreach(f: (A) => Unit): Unit = {
     var i = 0

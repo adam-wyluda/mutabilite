@@ -7,7 +7,7 @@ trait Opt[A] extends Any with Traversable1[A] {
 
 class Some[A](value: A) extends Opt[A] {
   def get = value
-  def isEmpty = false
+  def empty = false
 
   def size = 1
   def foreach(f: A => Unit) = f(value)
@@ -15,7 +15,7 @@ class Some[A](value: A) extends Opt[A] {
 
 class None[A] extends Opt[A] {
   def get = throw new NoSuchElementException
-  def isEmpty = true
+  def empty = true
 
   def size = 0
   def foreach(f: A => Unit) = ()

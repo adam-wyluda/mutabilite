@@ -9,9 +9,9 @@ class MapSet[A](initialSize: Int = 8)(implicit tag: ClassTag[A])
 
   def apply(elem: A): Boolean = map contains elem
 
-  def add(elem: A): Boolean = map.put(elem, ()).isEmpty
+  def add(elem: A): Boolean = map.put(elem, ()).empty
 
-  def remove(elem: A): Boolean = map.remove(elem).nonEmpty
+  def remove(elem: A): Boolean = map.remove(elem).notEmpty
 
   def intersect(that: Set[A]): Set[A] = {
     val result = new MapSet[A]
@@ -36,7 +36,7 @@ class MapSet[A](initialSize: Int = 8)(implicit tag: ClassTag[A])
     result
   }
 
-  override def isEmpty = map.isEmpty
+  override def empty = map.empty
   override def size: Int = map.size
   override def foreach(f: A => Unit): Unit = map foreach ((k, _) => f(k))
 }

@@ -16,8 +16,8 @@ trait SetTest { this: FunSuite with BeforeAndAfter =>
   }
 
   test("isEmpty") {
-    assert(set.nonEmpty)
-    assert(provideSet_Int.isEmpty)
+    assert(set.notEmpty)
+    assert(provideSet_Int.empty)
   }
 
   test("size") {

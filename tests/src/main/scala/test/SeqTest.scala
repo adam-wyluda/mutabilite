@@ -15,8 +15,8 @@ trait SeqTest { this: FunSuite with BeforeAndAfter =>
   }
 
   test("isEmpty") {
-    assert(seq.nonEmpty)
-    assert(provideSeq_Int.isEmpty)
+    assert(seq.notEmpty)
+    assert(provideSeq_Int.empty)
   }
 
   test("size") {
@@ -40,9 +40,9 @@ trait SeqTest { this: FunSuite with BeforeAndAfter =>
   test("append") {
     val seq = provideSeq_Int
 
-    assert(seq.isEmpty)
+    assert(seq.empty)
     1 to 3 foreach (seq.append(_))
-    assert(seq.nonEmpty)
+    assert(seq.notEmpty)
     assert(seq.size == 3)
   }
 

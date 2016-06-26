@@ -12,8 +12,8 @@ trait OptTest { this: FunSuite with BeforeAndAfter =>
   val none = provideNone
 
   test("isEmpty") {
-    assert(opt.nonEmpty)
-    assert(none.isEmpty)
+    assert(opt.notEmpty)
+    assert(none.empty)
   }
 
   test("get") {

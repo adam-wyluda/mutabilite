@@ -65,7 +65,7 @@ class NaiveSeq[A](initialSize: Int = 1)(implicit tag: ClassTag[A])
   }
   private def growTo(size: Int) = while (shouldGrow(size)) grow
 
-  override def isEmpty = _size == 0
+  override def empty = _size == 0
   override def size: Int = _size
   override def foreach(f: (A) => Unit): Unit =
     0 until _size foreach (a => f(array(a)))

@@ -207,7 +207,7 @@ class HashSet_${T}(initialSize: Int = 8)(implicit hashK: Hash_${T}) extends Set_
   @inline
   private[this] def isInit(hash: Int) = hash == 0
 
-  override def isEmpty = _size == 0
+  override def empty = _size == 0
 
   override def size: Int = _size
 
