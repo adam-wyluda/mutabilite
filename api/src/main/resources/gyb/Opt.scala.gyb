@@ -7,7 +7,7 @@ types = ['Boolean', 'Char', 'Byte', 'Short',
 
 % for T in types:
 
-trait Opt_${T} extends Opt[${T}] {
+trait Opt_${T} extends Any with Opt[${T}] {
   def get: ${T}
   def foreach(f: ${T} => Unit): Unit
 }

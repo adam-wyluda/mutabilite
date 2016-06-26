@@ -1,6 +1,6 @@
 package offheap.collection
 
-trait Opt[A] extends Traversable1[A] {
+trait Opt[A] extends Any with Traversable1[A] {
   def get: A
   def size: Int
 }

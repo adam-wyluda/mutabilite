@@ -13,4 +13,3 @@ mkdir -p ./offheap/src/main/scala/codegen
 python project/gyb.py ./offheap/src/main/resources/gyb/BufferSeq.scala.gyb > ./offheap/src/main/scala/codegen/OffheapBufferSeq.scala
 python project/gyb.py ./offheap/src/main/resources/gyb/HashMap.scala.gyb   > ./offheap/src/main/scala/codegen/OffheapHashMap.scala
 python project/gyb.py ./offheap/src/main/resources/gyb/HashSet.scala.gyb   > ./offheap/src/main/scala/codegen/OffheapHashSet.scala
-python project/gyb.py ./offheap/src/main/resources/gyb/Opt.scala.gyb       > ./offheap/src/main/scala/codegen/OffheapOpt.scala
