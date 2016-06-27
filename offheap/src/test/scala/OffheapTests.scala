@@ -4,14 +4,15 @@ import offheap.collection._
 import org.scalatest.{BeforeAndAfter, FunSuite}
 
 import HashEq.Implicits._
-import SeqBuilders._
 
-class OffheapOptTest extends FunSuite with BeforeAndAfter with OptTest {
-  def provideOpt_Int(value: Int): Opt[Int] = OffheapOpt_Int(value)
-  def provideNone: Opt[Int] = OffheapOpt_Int.empty
+class OffheapOptTest extends FunSuite with BeforeAndAfter {//with OptTest {
+  implicit val alloc = scala.offheap.malloc
+
+  def provideOpt_Int(value: Int): Opt_Int = OffheapOpt_Int(value)
+  def provideNone: Opt_Int = OffheapOpt_Int.empty
 }
 
-class OffheapSeqTest extends FunSuite with BeforeAndAfter with SeqTest {
+class OffheapSeqTest extends FunSuite with BeforeAndAfter {//with SeqTest {
   def provideSeq_Int: Seq[Int] = new OffheapBufferSeq_Int
 
   test("map_Int") {
@@ -49,11 +50,11 @@ class OffheapSeqTest extends FunSuite with BeforeAndAfter with SeqTest {
   }
 }
 
-class OffheapSetTest extends FunSuite with BeforeAndAfter with SetTest {
+class OffheapSetTest extends FunSuite with BeforeAndAfter {//with SetTest {
   def provideSet_Int: Set[Int] = new OffheapHashSet_Int
 }
 
-class OffheapMapTest extends FunSuite with BeforeAndAfter with MapTest {
-  def provideMap_Int_Object: Map[Int, Object] = new OffheapHashMap_Int_Object
-  def provideMap_Object_Int: Map[Object, Int] = new OffheapHashMap_Object_Int
-}
+//class OffheapMapTest extends FunSuite with BeforeAndAfter with MapTest {
+//  def provideMap_Int_Object: Map[Int, Object] = new OffheapHashMap_Int_Object
+//  def provideMap_Object_Int: Map[Object, Int] = new OffheapHashMap_Object_Int
+//}

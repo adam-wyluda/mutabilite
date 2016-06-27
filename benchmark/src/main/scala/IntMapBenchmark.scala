@@ -12,6 +12,12 @@ class IntMapBenchmark {
 
   import Benchmark._
 
+  implicit val allocator = scala.offheap.malloc
+
+  def test = {
+    val opt = OffheapOpt_Int(20)
+  }
+
   val offheapMap: OffheapHashMap_Int_Int = {
     val map = new OffheapHashMap_Int_Int(initialSize)
     var i = 0
@@ -190,6 +196,8 @@ class IntMapBenchmark {
 class IntMapRemoveOffheapBenchmark {
 
   import Benchmark._
+
+  implicit val allocator = scala.offheap.malloc
 
   var map: OffheapHashMap_Int_Int = _
 

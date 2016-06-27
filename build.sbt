@@ -4,7 +4,8 @@ name := "scala-offheap-collections"
 
 lazy val defaults = Defaults.coreDefaultSettings ++ Seq(
   version := "0.1-SNAPSHOT",
-  scalaVersion := "2.11.8"
+  scalaVersion := "2.11.8",
+  addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full)
 )
 
 lazy val api = project
@@ -63,8 +64,7 @@ lazy val offheap = project
       moduleName := "offheap",
       libraryDependencies ++= Seq(
         "sh.den" % "scala-offheap_2.11" % "0.1"
-      ),
-      addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full)
+      )
     )
   )
 

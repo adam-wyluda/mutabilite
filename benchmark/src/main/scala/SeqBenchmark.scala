@@ -14,6 +14,8 @@ class SeqBenchmark {
 
   val seqSize = Benchmark.size
 
+  implicit val allocator = scala.offheap.malloc
+
   val offheapSeq: OffheapBufferSeq_Int = {
     val seq = new OffheapBufferSeq_Int
     1 to seqSize foreach (seq.append(_))
@@ -316,6 +318,8 @@ class SeqBenchmark {
 @State(Scope.Thread)
 class SeqRemoveOffheapBenchmark {
 
+  implicit val allocator = scala.offheap.malloc
+
   val origin: OffheapBufferSeq_Int = {
     val seq = new OffheapBufferSeq_Int
     1 to 10000 foreach (seq.append(_))
@@ -332,7 +336,7 @@ class SeqRemoveOffheapBenchmark {
 
   @Benchmark
   def benchmark = {
-    while (seq.nonEmpty) seq.remove(0)
+    while (seq.notEmpty) seq.remove(0)
   }
 }
 
@@ -355,7 +359,7 @@ class SeqRemoveSpecializedBenchmark {
 
   @Benchmark
   def benchmark = {
-    while (seq.nonEmpty) seq.remove(0)
+    while (seq.notEmpty) seq.remove(0)
   }
 }
 
@@ -378,7 +382,7 @@ class SeqRemoveGenericBenchmark {
 
   @Benchmark
   def benchmark = {
-    while (seq.nonEmpty) seq.remove(0)
+    while (seq.notEmpty) seq.remove(0)
   }
 }
 
