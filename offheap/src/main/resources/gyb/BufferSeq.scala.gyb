@@ -1,18 +1,20 @@
 package offheap.collection
 
+import scala.{ offheap => oh }
+
 import HashEq._
 
 %{
 types = ['Boolean', 'Char', 'Byte', 'Short',
-  'Int', 'Long', 'Float', 'Double', 'Object']
+  'Int', 'Long', 'Float', 'Double']
 }%
 
 % for T in types:
 
-class OffheapBufferSeq_${T}(initialSize: Int = 16)(implicit eq: Eq_${T})
+class OffheapBufferSeq_${T}(initialSize: Int = 16)(implicit eq: Eq_${T}, allocator: oh.Allocator)
   extends Seq_${T} {
 
-  private[this] var array: Array[${T}] = new Array[${T}](initialSize)
+  private[this] var array: oh.Array[${T}] = oh.Array.uninit[${T}](initialSize)
   private[this] var _size = 0
 
   def apply(index: Int): ${T} = array(index)
@@ -98,12 +100,12 @@ class OffheapBufferSeq_${T}(initialSize: Int = 16)(implicit eq: Eq_${T})
     result
   }
 
-  private def copy(src: Int, dest: Int, len: Int) = System.arraycopy(array, src, array, dest, len)
+  private def copy(src: Int, dest: Int, len: Int) = oh.Array.copy(array, src, array, dest, len)
 
   private def shouldGrow(newSize: Int) = newSize > array.size
   private def grow = {
-    val newArray = new Array[${T}](array.size * 2)
-    System.arraycopy(array, 0, newArray, 0, _size)
+    val newArray = oh.Array.uninit[${T}](array.size * 2)
+    oh.Array.copy(array, 0, newArray, 0, _size)
     this.array = newArray
   }
   private def growTo(size: Int) = while (shouldGrow(size)) grow
