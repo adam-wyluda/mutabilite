@@ -7,37 +7,46 @@ import HashEq._
 
 %{
 types = ['Boolean', 'Char', 'Byte', 'Short',
-  'Int', 'Long', 'Float', 'Double']
+  'Int', 'Long', 'Float', 'Double', 'Object']
 }%
 
 % for T in types:
 
-@data class OffheapBufferSeq_${T}(var array: oh.Array[${T}], var _size: Int) {
+%{
+  if T == 'Object':
+    T_Arg = 'Long'
+    T_Eq = 'Offheap'
+  else:
+    T_Arg = T
+    T_Eq = T
+}%
+
+@data class OffheapBufferSeq_${T}(var array: oh.Array[${T_Arg}], var _size: Int) {
 
   def free(implicit allocator: oh.Allocator) = {
     allocator.free(array.addr)
     allocator.free(addr)
   }
 
-  def apply(index: Int): ${T} = array(index)
+  def apply(index: Int): ${T_Arg} = array(index)
 
-  def append(elem: ${T})(implicit allocator: oh.Allocator): Unit = {
+  def append(elem: ${T_Arg})(implicit allocator: oh.Allocator): Unit = {
     val newSize = _size + 1
     growTo(newSize)
     array(_size) = elem
     _size += 1
   }
 
-  def update(index: Int, value: ${T}): Unit = array(index) = value
+  def update(index: Int, value: ${T_Arg}): Unit = array(index) = value
 
-  def remove(n: Int): ${T} = {
+  def remove(n: Int): ${T_Arg} = {
     val removed = array(n)
     arraycopy(n + 1, n, _size - n)
     _size -= 1
     removed
   }
 
-  def index(elem: ${T})(implicit eq: Eq_${T}): Int = {
+  def index(elem: ${T_Arg})(implicit eq: Eq_${T_Eq}): Int = {
     var result = -1
     var i = 0
     while ({
@@ -56,7 +65,7 @@ types = ['Boolean', 'Char', 'Byte', 'Short',
     result
   }
 
-  def insert(index: Int, elem: ${T})(implicit allocator: oh.Allocator): Unit = {
+  def insert(index: Int, elem: ${T_Arg})(implicit allocator: oh.Allocator): Unit = {
     val newSize = _size + 1
     growTo(newSize)
     arraycopy(index, index + 1, _size - index)
@@ -64,7 +73,7 @@ types = ['Boolean', 'Char', 'Byte', 'Short',
     _size += 1
   }
 
-  def map_${T}(f: ${T} => ${T})(implicit allocator: oh.Allocator): OffheapBufferSeq_${T} = {
+  def map_${T}(f: ${T_Arg} => ${T_Arg})(implicit allocator: oh.Allocator): OffheapBufferSeq_${T} = {
     val builder = OffheapSeq_${T}.create(initialSize = array.size)
     var i = 0
     while (i < _size) {
@@ -74,7 +83,7 @@ types = ['Boolean', 'Char', 'Byte', 'Short',
     builder
   }
 
-  def flatMap_${T}(f: ${T} => OffheapBufferSeq_${T})(implicit allocator: oh.Allocator): OffheapBufferSeq_${T} = {
+  def flatMap_${T}(f: ${T_Arg} => OffheapBufferSeq_${T})(implicit allocator: oh.Allocator): OffheapBufferSeq_${T} = {
     val builder = OffheapSeq_${T}.create()
     var i = 0
     while (i < _size) {
@@ -92,7 +101,7 @@ types = ['Boolean', 'Char', 'Byte', 'Short',
     builder
   }
 
-  def filter(f: ${T} => Boolean)(implicit allocator: oh.Allocator): OffheapBufferSeq_${T} = {
+  def filter(f: ${T_Arg} => Boolean)(implicit allocator: oh.Allocator): OffheapBufferSeq_${T} = {
     val result = OffheapSeq_${T}.create()
     var i = 0
     while (i < _size) {
@@ -107,7 +116,7 @@ types = ['Boolean', 'Char', 'Byte', 'Short',
 
   private def shouldGrow(newSize: Int) = newSize > array.size
   private def grow(implicit allocator: oh.Allocator) = {
-    val newArray = oh.Array.uninit[${T}](array.size * 2)
+    val newArray = oh.Array.uninit[${T_Arg}](array.size * 2)
     oh.Array.copy(array, 0, newArray, 0, _size)
     allocator.free(this.array.addr)
     this.array = newArray
@@ -124,7 +133,7 @@ types = ['Boolean', 'Char', 'Byte', 'Short',
   def notEmpty = _size != 0
 
   def size: Int = _size
-  def foreach(f: ${T} => Unit): Unit = {
+  def foreach(f: ${T_Arg} => Unit): Unit = {
     var i = 0
     while (i < _size) {
       f(array(i))
@@ -135,7 +144,7 @@ types = ['Boolean', 'Char', 'Byte', 'Short',
 
 object OffheapSeq_${T} {
   def create(initialSize: Int = 16)(implicit allocator: oh.Allocator): OffheapBufferSeq_${T} =
-    OffheapBufferSeq_${T}(oh.Array.uninit[${T}](initialSize), 0)
+    OffheapBufferSeq_${T}(oh.Array.uninit[${T_Arg}](initialSize), 0)
 }
 
 % end
