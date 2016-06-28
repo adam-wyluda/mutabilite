@@ -1,6 +1,7 @@
 package offheap.collection
 
 import scala.{ offheap => oh }
+import scala.offheap.data
 
 import HashEq._
 
@@ -11,17 +12,16 @@ types = ['Boolean', 'Char', 'Byte', 'Short',
 
 % for T in types:
 
-class OffheapBufferSeq_${T}(initialSize: Int = 16)(implicit eq: Eq_${T}, allocator: oh.Allocator)
-  extends Seq_${T} {
+@data class OffheapBufferSeq_${T}(var array: oh.Array[${T}], var _size: Int) {
 
-  private[this] var array: oh.Array[${T}] = oh.Array.uninit[${T}](initialSize)
-  private[this] var _size = 0
-
-  def free = allocator.free(array.addr)
+  def free(implicit allocator: oh.Allocator) = {
+    allocator.free(array.addr)
+    allocator.free(addr)
+  }
 
   def apply(index: Int): ${T} = array(index)
 
-  def append(elem: ${T}): Unit = {
+  def append(elem: ${T})(implicit allocator: oh.Allocator): Unit = {
     val newSize = _size + 1
     growTo(newSize)
     array(_size) = elem
@@ -32,12 +32,12 @@ class OffheapBufferSeq_${T}(initialSize: Int = 16)(implicit eq: Eq_${T}, allocat
 
   def remove(n: Int): ${T} = {
     val removed = array(n)
-    copy(n + 1, n, _size - n)
+    arraycopy(n + 1, n, _size - n)
     _size -= 1
     removed
   }
 
-  def index(elem: ${T}): Int = {
+  def index(elem: ${T})(implicit eq: Eq_${T}): Int = {
     var result = -1
     var i = 0
     while ({
@@ -56,16 +56,16 @@ class OffheapBufferSeq_${T}(initialSize: Int = 16)(implicit eq: Eq_${T}, allocat
     result
   }
 
-  def insert(index: Int, elem: ${T}): Unit = {
+  def insert(index: Int, elem: ${T})(implicit allocator: oh.Allocator): Unit = {
     val newSize = _size + 1
     growTo(newSize)
-    copy(index, index + 1, _size - index)
+    arraycopy(index, index + 1, _size - index)
     array(index) = elem
     _size += 1
   }
 
-  def map_${T}(f: ${T} => ${T}): OffheapBufferSeq_${T} = {
-    val builder = new OffheapBufferSeq_${T}(initialSize = array.size)
+  def map_${T}(f: ${T} => ${T})(implicit allocator: oh.Allocator): OffheapBufferSeq_${T} = {
+    val builder = OffheapSeq_${T}.create(initialSize = array.size)
     var i = 0
     while (i < _size) {
       builder.append(f(array(i)))
@@ -74,8 +74,8 @@ class OffheapBufferSeq_${T}(initialSize: Int = 16)(implicit eq: Eq_${T}, allocat
     builder
   }
 
-  def flatMap_${T}(f: ${T} => OffheapBufferSeq_${T}): OffheapBufferSeq_${T} = {
-    val builder = new OffheapBufferSeq_${T}
+  def flatMap_${T}(f: ${T} => OffheapBufferSeq_${T})(implicit allocator: oh.Allocator): OffheapBufferSeq_${T} = {
+    val builder = OffheapSeq_${T}.create()
     var i = 0
     while (i < _size) {
       val el = array(i)
@@ -92,8 +92,8 @@ class OffheapBufferSeq_${T}(initialSize: Int = 16)(implicit eq: Eq_${T}, allocat
     builder
   }
 
-  def filter(f: ${T} => Boolean): OffheapBufferSeq_${T} = {
-    val result = new OffheapBufferSeq_${T}
+  def filter(f: ${T} => Boolean)(implicit allocator: oh.Allocator): OffheapBufferSeq_${T} = {
+    val result = OffheapSeq_${T}.create()
     var i = 0
     while (i < _size) {
       val el = array(i)
@@ -103,16 +103,16 @@ class OffheapBufferSeq_${T}(initialSize: Int = 16)(implicit eq: Eq_${T}, allocat
     result
   }
 
-  private def copy(src: Int, dest: Int, len: Int) = oh.Array.copy(array, src, array, dest, len)
+  private def arraycopy(src: Int, dest: Int, len: Int) = oh.Array.copy(array, src, array, dest, len)
 
   private def shouldGrow(newSize: Int) = newSize > array.size
-  private def grow = {
+  private def grow(implicit allocator: oh.Allocator) = {
     val newArray = oh.Array.uninit[${T}](array.size * 2)
     oh.Array.copy(array, 0, newArray, 0, _size)
     allocator.free(this.array.addr)
     this.array = newArray
   }
-  private def growTo(size: Int) = while (shouldGrow(size)) grow
+  private def growTo(size: Int)(implicit allocator: oh.Allocator) = while (shouldGrow(size)) grow
 
   private def lowestPowOf2GreaterThan(min: Int) = {
     var result = 1
@@ -120,15 +120,22 @@ class OffheapBufferSeq_${T}(initialSize: Int = 16)(implicit eq: Eq_${T}, allocat
     result
   }
 
-  override def empty = _size == 0
-  override def size: Int = _size
-  override def foreach(f: ${T} => Unit): Unit = {
+  def empty = _size == 0
+  def notEmpty = _size != 0
+
+  def size: Int = _size
+  def foreach(f: ${T} => Unit): Unit = {
     var i = 0
     while (i < _size) {
       f(array(i))
       i += 1
     }
   }
+}
+
+object OffheapSeq_${T} {
+  def create(initialSize: Int = 16)(implicit allocator: oh.Allocator): OffheapBufferSeq_${T} =
+    OffheapBufferSeq_${T}(oh.Array.uninit[${T}](initialSize), 0)
 }
 
 % end

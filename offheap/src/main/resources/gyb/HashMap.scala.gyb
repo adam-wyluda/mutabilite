@@ -171,7 +171,7 @@ class OffheapHashMap_${K}_${V}(initialSize: Int = 8)
     }
   }
 
-  def keys: OffheapHashSet_${K_Arg} = ???
+  def keys: HashSet_${K_Arg} = ???
 //  {
 //    val result = new OffheapHashSet_${K_Arg}
 //    var i = 0
@@ -182,7 +182,7 @@ class OffheapHashMap_${K}_${V}(initialSize: Int = 8)
 //    result
 //  }
 
-  def values: OffheapBufferSeq_${V_Arg} = ???
+  def values: BufferSeq_${V_Arg} = ???
 //  {
 //    val result = new OffheapBufferSeq_${V_Arg}
 //    var i = 0

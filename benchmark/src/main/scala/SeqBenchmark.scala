@@ -17,7 +17,7 @@ class SeqBenchmark {
   implicit val allocator = scala.offheap.malloc
 
   val offheapSeq: OffheapBufferSeq_Int = {
-    val seq = new OffheapBufferSeq_Int
+    val seq = OffheapSeq_Int.create()
     1 to seqSize foreach (seq.append(_))
     seq
   }
@@ -54,7 +54,7 @@ class SeqBenchmark {
   }
 
   @TearDown(Level.Invocation)
-  def tearDown = if (freedOffheapSeq != null) freedOffheapSeq.free
+  def tearDown = if (freedOffheapSeq.nonEmpty) freedOffheapSeq.free
 
   @Benchmark
   def readSequentialOffheap(blackhole: Blackhole) = {
@@ -106,7 +106,7 @@ class SeqBenchmark {
 
   @Benchmark
   def appendOffheap = {
-    freedOffheapSeq = new OffheapBufferSeq_Int(initialSize = 16)
+    freedOffheapSeq = OffheapSeq_Int.create(initialSize = 16)
     var i = 0
     while (i < seqSize) {
       freedOffheapSeq.append(i)
@@ -226,7 +226,7 @@ class SeqBenchmark {
 
   @Benchmark
   def prependOffheap = {
-    freedOffheapSeq = new OffheapBufferSeq_Int(initialSize = 16)
+    freedOffheapSeq = OffheapSeq_Int.create(initialSize = 16)
     var i = 0
     while (i < seqSize) {
       freedOffheapSeq.insert(0, i)
@@ -278,7 +278,7 @@ class SeqBenchmark {
 
   @Benchmark
   def flatMapOffheap = freedOffheapSeq = offheapSeq flatMap_Int { i =>
-    val r = new OffheapBufferSeq_Int
+    val r = OffheapSeq_Int.create()
     var j = 0
     while (j < 5) { r.append(i + j); j += 1 }
     r
@@ -327,7 +327,7 @@ class SeqRemoveOffheapBenchmark {
   implicit val allocator = scala.offheap.malloc
 
   val origin: OffheapBufferSeq_Int = {
-    val seq = new OffheapBufferSeq_Int
+    val seq = OffheapSeq_Int.create()
     1 to 10000 foreach (seq.append(_))
     seq
   }
@@ -336,7 +336,7 @@ class SeqRemoveOffheapBenchmark {
 
   @Setup(Level.Invocation)
   def setup = {
-    seq = new OffheapBufferSeq_Int
+    seq = OffheapSeq_Int.create()
     origin.foreach(seq.append(_))
   }
 
