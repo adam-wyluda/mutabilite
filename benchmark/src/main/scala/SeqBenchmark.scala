@@ -40,6 +40,8 @@ class SeqBenchmark {
     seq
   }
 
+  var freedOffheapSeq: OffheapBufferSeq_Int = _
+
   val random = Random
 
   var randIndex: Int = _
@@ -50,6 +52,9 @@ class SeqBenchmark {
     randIndex = random.nextInt(seqSize)
     randVal = random.nextInt
   }
+
+  @TearDown(Level.Invocation)
+  def tearDown = if (freedOffheapSeq != null) freedOffheapSeq.free
 
   @Benchmark
   def readSequentialOffheap(blackhole: Blackhole) = {
@@ -101,10 +106,10 @@ class SeqBenchmark {
 
   @Benchmark
   def appendOffheap = {
-    val s = new OffheapBufferSeq_Int(initialSize = 16)
+    freedOffheapSeq = new OffheapBufferSeq_Int(initialSize = 16)
     var i = 0
     while (i < seqSize) {
-      s.append(i)
+      freedOffheapSeq.append(i)
       i += 1
     }
   }
@@ -218,12 +223,13 @@ class SeqBenchmark {
     stdSeq foreach (sum += _)
     sum
   }
+
   @Benchmark
   def prependOffheap = {
-    val s = new OffheapBufferSeq_Int(initialSize = 16)
+    freedOffheapSeq = new OffheapBufferSeq_Int(initialSize = 16)
     var i = 0
     while (i < seqSize) {
-      s.insert(0, i)
+      freedOffheapSeq.insert(0, i)
       i += 1
     }
   }
@@ -259,7 +265,7 @@ class SeqBenchmark {
   }
 
   @Benchmark
-  def mapOffheap = offheapSeq map_Int (_ + 1)
+  def mapOffheap = freedOffheapSeq = offheapSeq map_Int (_ + 1)
 
   @Benchmark
   def mapSpecialized = specSeq map_Int (_ + 1)
@@ -271,7 +277,7 @@ class SeqBenchmark {
   def mapStdlib = stdSeq map (_ + 1)
 
   @Benchmark
-  def flatMapOffheap = offheapSeq flatMap_Int { i =>
+  def flatMapOffheap = freedOffheapSeq = offheapSeq flatMap_Int { i =>
     val r = new OffheapBufferSeq_Int
     var j = 0
     while (j < 5) { r.append(i + j); j += 1 }
@@ -303,7 +309,7 @@ class SeqBenchmark {
   }
 
   @Benchmark
-  def filterOffheap = offheapSeq filter (_ % 2 == 0)
+  def filterOffheap = freedOffheapSeq = offheapSeq filter (_ % 2 == 0)
 
   @Benchmark
   def filterSpecialized = specSeq filter (_ % 2 == 0)
@@ -333,6 +339,9 @@ class SeqRemoveOffheapBenchmark {
     seq = new OffheapBufferSeq_Int
     origin.foreach(seq.append(_))
   }
+
+  @TearDown(Level.Invocation)
+  def tearDown = seq.free
 
   @Benchmark
   def benchmark = {

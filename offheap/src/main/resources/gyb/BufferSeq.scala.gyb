@@ -17,6 +17,8 @@ class OffheapBufferSeq_${T}(initialSize: Int = 16)(implicit eq: Eq_${T}, allocat
   private[this] var array: oh.Array[${T}] = oh.Array.uninit[${T}](initialSize)
   private[this] var _size = 0
 
+  def free = allocator.free(array.addr)
+
   def apply(index: Int): ${T} = array(index)
 
   def append(elem: ${T}): Unit = {
@@ -72,7 +74,7 @@ class OffheapBufferSeq_${T}(initialSize: Int = 16)(implicit eq: Eq_${T}, allocat
     builder
   }
 
-  def flatMap_${T}(f: ${T} => Seq_${T}): OffheapBufferSeq_${T} = {
+  def flatMap_${T}(f: ${T} => OffheapBufferSeq_${T}): OffheapBufferSeq_${T} = {
     val builder = new OffheapBufferSeq_${T}
     var i = 0
     while (i < _size) {
@@ -84,6 +86,7 @@ class OffheapBufferSeq_${T}(initialSize: Int = 16)(implicit eq: Eq_${T}, allocat
         builder.append(result(j))
         j += 1
       }
+      result.free
       i += 1
     }
     builder
@@ -106,6 +109,7 @@ class OffheapBufferSeq_${T}(initialSize: Int = 16)(implicit eq: Eq_${T}, allocat
   private def grow = {
     val newArray = oh.Array.uninit[${T}](array.size * 2)
     oh.Array.copy(array, 0, newArray, 0, _size)
+    allocator.free(this.array.addr)
     this.array = newArray
   }
   private def growTo(size: Int) = while (shouldGrow(size)) grow

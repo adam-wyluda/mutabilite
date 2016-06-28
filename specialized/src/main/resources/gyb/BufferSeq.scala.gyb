@@ -26,9 +26,9 @@ trait Seq_${T} extends Seq[${T}] {
   def foreach(f: ${T} => Unit)
 
 //  def map[B, S <: Seq[B]](f: ${T} => B)(implicit builder: S): S
-  def map_${T}(f: ${T} => ${T}): Seq_${T}
+//  def map_${T}(f: ${T} => ${T}): Seq_${T}
 //  def flatMap[B, S <: Seq[B]](f: ${T} => Traversable1[B])(implicit builder: S): S
-  def flatMap_${T}(f: ${T} => Seq_${T}): Seq_${T}
+//  def flatMap_${T}(f: ${T} => Seq_${T}): Seq_${T}
   def filter(f: ${T} => Boolean): Seq_${T}
 }
 

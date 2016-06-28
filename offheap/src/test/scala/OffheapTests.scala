@@ -24,6 +24,8 @@ class OffheapSeqTest extends FunSuite with BeforeAndAfter with SeqTest {
     val mapped: OffheapBufferSeq_Int = seq map_Int (_ * 2)
     assert(mapped.size == 3)
     1 to 3 foreach (i => assert(mapped(i - 1) == i * 2))
+    seq.free
+    mapped.free
   }
 
   test("flatMap_Int") {
