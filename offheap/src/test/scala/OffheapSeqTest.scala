@@ -5,13 +5,6 @@ import org.scalatest.{BeforeAndAfter, FunSuite}
 
 import HashEq.Implicits._
 
-class OffheapOptTest extends FunSuite with BeforeAndAfter {//with OptTest {
-  implicit val alloc = scala.offheap.malloc
-
-  def provideOpt_Int(value: Int): Opt_Int = OffheapOpt_Int(value)
-  def provideNone: Opt_Int = OffheapOpt_Int.empty
-}
-
 class OffheapSeqTest extends FunSuite with BeforeAndAfter {
   implicit val alloc = scala.offheap.malloc
 
@@ -128,12 +121,3 @@ class OffheapSeqTest extends FunSuite with BeforeAndAfter {
     2 to 10 by 2 foreach (i => assert(filtered((i - 1) / 2) == i))
   }
 }
-
-class OffheapSetTest extends FunSuite with BeforeAndAfter {//with SetTest {
-  def provideSet_Int: Set[Int] = new OffheapHashSet_Int
-}
-
-//class OffheapMapTest extends FunSuite with BeforeAndAfter with MapTest {
-//  def provideMap_Int_Object: Map[Int, Object] = new OffheapHashMap_Int_Object
-//  def provideMap_Object_Int: Map[Object, Int] = new OffheapHashMap_Object_Int
-//}
