@@ -1,5 +1,6 @@
 package offheap.collection
 
+import scala.{ offheap => oh }
 import scala.offheap.data
 
 import HashEq._
@@ -44,25 +45,18 @@ types = ['Boolean', 'Char', 'Byte', 'Short',
     V_Hash = K
 }%
 
-class OffheapHashMap_${K}_${V}(initialSize: Int = 8)
-(implicit
-    hashK: Hash_${K_Hash},
-  % if K_Hash != V_Hash:
-    hashV: Hash_${V_Hash},
-  % end
+@data class OffheapHashMap_${K}_${V}
+(
+  var hashes: oh.Array[Int],
+  var _keys: oh.Array[${K_Arg}],
+  var _values: oh.Array[${V_Arg}],
+  var _size: Int,
+  var capacity: Int,
+  var mask: Int
+) {
 
-    allocator: scala.offheap.Allocator
-)
-    extends Map_${K_Arg}_${V_Arg} {
-
-  private[this] var hashes: Array[Int] = new Array[Int](initialSize)
-  private[this] var _keys: Array[${K_Arg}] = new Array[${K_Arg}](initialSize)
-  private[this] var _values: Array[${V_Arg}] = new Array[${V_Arg}](initialSize)
-  private[this] var _size = 0
-  private[this] var capacity = initialSize
-  private[this] var mask = capacity - 1
-
-  def apply(key: ${K_Arg}): OffheapOpt_${V_Arg} = {
+  def apply(key: ${K_Arg})
+      (implicit hashK: Hash_${K_Hash}, allocator: scala.offheap.Allocator): OffheapOpt_${V_Arg} = {
     val index = indexOf(key)
     if (index == -1) {
       OffheapOpt_${V_Arg}.empty
@@ -71,8 +65,8 @@ class OffheapHashMap_${K}_${V}(initialSize: Int = 8)
     }
   }
 
-  private[this] def indexOf(key: ${K_Arg}): Int = {
-    var hash = hashCode(key)
+  private[this] def indexOf(key: ${K_Arg})(implicit hashK: Hash_${K_Hash}): Int = {
+    var hash = calcHashCode(key)
     var pos = hash
     var dis = 0
     var result = -1
@@ -99,10 +93,11 @@ class OffheapHashMap_${K}_${V}(initialSize: Int = 8)
     result
   }
 
-  def put(key: ${K_Arg}, value: ${V_Arg}): OffheapOpt_${V_Arg} = {
+  def put(key: ${K_Arg}, value: ${V_Arg})
+      (implicit hashK: Hash_${K_Hash}, allocator: scala.offheap.Allocator): OffheapOpt_${V_Arg} = {
     var _key = key
     var _value = value
-    var originalHash = hashCode(key)
+    var originalHash = calcHashCode(key)
     var hash = originalHash
     var pos = hash
     var dis = 0
@@ -139,7 +134,8 @@ class OffheapHashMap_${K}_${V}(initialSize: Int = 8)
     previous
   }
 
-  def remove(key: ${K_Arg}): OffheapOpt_${V_Arg} = {
+  def remove(key: ${K_Arg})
+      (implicit hashK: Hash_${K_Hash}, allocator: scala.offheap.Allocator): OffheapOpt_${V_Arg} = {
     var index = indexOf(key)
     if (index != -1) {
       val previous = OffheapOpt_${V_Arg}(_values(index))
@@ -169,9 +165,9 @@ class OffheapHashMap_${K}_${V}(initialSize: Int = 8)
     }
   }
 
-  def keys: HashSet_${K_Arg} = ???
+  def keys(implicit hashK: Hash_${K_Hash}): HashSet_${K_Arg} = ???
 //  {
-//    val result = new OffheapHashSet_${K_Arg}
+//    val result = OffheapHashSet_${K_Arg}
 //    var i = 0
 //    while (i < capacity) {
 //      if (!isInit(hashes(i))) result.add(_keys(i))
@@ -180,23 +176,23 @@ class OffheapHashMap_${K}_${V}(initialSize: Int = 8)
 //    result
 //  }
 
-  def values: BufferSeq_${V_Arg} = ???
-//  {
-//    val result = new OffheapBufferSeq_${V_Arg}
-//    var i = 0
-//    while (i < capacity) {
-//      if (!isInit(hashes(i))) result.append(_values(i))
-//      i += 1
-//    }
-//    result
-//  }
+  def values(implicit hashV: Hash_${V_Hash}, allocator: scala.offheap.Allocator): OffheapBufferSeq_${V_Arg} = {
+    val result = OffheapSeq_${V_Arg}.create()
+    var i = 0
+    while (i < capacity) {
+      if (!isInit(hashes(i))) result.append(_values(i))
+      i += 1
+    }
+    result
+  }
 
-  def contains(key: ${K_Arg}): Boolean = this(key).nonEmpty
+  def contains(key: ${K_Arg})(implicit hashK: Hash_${K_Hash}): Boolean = indexOf(key) != -1
 
   @inline
   private[this] def shouldGrow = _size > capacity * 9 / 10
 
-  private[this] def growIfNecessary: Unit = {
+  private[this] def growIfNecessary
+      (implicit hashK: Hash_${K_Hash}, allocator: scala.offheap.Allocator): Unit = {
     if (shouldGrow) {
       val oldCapacity = capacity
       val oldHashes = hashes
@@ -204,9 +200,9 @@ class OffheapHashMap_${K}_${V}(initialSize: Int = 8)
       val oldValues = _values
       capacity *= 2
       mask = capacity - 1
-      hashes = new Array[Int](capacity)
-      _keys = new Array[${K_Arg}](capacity)
-      _values = new Array[${V_Arg}](capacity)
+      hashes = oh.Array.uninit[Int](capacity)
+      _keys = oh.Array.uninit[${K_Arg}](capacity)
+      _values = oh.Array.uninit[${V_Arg}](capacity)
       _size = 0
       var i = 0
       while (i < oldCapacity) {
@@ -221,7 +217,7 @@ class OffheapHashMap_${K}_${V}(initialSize: Int = 8)
     }
   }
 
-  private[this] def hashCode(key: ${K_Arg}) = {
+  private[this] def calcHashCode(key: ${K_Arg})(implicit hashK: Hash_${K_Hash}) = {
     var hash = hashK.hash(key) & mask
     hash |= (if (hash == 0) 1 else 0)
     hash
@@ -236,11 +232,11 @@ class OffheapHashMap_${K}_${V}(initialSize: Int = 8)
     _values(pos) = value
   }
 
-  override def empty = _size == 0
+  def empty = _size == 0
+  def notEmpty = _size != 0
 
-  override def size: Int = _size
-
-  override def foreach(f: (${K_Arg}, ${V_Arg}) => Unit): Unit = {
+  def size: Int = _size
+  def foreach(f: (${K_Arg}, ${V_Arg}) => Unit): Unit = {
     var i = 0
     while (i < capacity) {
       val hash = hashes(i)
@@ -252,6 +248,18 @@ class OffheapHashMap_${K}_${V}(initialSize: Int = 8)
       i += 1
     }
   }
+}
+
+object OffheapMap_${K}_${V} {
+  def create(initialSize: Int = 8)(implicit allocator: oh.Allocator): OffheapHashMap_${K}_${V} =
+    OffheapHashMap_${K}_${V}(
+      oh.Array.uninit[Int](initialSize), // hashes
+      oh.Array.uninit[${K_Arg}](initialSize), // keys
+      oh.Array.uninit[${V_Arg}](initialSize), // values
+      0, // size
+      initialSize, // capacity
+      initialSize - 1 // mask
+    )
 }
 
 % end

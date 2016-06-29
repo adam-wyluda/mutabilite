@@ -14,12 +14,8 @@ class IntMapBenchmark {
 
   implicit val allocator = scala.offheap.malloc
 
-  def test = {
-    val opt = OffheapOpt_Int(20)
-  }
-
   val offheapMap: OffheapHashMap_Int_Int = {
-    val map = new OffheapHashMap_Int_Int(initialSize)
+    val map = OffheapMap_Int_Int.create(initialSize)
     var i = 0
     while (i < size) {
       map.put(i, i * i)
@@ -93,7 +89,7 @@ class IntMapBenchmark {
 
   @Benchmark
   def putAllOffheap = {
-    val m = new OffheapHashMap_Int_Int(initialSize)
+    val m = OffheapMap_Int_Int.create(initialSize)
     var i = 0
     while (i < size) {
       m.put(i, i)
@@ -149,7 +145,7 @@ class IntMapBenchmark {
 
   @Benchmark
   def putRemoveReadOffheap(blackhole: Blackhole) = {
-    val map = new OffheapHashMap_Int_Int(initialSize)
+    val map = OffheapMap_Int_Int.create(initialSize)
     var i = 0
     while (i < size) { map.put(i, i); i += 1 }
     i = 0
@@ -203,7 +199,7 @@ class IntMapRemoveOffheapBenchmark {
 
   @Setup(Level.Invocation)
   def setup = {
-    map = new OffheapHashMap_Int_Int
+    map = OffheapMap_Int_Int.create(initialSize)
     0 until size foreach (i => map.put(i, i * i))
   }
 
