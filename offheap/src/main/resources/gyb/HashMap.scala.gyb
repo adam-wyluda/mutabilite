@@ -19,6 +19,12 @@ types = ['Boolean', 'Char', 'Byte', 'Short',
 % end
 % end
 
+@data class OffheapOpt_Object(value: Long) extends Opt_Long {
+  def empty = isEmpty
+  def size = if (nonEmpty) 1 else 0
+  def foreach(f: Long => Unit) = if (nonEmpty) f(value) else ()
+}
+
 % for K in types:
 % for V in types:
 
