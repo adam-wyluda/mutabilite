@@ -68,7 +68,7 @@ types = ['Boolean', 'Char', 'Byte', 'Short',
   def insert(index: Int, elem: ${T_Arg})(implicit allocator: oh.Allocator): Unit = {
     val newSize = _size + 1
     growTo(newSize)
-    arraycopy(index, index + 1, _size - index)
+    if (_size != 0) arraycopy(index, index + 1, _size - index)
     array(index) = elem
     _size += 1
   }

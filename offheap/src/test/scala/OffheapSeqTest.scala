@@ -49,6 +49,13 @@ class OffheapSeqTest extends FunSuite with BeforeAndAfter {
     assert(seq.size == 3)
   }
 
+  test("prepend") {
+    val seq = provideSeq_Int
+
+    1 to 10 foreach (seq.insert(0, _))
+    assert(seq.size == 10)
+  }
+
   test("update") {
     seq(0) = 100
     assert(seq(0) == 100)
