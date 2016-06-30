@@ -5,6 +5,7 @@ import offheap.collection._
 import HashEq.Implicits._
 import org.openjdk.jmh.infra.Blackhole
 
+import scala.offheap.{Pool, Region}
 import scala.collection.mutable.{HashSet => StdlibSet}
 
 @State(Scope.Thread)
@@ -12,9 +13,11 @@ class IntSetBenchmark {
 
   import Benchmark._
 
-  implicit val allocator = scala.offheap.malloc
+  implicit val props = Region.Props(Pool(pageSize = 4 * 1024 * 1024, chunkSize = 16 * 1024 * 1024))
+  val malloc = scala.offheap.malloc
 
   val offheapSet: OffheapHashSet_Int = {
+    implicit val alloc = malloc
     val set = OffheapSet_Int.create(initialSize)
     var i = 0
     while (i < size) {
@@ -59,15 +62,21 @@ class IntSetBenchmark {
   var randKey: Int = _
   var nonExistingKey: Int = _
 
+  var region: Region = _
+
   @Setup(Level.Invocation)
   def setup = {
     randKey = random.nextInt(size)
     nonExistingKey = randKey + size
     freedSet = OffheapHashSet_Int.empty
+    region = Region.open
   }
 
   @TearDown(Level.Invocation)
-  def tearDown = if (freedSet.nonEmpty) freedSet.free
+  def tearDown = {
+    if (freedSet.nonEmpty) freedSet.free(malloc)
+    region.close
+  }
 
   @Benchmark
   def containsExistingOffheap = offheapSet(randKey)
@@ -95,10 +104,22 @@ class IntSetBenchmark {
 
   @Benchmark
   def addOffheap = {
+    implicit val alloc = malloc
     val freedSet = OffheapSet_Int.create(initialSize)
     var i = 0
     while (i < size) {
       freedSet.add(i)
+      i += 1
+    }
+  }
+
+  @Benchmark
+  def addRegion = {
+    implicit val alloc = region
+    val s = OffheapSet_Int.create(initialSize)
+    var i = 0
+    while (i < size) {
+      s.add(i)
       i += 1
     }
   }
