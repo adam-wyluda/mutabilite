@@ -63,7 +63,7 @@ lazy val offheap = project
     defaults ++ Seq(
       moduleName := "offheap",
       libraryDependencies ++= Seq(
-        "sh.den" % "scala-offheap_2.11" % "0.1"
+        "sh.den" % "scala-offheap_2.11" % "0.2-SNAPSHOT"
       )
     )
   )
