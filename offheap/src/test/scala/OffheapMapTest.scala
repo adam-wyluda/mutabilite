@@ -18,7 +18,7 @@ class OffheapMapTest extends FunSuite with BeforeAndAfter {
     map.put(2, 22)
     map.put(3, 33)
     map.put(2, 2)
-    map.put(3, 2)
+    map.put(3, 3)
   }
 
   test("isEmpty") {
@@ -52,7 +52,7 @@ class OffheapMapTest extends FunSuite with BeforeAndAfter {
     val nothing = map.put(4, 44)
     assert(map.size == 4)
     assert(nothing.empty)
-    assert(map(4).get == 4)
+    assert(map(4).get == 44)
 
     val previous = map.put(4, 4)
     assert(map.size == 4)

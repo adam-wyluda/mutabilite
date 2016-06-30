@@ -200,7 +200,7 @@ types = ['Boolean', 'Char', 'Byte', 'Short',
       val oldValues = _values
       capacity *= 2
       mask = capacity - 1
-      hashes = oh.Array.uninit[Int](capacity)
+      hashes = oh.Array.fill[Int](capacity) { 0 }
       _keys = oh.Array.uninit[${K_Arg}](capacity)
       _values = oh.Array.uninit[${V_Arg}](capacity)
       _size = 0
@@ -253,7 +253,7 @@ types = ['Boolean', 'Char', 'Byte', 'Short',
 object OffheapMap_${K}_${V} {
   def create(initialSize: Int = 8)(implicit allocator: oh.Allocator): OffheapHashMap_${K}_${V} =
     OffheapHashMap_${K}_${V}(
-      oh.Array.uninit[Int](initialSize), // hashes
+      oh.Array.fill[Int](initialSize) { 0 }, // hashes
       oh.Array.uninit[${K_Arg}](initialSize), // keys
       oh.Array.uninit[${V_Arg}](initialSize), // values
       0, // size
