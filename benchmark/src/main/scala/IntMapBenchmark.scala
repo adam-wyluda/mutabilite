@@ -54,6 +54,8 @@ class IntMapBenchmark {
     map
   }
 
+  var freedMap: OffheapHashMap_Int_Int = _
+
   var randKey: Int = _
   var nonExistingKey: Int = _
 
@@ -61,7 +63,11 @@ class IntMapBenchmark {
   def setup = {
     randKey = random.nextInt(size)
     nonExistingKey = randKey + size
+    freedMap = OffheapHashMap_Int_Int.empty
   }
+
+  @TearDown(Level.Invocation)
+  def tearDown = if (freedMap.nonEmpty) freedMap.free
 
   @Benchmark
   def getRandomOffheap = offheapMap(randKey)
@@ -89,10 +95,10 @@ class IntMapBenchmark {
 
   @Benchmark
   def putAllOffheap = {
-    val m = OffheapMap_Int_Int.create(initialSize)
+    freedMap = OffheapMap_Int_Int.create(initialSize)
     var i = 0
     while (i < size) {
-      m.put(i, i)
+      freedMap.put(i, i)
       i += 1
     }
   }
@@ -145,13 +151,13 @@ class IntMapBenchmark {
 
   @Benchmark
   def putRemoveReadOffheap(blackhole: Blackhole) = {
-    val map = OffheapMap_Int_Int.create(initialSize)
+    freedMap = OffheapMap_Int_Int.create(initialSize)
     var i = 0
-    while (i < size) { map.put(i, i); i += 1 }
+    while (i < size) { freedMap.put(i, i); i += 1 }
     i = 0
-    while (i < size / 10) { map.remove(i * 10); i += 1 }
+    while (i < size / 10) { freedMap.remove(i * 10); i += 1 }
     i = 0
-    while (i < size) { blackhole.consume(map(i)); i += 1 }
+    while (i < size) { blackhole.consume(freedMap(i)); i += 1 }
   }
 
   @Benchmark
@@ -202,6 +208,9 @@ class IntMapRemoveOffheapBenchmark {
     map = OffheapMap_Int_Int.create(initialSize)
     0 until size foreach (i => map.put(i, i * i))
   }
+
+  @Setup(Level.Invocation)
+  def tearDown = map.free
 
   @Benchmark
   def benchmark = {

@@ -40,7 +40,7 @@ class SeqBenchmark {
     seq
   }
 
-  var freedOffheapSeq: OffheapBufferSeq_Int = _
+  var freedSeq: OffheapBufferSeq_Int = _
 
   val random = Random
 
@@ -51,10 +51,11 @@ class SeqBenchmark {
   def setup = {
     randIndex = random.nextInt(seqSize)
     randVal = random.nextInt
+    freedSeq = OffheapBufferSeq_Int.empty
   }
 
   @TearDown(Level.Invocation)
-  def tearDown = if (freedOffheapSeq.nonEmpty) freedOffheapSeq.free
+  def tearDown = if (freedSeq.nonEmpty) freedSeq.free
 
   @Benchmark
   def readSequentialOffheap(blackhole: Blackhole) = {
@@ -106,10 +107,10 @@ class SeqBenchmark {
 
   @Benchmark
   def appendOffheap = {
-    freedOffheapSeq = OffheapSeq_Int.create(initialSize = 16)
+    freedSeq = OffheapSeq_Int.create(initialSize = 16)
     var i = 0
     while (i < seqSize) {
-      freedOffheapSeq.append(i)
+      freedSeq.append(i)
       i += 1
     }
   }
@@ -226,10 +227,10 @@ class SeqBenchmark {
 
   @Benchmark
   def prependOffheap = {
-    freedOffheapSeq = OffheapSeq_Int.create(initialSize = 16)
+    freedSeq = OffheapSeq_Int.create(initialSize = 16)
     var i = 0
     while (i < seqSize) {
-      freedOffheapSeq.insert(0, i)
+      freedSeq.insert(0, i)
       i += 1
     }
   }
@@ -265,7 +266,7 @@ class SeqBenchmark {
   }
 
   @Benchmark
-  def mapOffheap = freedOffheapSeq = offheapSeq map_Int (_ + 1)
+  def mapOffheap = freedSeq = offheapSeq map_Int (_ + 1)
 
   @Benchmark
   def mapSpecialized = specSeq map_Int (_ + 1)
@@ -277,7 +278,7 @@ class SeqBenchmark {
   def mapStdlib = stdSeq map (_ + 1)
 
   @Benchmark
-  def flatMapOffheap = freedOffheapSeq = offheapSeq flatMap_Int { i =>
+  def flatMapOffheap = freedSeq = offheapSeq flatMap_Int { i =>
     val r = OffheapSeq_Int.create()
     var j = 0
     while (j < 5) { r.append(i + j); j += 1 }
@@ -309,7 +310,7 @@ class SeqBenchmark {
   }
 
   @Benchmark
-  def filterOffheap = freedOffheapSeq = offheapSeq filter (_ % 2 == 0)
+  def filterOffheap = freedSeq = offheapSeq filter (_ % 2 == 0)
 
   @Benchmark
   def filterSpecialized = specSeq filter (_ % 2 == 0)

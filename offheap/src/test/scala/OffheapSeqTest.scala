@@ -8,18 +8,20 @@ import HashEq.Implicits._
 class OffheapSeqTest extends FunSuite with BeforeAndAfter {
   implicit val alloc = scala.offheap.malloc
 
-  def provideSeq_Int = OffheapSeq_Int.create()
-
   var seq: OffheapBufferSeq_Int = _
 
   before {
-    seq = provideSeq_Int
+    seq = OffheapSeq_Int.create()
     1 to 10 foreach (seq.append(_))
+  }
+
+  after {
+    seq.free
   }
 
   test("isEmpty") {
     assert(seq.notEmpty)
-    assert(provideSeq_Int.empty)
+    assert(OffheapSeq_Int.create().empty)
   }
 
   test("size") {
@@ -41,7 +43,7 @@ class OffheapSeqTest extends FunSuite with BeforeAndAfter {
   }
 
   test("append") {
-    val seq = provideSeq_Int
+    val seq = OffheapSeq_Int.create()
 
     assert(seq.empty)
     1 to 3 foreach (seq.append(_))
@@ -50,7 +52,7 @@ class OffheapSeqTest extends FunSuite with BeforeAndAfter {
   }
 
   test("prepend") {
-    val seq = provideSeq_Int
+    val seq = OffheapSeq_Int.create()
 
     1 to 10 foreach (seq.insert(0, _))
     assert(seq.size == 10)
@@ -99,8 +101,6 @@ class OffheapSeqTest extends FunSuite with BeforeAndAfter {
     val mapped: OffheapBufferSeq_Int = seq map_Int (_ * 2)
     assert(mapped.size == 3)
     1 to 3 foreach (i => assert(mapped(i - 1) == i * 2))
-    seq.free
-    mapped.free
   }
 
   test("flatMap_Int") {

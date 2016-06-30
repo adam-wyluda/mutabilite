@@ -21,6 +21,10 @@ class OffheapMapTest extends FunSuite with BeforeAndAfter {
     map.put(3, 3)
   }
 
+  after {
+    map.free
+  }
+
   test("isEmpty") {
     assert(map.notEmpty)
     assert(OffheapMap_Int_Int.create().empty)

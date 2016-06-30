@@ -55,6 +55,13 @@ types = ['Boolean', 'Char', 'Byte', 'Short',
   var mask: Int
 ) {
 
+  def free(implicit allocator: oh.Allocator) = {
+    allocator.free(hashes.addr)
+    allocator.free(_keys.addr)
+    allocator.free(_values.addr)
+    allocator.free(addr)
+  }
+
   def apply(key: ${K_Arg})
       (implicit hashK: Hash_${K_Hash}, allocator: scala.offheap.Allocator): OffheapOpt_${V_Arg} = {
     val index = indexOf(key)
@@ -214,6 +221,9 @@ types = ['Boolean', 'Char', 'Byte', 'Short',
         }
         i += 1
       }
+      allocator.free(oldHashes.addr)
+      allocator.free(oldKeys.addr)
+      allocator.free(oldValues.addr)
     }
   }
 
