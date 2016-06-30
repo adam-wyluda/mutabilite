@@ -6,6 +6,7 @@ import SeqBuilders._
 import HashEq.Implicits._
 import org.openjdk.jmh.infra.Blackhole
 
+import scala.offheap.{Pool, Region}
 import scala.util.Random
 import scala.collection.mutable.{ArrayBuffer => StdlibSeq}
 
@@ -14,9 +15,11 @@ class SeqBenchmark {
 
   val seqSize = Benchmark.size
 
-  implicit val allocator = scala.offheap.malloc
+  implicit val props = Region.Props(Pool(pageSize = 4 * 1024 * 1024, chunkSize = 16 * 1024 * 1024))
+  val malloc = scala.offheap.malloc
 
   val offheapSeq: OffheapBufferSeq_Int = {
+    implicit val alloc = malloc
     val seq = OffheapSeq_Int.create()
     1 to seqSize foreach (seq.append(_))
     seq
@@ -55,7 +58,7 @@ class SeqBenchmark {
   }
 
   @TearDown(Level.Invocation)
-  def tearDown = if (freedSeq.nonEmpty) freedSeq.free
+  def tearDown = if (freedSeq.nonEmpty) freedSeq.free(malloc)
 
   @Benchmark
   def readSequentialOffheap(blackhole: Blackhole) = {
@@ -107,6 +110,7 @@ class SeqBenchmark {
 
   @Benchmark
   def appendOffheap = {
+    implicit val alloc = malloc
     freedSeq = OffheapSeq_Int.create(initialSize = 16)
     var i = 0
     while (i < seqSize) {
@@ -114,6 +118,17 @@ class SeqBenchmark {
       i += 1
     }
   }
+
+  @Benchmark
+  def appendRegion = Region { implicit r =>
+    val s = OffheapSeq_Int.create(initialSize = 16)
+    var i = 0
+    while (i < seqSize) {
+      s.append(i)
+      i += 1
+    }
+  }
+
 
   @Benchmark
   def appendSpecialized = {
@@ -227,10 +242,21 @@ class SeqBenchmark {
 
   @Benchmark
   def prependOffheap = {
+    implicit val alloc = malloc
     freedSeq = OffheapSeq_Int.create(initialSize = 16)
     var i = 0
     while (i < seqSize) {
       freedSeq.insert(0, i)
+      i += 1
+    }
+  }
+
+  @Benchmark
+  def prependRegion = Region { implicit r =>
+    val s = OffheapSeq_Int.create(initialSize = 16)
+    var i = 0
+    while (i < seqSize) {
+      s.insert(0, i)
       i += 1
     }
   }
@@ -266,7 +292,12 @@ class SeqBenchmark {
   }
 
   @Benchmark
-  def mapOffheap = freedSeq = offheapSeq map_Int (_ + 1)
+  def mapOffheap = freedSeq = offheapSeq.map_Int(_ + 1)(malloc)
+
+  @Benchmark
+  def mapRegion = Region { implicit r =>
+    offheapSeq.map_Int(_ + 1)
+  }
 
   @Benchmark
   def mapSpecialized = specSeq map_Int (_ + 1)
@@ -278,11 +309,24 @@ class SeqBenchmark {
   def mapStdlib = stdSeq map (_ + 1)
 
   @Benchmark
-  def flatMapOffheap = freedSeq = offheapSeq flatMap_Int { i =>
-    val r = OffheapSeq_Int.create()
-    var j = 0
-    while (j < 5) { r.append(i + j); j += 1 }
-    r
+  def flatMapOffheap = freedSeq = {
+    implicit val alloc = malloc
+    offheapSeq flatMap_Int { i =>
+      val r = OffheapSeq_Int.create()
+      var j = 0
+      while (j < 5) { r.append(i + j); j += 1 }
+      r
+    }
+  }
+
+  @Benchmark
+  def flatMapRegion = Region { implicit r =>
+    offheapSeq flatMap_Int { i =>
+      val s = OffheapSeq_Int.create()
+      var j = 0
+      while (j < 5) { s.append(i + j); j += 1 }
+      s
+    }
   }
 
   @Benchmark
@@ -310,7 +354,12 @@ class SeqBenchmark {
   }
 
   @Benchmark
-  def filterOffheap = freedSeq = offheapSeq filter (_ % 2 == 0)
+  def filterOffheap = freedSeq = offheapSeq.filter(_ % 2 == 0)(malloc)
+
+  @Benchmark
+  def filterRegion = Region { implicit r =>
+    offheapSeq.filter(_ % 2 == 0)
+  }
 
   @Benchmark
   def filterSpecialized = specSeq filter (_ % 2 == 0)
