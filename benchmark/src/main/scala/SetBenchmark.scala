@@ -12,15 +12,15 @@ class SetBenchmark {
 
   import Benchmark._
 
-  val offheapSet: OffheapHashSet_Object = {
-    val set = new OffheapHashSet_Object(initialSize)
-    var i = 0
-    while (i < size) {
-      set.add(keys(i))
-      i += 1
-    }
-    set
-  }
+//  val offheapSet: OffheapHashSet_Object = {
+//    val set = new OffheapHashSet_Object(initialSize)
+//    var i = 0
+//    while (i < size) {
+//      set.add(keys(i))
+//      i += 1
+//    }
+//    set
+//  }
 
   val specSet: HashSet_Object = {
     val set = new HashSet_Object(initialSize)
@@ -61,8 +61,8 @@ class SetBenchmark {
     nonExistingKey = Key.generate
   }
 
-  @Benchmark
-  def containsExistingOffheap = offheapSet(randKey)
+//  @Benchmark
+//  def containsExistingOffheap = offheapSet(randKey)
 
   @Benchmark
   def containsExistingSpecialized = specSet(randKey)
@@ -73,8 +73,8 @@ class SetBenchmark {
   @Benchmark
   def containsExistingStdlib = stdSet(randKey)
 
-  @Benchmark
-  def containsNonExistingOffheap = offheapSet(nonExistingKey)
+//  @Benchmark
+//  def containsNonExistingOffheap = offheapSet(nonExistingKey)
 
   @Benchmark
   def containsNonExistingSpecialized = specSet(nonExistingKey)
@@ -85,15 +85,15 @@ class SetBenchmark {
   @Benchmark
   def containsNonExistingStdlib = stdSet(nonExistingKey)
 
-  @Benchmark
-  def addOffheap = {
-    val s = new OffheapHashSet_Object(initialSize)
-    var i = 0
-    while (i < size) {
-      s.add(keys(i))
-      i += 1
-    }
-  }
+//  @Benchmark
+//  def addOffheap = {
+//    val s = new OffheapHashSet_Object(initialSize)
+//    var i = 0
+//    while (i < size) {
+//      s.add(keys(i))
+//      i += 1
+//    }
+//  }
 
   @Benchmark
   def addSpecialized = {
@@ -125,9 +125,9 @@ class SetBenchmark {
     }
   }
 
-  @Benchmark
-  def foreachOffheap(blackhole: Blackhole) =
-    offheapSet foreach (blackhole.consume(_))
+//  @Benchmark
+//  def foreachOffheap(blackhole: Blackhole) =
+//    offheapSet foreach (blackhole.consume(_))
 
   @Benchmark
   def foreachSpecialized(blackhole: Blackhole) =
@@ -142,29 +142,29 @@ class SetBenchmark {
     stdSet foreach (blackhole.consume(_))
 }
 
-@State(Scope.Thread)
-class SetRemoveOffheapBenchmark {
-
-  import Benchmark._
-
-  var set: OffheapHashSet_Object = _
-
-  @Setup(Level.Invocation)
-  def setup = {
-    set = new OffheapHashSet_Object(initialSize)
-    var i = 0
-    while (i < size) {
-      set.add(keys(i))
-      i += 1
-    }
-  }
-
-  @Benchmark
-  def benchmark = {
-    var i = 0
-    while (i < size / 10) { set.remove(keys(i * 10)); i += 1 }
-  }
-}
+//@State(Scope.Thread)
+//class SetRemoveOffheapBenchmark {
+//
+//  import Benchmark._
+//
+//  var set: OffheapHashSet_Object = _
+//
+//  @Setup(Level.Invocation)
+//  def setup = {
+//    set = new OffheapHashSet_Object(initialSize)
+//    var i = 0
+//    while (i < size) {
+//      set.add(keys(i))
+//      i += 1
+//    }
+//  }
+//
+//  @Benchmark
+//  def benchmark = {
+//    var i = 0
+//    while (i < size / 10) { set.remove(keys(i * 10)); i += 1 }
+//  }
+//}
 
 @State(Scope.Thread)
 class SetRemoveSpecializedBenchmark {

@@ -1,5 +1,8 @@
 package offheap.collection
 
+import scala.{ offheap => oh }
+import scala.offheap.data
+
 import HashEq._
 
 %{
@@ -9,18 +12,35 @@ types = ['Boolean', 'Char', 'Byte', 'Short',
 
 % for T in types:
 
-class OffheapHashSet_${T}(initialSize: Int = 8)(implicit hashK: Hash_${T}) extends Set_${T} {
+%{
+  if T == 'Object':
+    T_Arg = 'Long'
+    T_Hash = 'Offheap'
+  else:
+    T_Arg = T
+    T_Hash = T
+}%
 
-  private[this] var hashes: Array[Int] = new Array[Int](initialSize)
-  private[this] var _keys: Array[${T}] = new Array[${T}](initialSize)
-  private[this] var _size = 0
-  private[this] var capacity = initialSize
-  private[this] var mask = capacity - 1
+@data class OffheapHashSet_${T}
+(
+  var hashes: oh.Array[Int],
+  var _keys: oh.Array[${T_Arg}],
+  var _size: Int,
+  var capacity: Int,
+  var mask: Int
+) {
 
-  def apply(key: ${T}): Boolean = indexOf(key) != -1
+  def free(implicit allocator: oh.Allocator) = {
+    allocator.free(hashes.addr)
+    allocator.free(_keys.addr)
+    allocator.free(addr)
+  }
 
-  private[this] def indexOf(key: ${T}): Int = {
-    var hash = hashCode(key)
+  def apply(key: ${T_Arg})(implicit hashK: Hash_${T_Hash}): Boolean = indexOf(key) != -1
+
+  private[this] def indexOf(key: ${T_Arg})
+      (implicit hashK: Hash_${T_Hash}): Int = {
+    var hash = calcHashCode(key)
     var pos = hash
     var dis = 0
     var result = -1
@@ -47,9 +67,10 @@ class OffheapHashSet_${T}(initialSize: Int = 8)(implicit hashK: Hash_${T}) exten
     result
   }
 
-  def add(key: ${T}): Boolean = {
+  def add(key: ${T_Arg})
+      (implicit hashK: Hash_${T_Hash}, allocator: oh.Allocator): Boolean = {
     var _key = key
-    var originalHash = hashCode(key)
+    var originalHash = calcHashCode(key)
     var hash = originalHash
     var pos = hash
     var dis = 0
@@ -84,7 +105,8 @@ class OffheapHashSet_${T}(initialSize: Int = 8)(implicit hashK: Hash_${T}) exten
     result
   }
 
-  def remove(key: ${T}): Boolean = {
+  def remove(key: ${T_Arg})
+      (implicit hashK: Hash_${T_Hash}): Boolean = {
     var index = indexOf(key)
     if (index != -1) {
       while ({
@@ -112,46 +134,26 @@ class OffheapHashSet_${T}(initialSize: Int = 8)(implicit hashK: Hash_${T}) exten
     }
   }
 
-  def intersect(that: Set[${T}]): OffheapHashSet_${T} = {
-    val result = new OffheapHashSet_${T}
+  def intersect(that: OffheapHashSet_${T})
+      (implicit hashK: Hash_${T_Hash}, allocator: oh.Allocator): OffheapHashSet_${T} = {
+    val result = OffheapSet_${T}.create()
     foreach { a =>
       if (that(a)) result.add(a)
     }
     result
   }
 
-  def intersect_${T}(that: Set_${T}): OffheapHashSet_${T} = {
-    val result = new OffheapHashSet_${T}
-    foreach { a =>
-      if (that(a)) result.add(a)
-    }
-    result
-  }
-
-  def union(that: Set[${T}]): OffheapHashSet_${T} = {
-    val result = new OffheapHashSet_${T}
+  def union(that: OffheapHashSet_${T})
+      (implicit hashK: Hash_${T_Hash}, allocator: oh.Allocator): OffheapHashSet_${T} = {
+    val result = OffheapSet_${T}.create()
     this foreach (result.add(_))
     that foreach (result.add(_))
     result
   }
 
-  def union_${T}(that: Set_${T}): OffheapHashSet_${T} = {
-    val result = new OffheapHashSet_${T}
-    this foreach (result.add(_))
-    that foreach (result.add(_))
-    result
-  }
-
-  def diff(that: Set[${T}]): OffheapHashSet_${T} = {
-    val result = new OffheapHashSet_${T}
-    foreach { a =>
-      if (!that(a)) result.add(a)
-    }
-    result
-  }
-
-  def diff_${T}(that: Set_${T}): OffheapHashSet_${T} = {
-    val result = new OffheapHashSet_${T}
+  def diff(that: OffheapHashSet_${T})
+      (implicit hashK: Hash_${T_Hash}, allocator: oh.Allocator): OffheapHashSet_${T} = {
+    val result = OffheapSet_${T}.create()
     foreach { a =>
       if (!that(a)) result.add(a)
     }
@@ -161,15 +163,16 @@ class OffheapHashSet_${T}(initialSize: Int = 8)(implicit hashK: Hash_${T}) exten
   @inline
   private[this] def shouldGrow = _size > capacity * 9 / 10
 
-  private[this] def growIfNecessary: Unit = {
+  private[this] def growIfNecessary
+      (implicit hashK: Hash_${T_Hash}, allocator: oh.Allocator): Unit = {
     if (shouldGrow) {
       val oldCapacity = capacity
       val oldHashes = hashes
       val oldKeys = _keys
       capacity *= 2
       mask = capacity - 1
-      hashes = new Array[Int](capacity)
-      _keys = new Array[${T}](capacity)
+      hashes = oh.Array.fill[Int](capacity) { 0 }
+      _keys = oh.Array.uninit[${T_Arg}](capacity)
       _size = 0
       var i = 0
       while (i < oldCapacity) {
@@ -180,10 +183,12 @@ class OffheapHashSet_${T}(initialSize: Int = 8)(implicit hashK: Hash_${T}) exten
         }
         i += 1
       }
+      allocator.free(oldHashes.addr)
+      allocator.free(oldKeys.addr)
     }
   }
 
-  private[this] def hashCode(key: ${T}) = {
+  private[this] def calcHashCode(key: ${T_Arg})(implicit hashK: Hash_${T_Hash}) = {
     var hash = hashK.hash(key) & mask
     hash |= (if (hash == 0) 1 else 0)
     hash
@@ -192,11 +197,12 @@ class OffheapHashSet_${T}(initialSize: Int = 8)(implicit hashK: Hash_${T}) exten
   @inline
   private[this] def isInit(hash: Int) = hash == 0
 
-  override def empty = _size == 0
+  def empty = _size == 0
+  def notEmpty = _size != 0
 
-  override def size: Int = _size
+  def size: Int = _size
 
-  override def foreach(f: ${T} => Unit): Unit = {
+  def foreach(f: ${T_Arg} => Unit): Unit = {
     var i = 0
     while (i < capacity) {
       val hash = hashes(i)
@@ -207,6 +213,17 @@ class OffheapHashSet_${T}(initialSize: Int = 8)(implicit hashK: Hash_${T}) exten
       i += 1
     }
   }
+}
+
+object OffheapSet_${T} {
+  def create(initialSize: Int = 8)(implicit allocator: oh.Allocator): OffheapHashSet_${T} =
+    OffheapHashSet_${T}(
+      oh.Array.fill[Int](initialSize) { 0 }, // hashes
+      oh.Array.uninit[${T_Arg}](initialSize), // keys
+      0, // size
+      initialSize, // capacity
+      initialSize - 1 // mask
+    )
 }
 
 % end

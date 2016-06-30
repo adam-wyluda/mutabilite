@@ -12,8 +12,10 @@ class IntSetBenchmark {
 
   import Benchmark._
 
+  implicit val allocator = scala.offheap.malloc
+
   val offheapSet: OffheapHashSet_Int = {
-    val set = new OffheapHashSet_Int(initialSize)
+    val set = OffheapSet_Int.create(initialSize)
     var i = 0
     while (i < size) {
       set.add(i)
@@ -52,6 +54,8 @@ class IntSetBenchmark {
     set
   }
 
+  var freedSet: OffheapHashSet_Int = _
+
   var randKey: Int = _
   var nonExistingKey: Int = _
 
@@ -59,7 +63,11 @@ class IntSetBenchmark {
   def setup = {
     randKey = random.nextInt(size)
     nonExistingKey = randKey + size
+    freedSet = OffheapHashSet_Int.empty
   }
+
+  @TearDown(Level.Invocation)
+  def tearDown = if (freedSet.nonEmpty) freedSet.free
 
   @Benchmark
   def containsExistingOffheap = offheapSet(randKey)
@@ -87,10 +95,10 @@ class IntSetBenchmark {
 
   @Benchmark
   def addOffheap = {
-    val s = new OffheapHashSet_Int(initialSize)
+    val freedSet = OffheapSet_Int.create(initialSize)
     var i = 0
     while (i < size) {
-      s.add(i)
+      freedSet.add(i)
       i += 1
     }
   }
@@ -147,17 +155,22 @@ class IntSetRemoveOffheapBenchmark {
 
   import Benchmark._
 
+  implicit val allocator = scala.offheap.malloc
+
   var set: OffheapHashSet_Int = _
 
   @Setup(Level.Invocation)
   def setup = {
-    set = new OffheapHashSet_Int(initialSize)
+    set = OffheapSet_Int.create(initialSize)
     var i = 0
     while (i < size) {
       set.add(i)
       i += 1
     }
   }
+
+  @TearDown(Level.Invocation)
+  def tearDown = set.free
 
   @Benchmark
   def benchmark = {

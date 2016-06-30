@@ -172,19 +172,18 @@ types = ['Boolean', 'Char', 'Byte', 'Short',
     }
   }
 
-  def keys(implicit hashK: Hash_${K_Hash}): HashSet_${K_Arg} = ???
-//  {
-//    val result = OffheapHashSet_${K_Arg}
-//    var i = 0
-//    while (i < capacity) {
-//      if (!isInit(hashes(i))) result.add(_keys(i))
-//      i += 1
-//    }
-//    result
-//  }
+  def keys(implicit hashK: Hash_${K_Hash}, allocator: scala.offheap.Allocator): OffheapHashSet_${K} = {
+    val result = OffheapSet_${K}.create()
+    var i = 0
+    while (i < capacity) {
+      if (!isInit(hashes(i))) result.add(_keys(i))
+      i += 1
+    }
+    result
+  }
 
-  def values(implicit hashV: Hash_${V_Hash}, allocator: scala.offheap.Allocator): OffheapBufferSeq_${V_Arg} = {
-    val result = OffheapSeq_${V_Arg}.create()
+  def values(implicit hashV: Hash_${V_Hash}, allocator: scala.offheap.Allocator): OffheapBufferSeq_${V} = {
+    val result = OffheapSeq_${V}.create()
     var i = 0
     while (i < capacity) {
       if (!isInit(hashes(i))) result.append(_values(i))
