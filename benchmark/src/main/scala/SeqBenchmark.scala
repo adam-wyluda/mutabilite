@@ -50,15 +50,21 @@ class SeqBenchmark {
   var randIndex: Int = _
   var randVal: Int = _
 
+  var region: Region = _
+
   @Setup(Level.Invocation)
   def setup = {
     randIndex = random.nextInt(seqSize)
     randVal = random.nextInt
     freedSeq = OffheapBufferSeq_Int.empty
+    region = Region.open
   }
 
   @TearDown(Level.Invocation)
-  def tearDown = if (freedSeq.nonEmpty) freedSeq.free(malloc)
+  def tearDown = {
+    if (freedSeq.nonEmpty) freedSeq.free(malloc)
+    region.close
+  }
 
   @Benchmark
   def readSequentialOffheap(blackhole: Blackhole) = {
@@ -120,7 +126,8 @@ class SeqBenchmark {
   }
 
   @Benchmark
-  def appendRegion = Region { implicit r =>
+  def appendRegion = {
+    implicit val alloc = region
     val s = OffheapSeq_Int.create(initialSize = 16)
     var i = 0
     while (i < seqSize) {
@@ -252,7 +259,8 @@ class SeqBenchmark {
   }
 
   @Benchmark
-  def prependRegion = Region { implicit r =>
+  def prependRegion = {
+    implicit val alloc = region
     val s = OffheapSeq_Int.create(initialSize = 16)
     var i = 0
     while (i < seqSize) {
@@ -295,9 +303,7 @@ class SeqBenchmark {
   def mapOffheap = freedSeq = offheapSeq.map_Int(_ + 1)(malloc)
 
   @Benchmark
-  def mapRegion = Region { implicit r =>
-    offheapSeq.map_Int(_ + 1)
-  }
+  def mapRegion = offheapSeq.map_Int(_ + 1)(region)
 
   @Benchmark
   def mapSpecialized = specSeq map_Int (_ + 1)
@@ -320,7 +326,8 @@ class SeqBenchmark {
   }
 
   @Benchmark
-  def flatMapRegion = Region { implicit r =>
+  def flatMapRegion = {
+    implicit val alloc = region
     offheapSeq flatMap_Int { i =>
       val s = OffheapSeq_Int.create()
       var j = 0
@@ -357,9 +364,7 @@ class SeqBenchmark {
   def filterOffheap = freedSeq = offheapSeq.filter(_ % 2 == 0)(malloc)
 
   @Benchmark
-  def filterRegion = Region { implicit r =>
-    offheapSeq.filter(_ % 2 == 0)
-  }
+  def filterRegion = offheapSeq.filter(_ % 2 == 0)(region)
 
   @Benchmark
   def filterSpecialized = specSeq filter (_ % 2 == 0)
