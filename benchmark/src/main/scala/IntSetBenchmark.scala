@@ -105,7 +105,7 @@ class IntSetBenchmark {
   @Benchmark
   def addOffheap = {
     implicit val alloc = malloc
-    val freedSet = OffheapSet_Int.create(initialSize)
+    val freedSet = OffheapSet_Int.create(initialSize = 16)
     var i = 0
     while (i < size) {
       freedSet.add(i)
@@ -116,7 +116,7 @@ class IntSetBenchmark {
   @Benchmark
   def addRegion = {
     implicit val alloc = region
-    val s = OffheapSet_Int.create(initialSize)
+    val s = OffheapSet_Int.create(initialSize = 16)
     var i = 0
     while (i < size) {
       s.add(i)
@@ -126,7 +126,7 @@ class IntSetBenchmark {
 
   @Benchmark
   def addSpecialized = {
-    val s = new HashSet_Int(initialSize)
+    val s = new HashSet_Int(initialSize = 16)
     var i = 0
     while (i < size) {
       s.add(i)
@@ -136,7 +136,7 @@ class IntSetBenchmark {
 
   @Benchmark
   def addGeneric = {
-    val s = new HashSet[Int](initialSize)
+    val s = new HashSet[Int](initialSize = 16)
     var i = 0
     while (i < size) {
       s.add(i)

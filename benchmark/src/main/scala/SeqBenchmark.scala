@@ -15,7 +15,7 @@ class SeqBenchmark {
 
   val seqSize = Benchmark.size
 
-  implicit val props = Region.Props(Pool(pageSize = 4 * 1024 * 1024, chunkSize = 16 * 1024 * 1024))
+  implicit val props = Region.Props(Pool(pageSize = 8 * 1024 * 1024, chunkSize = 16 * 1024 * 1024))
   val malloc = scala.offheap.malloc
 
   val offheapSeq: OffheapBufferSeq_Int = {

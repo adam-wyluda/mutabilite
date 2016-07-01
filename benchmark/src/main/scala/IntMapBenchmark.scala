@@ -111,7 +111,7 @@ class IntMapBenchmark {
   @Benchmark
   def putAllOffheap = {
     implicit val alloc = malloc
-    freedMap = OffheapMap_Int_Int.create(initialSize)
+    freedMap = OffheapMap_Int_Int.create(initialSize = 16)
     var i = 0
     while (i < size) {
       freedMap.put(i, i)
@@ -122,7 +122,7 @@ class IntMapBenchmark {
   @Benchmark
   def putAllRegion = {
     implicit val alloc = region
-    val s = OffheapMap_Int_Int.create(initialSize)
+    val s = OffheapMap_Int_Int.create(initialSize = 16)
     var i = 0
     while (i < size) {
       s.put(i, i)
@@ -132,7 +132,7 @@ class IntMapBenchmark {
 
   @Benchmark
   def putAllSpecialized = {
-    val m = new HashMap_Int_Int(initialSize)
+    val m = new HashMap_Int_Int(initialSize = 16)
     var i = 0
     while (i < size) {
       m.put(i, i)
@@ -142,7 +142,7 @@ class IntMapBenchmark {
 
   @Benchmark
   def putAllGeneric = {
-    val m = new HashMap[Int, Int](initialSize)
+    val m = new HashMap[Int, Int](initialSize = 16)
     var i = 0
     while (i < size) {
       m.put(i, i)
@@ -152,7 +152,7 @@ class IntMapBenchmark {
 
   @Benchmark
   def putAllStdlib = {
-    val m = new StdlibMap[Int, Int](initialSize)
+    val m = new StdlibMap[Int, Int](initialSize = 16)
     var i = 0
     while (i < size) {
       m.put(i, i)
@@ -179,7 +179,7 @@ class IntMapBenchmark {
   @Benchmark
   def putRemoveReadOffheap(blackhole: Blackhole) = {
     implicit val alloc = malloc
-    freedMap = OffheapMap_Int_Int.create(initialSize)
+    freedMap = OffheapMap_Int_Int.create(initialSize = 16)
     var i = 0
     while (i < size) { freedMap.put(i, i); i += 1 }
     i = 0
@@ -191,7 +191,7 @@ class IntMapBenchmark {
   @Benchmark
   def putRemoveReadRegion(blackhole: Blackhole) = {
     implicit val alloc = region
-    val s = OffheapMap_Int_Int.create(initialSize)
+    val s = OffheapMap_Int_Int.create(initialSize = 16)
     var i = 0
     while (i < size) { s.put(i, i); i += 1 }
     i = 0
@@ -202,7 +202,7 @@ class IntMapBenchmark {
 
   @Benchmark
   def putRemoveReadSpecialized(blackhole: Blackhole) = {
-    val map = new HashMap_Int_Int(initialSize)
+    val map = new HashMap_Int_Int(initialSize = 16)
     var i = 0
     while (i < size) { map.put(i, i); i += 1 }
     i = 0
@@ -213,7 +213,7 @@ class IntMapBenchmark {
 
   @Benchmark
   def putRemoveReadGeneric(blackhole: Blackhole) = {
-    val map = new HashMap[Int, Int](initialSize)
+    val map = new HashMap[Int, Int](initialSize = 16)
     var i = 0
     while (i < size) { map.put(i, i); i += 1 }
     i = 0
@@ -224,7 +224,7 @@ class IntMapBenchmark {
 
   @Benchmark
   def putRemoveReadStdlib(blackhole: Blackhole) = {
-    val map = new StdlibMap[Int, Int](initialSize)
+    val map = new StdlibMap[Int, Int](initialSize = 16)
     var i = 0
     while (i < size) { map.put(i, i); i += 1 }
     i = 0
