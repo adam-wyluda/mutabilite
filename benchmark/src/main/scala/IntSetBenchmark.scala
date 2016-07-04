@@ -5,7 +5,6 @@ import offheap.collection._
 import HashEq.Implicits._
 import org.openjdk.jmh.infra.Blackhole
 
-import scala.offheap.{Pool, Region}
 import scala.collection.mutable.{HashSet => StdlibSet}
 
 @State(Scope.Thread)
@@ -13,19 +12,19 @@ class IntSetBenchmark {
 
   import Benchmark._
 
-  implicit val props = Region.Props(Pool(pageSize = 4 * 1024 * 1024, chunkSize = 16 * 1024 * 1024))
-  val malloc = scala.offheap.malloc
-
-  val offheapSet: OffheapHashSet_Int = {
-    implicit val alloc = malloc
-    val set = OffheapSet_Int.create(initialSize)
-    var i = 0
-    while (i < size) {
-      set.add(i)
-      i += 1
-    }
-    set
-  }
+//  implicit val props = Region.Props(Pool(pageSize = 4 * 1024 * 1024, chunkSize = 16 * 1024 * 1024))
+//  val malloc = scala.offheap.malloc
+//
+//  val offheapSet: OffheapHashSet_Int = {
+//    implicit val alloc = malloc
+//    val set = OffheapSet_Int.create(initialSize)
+//    var i = 0
+//    while (i < size) {
+//      set.add(i)
+//      i += 1
+//    }
+//    set
+//  }
 
   val specSet: HashSet_Int = {
     val set = new HashSet_Int(initialSize)
@@ -57,29 +56,29 @@ class IntSetBenchmark {
     set
   }
 
-  var freedSet: OffheapHashSet_Int = _
+//  var freedSet: OffheapHashSet_Int = _
 
   var randKey: Int = _
   var nonExistingKey: Int = _
 
-  var region: Region = _
+//  var region: Region = _
 
   @Setup(Level.Invocation)
   def setup = {
     randKey = random.nextInt(size)
     nonExistingKey = randKey + size
-    freedSet = OffheapHashSet_Int.empty
-    region = Region.open
+//    freedSet = OffheapHashSet_Int.empty
+//    region = Region.open
   }
 
-  @TearDown(Level.Invocation)
-  def tearDown = {
-    if (freedSet.nonEmpty) freedSet.free(malloc)
-    region.close
-  }
+//  @TearDown(Level.Invocation)
+//  def tearDown = {
+//    if (freedSet.nonEmpty) freedSet.free(malloc)
+//    region.close
+//  }
 
-  @Benchmark
-  def containsExistingOffheap = offheapSet(randKey)
+//  @Benchmark
+//  def containsExistingOffheap = offheapSet(randKey)
 
   @Benchmark
   def containsExistingSpecialized = specSet(randKey)
@@ -90,8 +89,8 @@ class IntSetBenchmark {
   @Benchmark
   def containsExistingStdlib = stdSet(randKey)
 
-  @Benchmark
-  def containsNonExistingOffheap = offheapSet(nonExistingKey)
+//  @Benchmark
+//  def containsNonExistingOffheap = offheapSet(nonExistingKey)
 
   @Benchmark
   def containsNonExistingSpecialized = specSet(nonExistingKey)
@@ -102,27 +101,27 @@ class IntSetBenchmark {
   @Benchmark
   def containsNonExistingStdlib = stdSet(nonExistingKey)
 
-  @Benchmark
-  def addOffheap = {
-    implicit val alloc = malloc
-    val freedSet = OffheapSet_Int.create(initialSize = 16)
-    var i = 0
-    while (i < size) {
-      freedSet.add(i)
-      i += 1
-    }
-  }
-
-  @Benchmark
-  def addRegion = {
-    implicit val alloc = region
-    val s = OffheapSet_Int.create(initialSize = 16)
-    var i = 0
-    while (i < size) {
-      s.add(i)
-      i += 1
-    }
-  }
+//  @Benchmark
+//  def addOffheap = {
+//    implicit val alloc = malloc
+//    val freedSet = OffheapSet_Int.create(initialSize = 16)
+//    var i = 0
+//    while (i < size) {
+//      freedSet.add(i)
+//      i += 1
+//    }
+//  }
+//
+//  @Benchmark
+//  def addRegion = {
+//    implicit val alloc = region
+//    val s = OffheapSet_Int.create(initialSize = 16)
+//    var i = 0
+//    while (i < size) {
+//      s.add(i)
+//      i += 1
+//    }
+//  }
 
   @Benchmark
   def addSpecialized = {
@@ -154,9 +153,9 @@ class IntSetBenchmark {
     }
   }
 
-  @Benchmark
-  def foreachOffheap(blackhole: Blackhole) =
-    offheapSet foreach (blackhole.consume(_))
+//  @Benchmark
+//  def foreachOffheap(blackhole: Blackhole) =
+//    offheapSet foreach (blackhole.consume(_))
 
   @Benchmark
   def foreachSpecialized(blackhole: Blackhole) =
@@ -171,34 +170,34 @@ class IntSetBenchmark {
     stdSet foreach (blackhole.consume(_))
 }
 
-@State(Scope.Thread)
-class IntSetRemoveOffheapBenchmark {
-
-  import Benchmark._
-
-  implicit val allocator = scala.offheap.malloc
-
-  var set: OffheapHashSet_Int = _
-
-  @Setup(Level.Invocation)
-  def setup = {
-    set = OffheapSet_Int.create(initialSize)
-    var i = 0
-    while (i < size) {
-      set.add(i)
-      i += 1
-    }
-  }
-
-  @TearDown(Level.Invocation)
-  def tearDown = set.free
-
-  @Benchmark
-  def benchmark = {
-    var i = 0
-    while (i < size / 10) { set.remove(i * 10); i += 1 }
-  }
-}
+//@State(Scope.Thread)
+//class IntSetRemoveOffheapBenchmark {
+//
+//  import Benchmark._
+//
+//  implicit val allocator = scala.offheap.malloc
+//
+//  var set: OffheapHashSet_Int = _
+//
+//  @Setup(Level.Invocation)
+//  def setup = {
+//    set = OffheapSet_Int.create(initialSize)
+//    var i = 0
+//    while (i < size) {
+//      set.add(i)
+//      i += 1
+//    }
+//  }
+//
+//  @TearDown(Level.Invocation)
+//  def tearDown = set.free
+//
+//  @Benchmark
+//  def benchmark = {
+//    var i = 0
+//    while (i < size / 10) { set.remove(i * 10); i += 1 }
+//  }
+//}
 
 @State(Scope.Thread)
 class IntSetRemoveSpecializedBenchmark {
