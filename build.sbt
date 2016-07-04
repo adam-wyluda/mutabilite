@@ -47,14 +47,25 @@ lazy val generic = project
     )
   )
 
+lazy val macros = project
+  .in(file("macros"))
+  .settings(
+    defaults ++ Seq(
+      moduleName := "macros",
+      libraryDependencies ++= Seq(
+        "org.scala-lang" % "scala-reflect" % "2.11.8"
+      )
+    )
+  )
+
 lazy val specialized = project
   .in(file("specialized"))
-  .dependsOn(api, tests % "test")
+  .dependsOn(api, macros, tests % "test")
   .settings(
     defaults ++ Seq(
       moduleName := "specialized"
     )
-  )
+)
 
 lazy val offheap = project
   .in(file("offheap"))
