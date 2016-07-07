@@ -2,7 +2,6 @@ package benchmark
 
 import org.openjdk.jmh.annotations._
 import offheap.collection._
-import SeqBuilders._
 import HashEq.Implicits._
 import org.openjdk.jmh.infra.Blackhole
 
@@ -305,7 +304,7 @@ class SeqBenchmark {
 //  def mapRegion = offheapSeq.map_Int(_ + 1)(region)
 
   @Benchmark
-  def mapSpecialized = specSeq map_Int (_ + 1)
+  def mapSpecialized = specSeq map (_ + 1)
 
   @Benchmark
   def mapGeneric = genericSeq map (_ + 1)
@@ -336,7 +335,7 @@ class SeqBenchmark {
 //  }
 
   @Benchmark
-  def flatMapSpecialized = specSeq flatMap_Int { i =>
+  def flatMapSpecialized = specSeq flatMap { i =>
     val r = new BufferSeq_Int
     var j = 0
     while (j < 5) { r.append(i + j); j += 1 }
