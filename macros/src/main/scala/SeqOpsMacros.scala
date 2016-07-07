@@ -1,8 +1,8 @@
 package offheap.collection.macros
 
-import scala.reflect.macros.blackbox
+import scala.reflect.macros.whitebox
 
-class SeqOpsMacros(val c: blackbox.Context) extends Common {
+class SeqOpsMacros(val c: whitebox.Context) extends Common {
   import c.universe._
   import c.universe.definitions._
 

@@ -1,12 +1,12 @@
 package offheap.collection.macros
 
-import scala.reflect.macros.blackbox
+import scala.reflect.macros.whitebox
 
 // Uses code from:
 // https://github.com/densh/scala-offheap
 trait Common {
 
-  val c: blackbox.Context
+  val c: whitebox.Context
 
   import c.universe.{ weakTypeOf => wt, _ }
   import c.universe.definitions._

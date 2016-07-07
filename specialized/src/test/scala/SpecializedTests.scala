@@ -4,7 +4,6 @@ import offheap.collection._
 import org.scalatest.{BeforeAndAfter, FunSuite}
 
 import HashEq.Implicits._
-import SeqBuilders._
 
 class SpecializedOptTest extends FunSuite with BeforeAndAfter with OptTest {
   def provideOpt_Int(value: Int): Opt[Int] = new Some_Int(value)
@@ -14,54 +13,41 @@ class SpecializedOptTest extends FunSuite with BeforeAndAfter with OptTest {
 class SpecializedSeqTest extends FunSuite with BeforeAndAfter with SeqTest {
   def provideSeq_Int: Seq[Int] = new BufferSeq_Int
 
-  test("map") {
+  test("map int") {
     val seq = new BufferSeq_Int
     1 to 3 foreach (seq.append(_))
 
-    val mapped = seq.map(i => i * 2.0f)
-    val test: Seq_Float = mapped
-    assert(mapped.size == 3)
-    1 to 3 foreach (i => assert(mapped(i - 1) == i * 2.0f))
-  }
-
-  test("map_Int") {
-    val seq: BufferSeq_Int = new BufferSeq_Int
-    1 to 3 foreach (seq.append(_))
-
-    val mapped: BufferSeq_Int = seq map_Int (_ * 2)
+    val mapped = seq.map(i => i * 2)
+    val test: BufferSeq_Int = mapped
     assert(mapped.size == 3)
     1 to 3 foreach (i => assert(mapped(i - 1) == i * 2))
   }
 
-  test("flatMap") {
-    val seq = new BufferSeq_Int
-    1 to 5 by 2 foreach (seq.append(_))
-
-    val mapped = seq flatMap { i =>
-      val r = new BufferSeq_Float
-      r.append(i)
-      r.append(i + 1)
-      r
-    }
-    val test: Seq_Float = mapped
-
-    assert(mapped.size == 6)
-    1 to 6 foreach (i => assert(mapped(i - 1) == i))
-  }
-
-  test("flatMap_Int") {
-    val seq: BufferSeq_Int = new BufferSeq_Int
-    1 to 5 by 2 foreach (seq.append(_))
-
-    val mapped: BufferSeq_Int = seq flatMap_Int { i =>
-      val r = new BufferSeq_Int
-      r.append(i)
-      r.append(i + 1)
-      r
-    }
-    assert(mapped.size == 6)
-    1 to 6 foreach (i => assert(mapped(i - 1) == i))
-  }
+//  test("map") {
+//    val seq = new BufferSeq_Int
+//    1 to 3 foreach (seq.append(_))
+//
+//    val mapped = seq.map(i => i * 2.0f)
+//    val test: Seq_Float = mapped
+//    assert(mapped.size == 3)
+//    1 to 3 foreach (i => assert(mapped(i - 1) == i * 2.0f))
+//  }
+//
+//  test("flatMap") {
+//    val seq = new BufferSeq_Int
+//    1 to 5 by 2 foreach (seq.append(_))
+//
+//    val mapped = seq flatMap { i =>
+//      val r = new BufferSeq_Float
+//      r.append(i)
+//      r.append(i + 1)
+//      r
+//    }
+//    val test: Seq_Float = mapped
+//
+//    assert(mapped.size == 6)
+//    1 to 6 foreach (i => assert(mapped(i - 1) == i))
+//  }
 
   test("filter") {
     val seq: Seq_Int = new BufferSeq_Int
