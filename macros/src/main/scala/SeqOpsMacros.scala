@@ -31,7 +31,8 @@ class SeqOpsMacros(val c: whitebox.Context) extends Common {
       q"""
         val builder = new $builder(initialSize = $pre.seq.size)
         var i = 0
-        while (i < $pre.seq.size) {
+        val size = $pre.seq.size
+        while (i < size) {
           builder.append(${app(f, q"$pre.seq(i)")})
           i += 1
         }
@@ -45,7 +46,8 @@ class SeqOpsMacros(val c: whitebox.Context) extends Common {
       q"""
         val builder = new $builder
         var i = 0
-        while (i < $pre.seq.size) {
+        val size = $pre.seq.size
+        while (i < size) {
           val el = $pre.seq(i)
           val result = ${app(f, q"el")}
           val resultSize = result.size
@@ -66,7 +68,8 @@ class SeqOpsMacros(val c: whitebox.Context) extends Common {
       q"""
         val result = new $builder
         var i = 0
-        while (i < $pre.seq.size) {
+        val size = $pre.seq.size
+        while (i < size) {
           val el = $pre.seq(i)
           if (${app(f, q"el")}) result.append(el)
           i += 1
