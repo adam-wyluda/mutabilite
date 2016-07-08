@@ -23,31 +23,47 @@ class SpecializedSeqTest extends FunSuite with BeforeAndAfter with SeqTest {
     1 to 3 foreach (i => assert(mapped(i - 1) == i * 2))
   }
 
-//  test("map") {
-//    val seq = new BufferSeq_Int
-//    1 to 3 foreach (seq.append(_))
-//
-//    val mapped = seq.map(i => i * 2.0f)
-//    val test: Seq_Float = mapped
-//    assert(mapped.size == 3)
-//    1 to 3 foreach (i => assert(mapped(i - 1) == i * 2.0f))
-//  }
-//
-//  test("flatMap") {
-//    val seq = new BufferSeq_Int
-//    1 to 5 by 2 foreach (seq.append(_))
-//
-//    val mapped = seq flatMap { i =>
-//      val r = new BufferSeq_Float
-//      r.append(i)
-//      r.append(i + 1)
-//      r
-//    }
-//    val test: Seq_Float = mapped
-//
-//    assert(mapped.size == 6)
-//    1 to 6 foreach (i => assert(mapped(i - 1) == i))
-//  }
+  test("flatMap int") {
+    val seq = new BufferSeq_Int
+    1 to 5 by 2 foreach (seq.append(_))
+
+    val mapped = seq flatMap { i =>
+      val r = new BufferSeq_Int
+      r.append(i)
+      r.append(i + 1)
+      r
+    }
+    val test: BufferSeq_Int = mapped
+
+    assert(mapped.size == 6)
+    1 to 6 foreach (i => assert(mapped(i - 1) == i))
+  }
+
+  test("map") {
+    val seq = new BufferSeq_Int
+    1 to 3 foreach (seq.append(_))
+
+    val mapped = seq.map(i => i * 2.0f)
+    val test: Seq_Float = mapped
+    assert(mapped.size == 3)
+    1 to 3 foreach (i => assert(mapped(i - 1) == i * 2.0f))
+  }
+
+  test("flatMap") {
+    val seq = new BufferSeq_Int
+    1 to 5 by 2 foreach (seq.append(_))
+
+    val mapped = seq flatMap { i =>
+      val r = new BufferSeq_Float
+      r.append(i)
+      r.append(i + 1)
+      r
+    }
+    val test: Seq_Float = mapped
+
+    assert(mapped.size == 6)
+    1 to 6 foreach (i => assert(mapped(i - 1) == i))
+  }
 
   test("filter") {
     val seq: Seq_Int = new BufferSeq_Int
