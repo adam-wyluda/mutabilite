@@ -6,8 +6,6 @@ import scala.reflect.macros.whitebox
 // https://github.com/densh/scala-offheap
 trait Common extends Definitions {
 
-  val c: whitebox.Context
-
   import c.universe.{ weakTypeOf => wt, _ }
   import c.universe.definitions._
   import c.internal._, decorators._
@@ -45,4 +43,39 @@ trait Common extends Definitions {
 
   def isSemiStable(sym: Symbol) =
     (sym.isTerm && sym.asTerm.isStable) || sym.attachments.get[SemiStable].nonEmpty
+
+  def app(f: Tree, argValues: Tree*) = f match {
+    case q"(..$params => $body)" =>
+      changeOwner(body, f.symbol, enclosingOwner)
+      val args = params zip(argValues) map { case (param, argValue) =>
+        val q"$_ val $_: $argTpt = $_" = param
+        argValue match {
+          case rt: RefTree if isSemiStable(rt.symbol) =>
+            (rt, q"")
+          case _ =>
+            val vd = freshVal("arg", argTpt.tpe, argValue)
+            (q"${vd.symbol}", vd)
+        }
+      }
+      val argVals = args map (_._1)
+      val argDefs = args map (_._2) filter { case q"" => false; case _ => true }
+
+      val param2Val = params zip (argVals) map { case (param, arg) =>
+        (param.symbol, arg)
+      } toMap
+
+      val transformedBody = typingTransform(body) { (tree, api) =>
+        tree match {
+          case id: Ident if param2Val.contains(id.symbol) =>
+            val arg = param2Val(id.symbol)
+            api.typecheck(q"$arg")
+          case _ =>
+            api.default(tree)
+        }
+      }
+
+      q"..$argDefs; $transformedBody"
+    case _             =>
+      q"$f(..$argValues)"
+  }
 }
