@@ -4,7 +4,7 @@ import scala.reflect.macros.whitebox
 
 // Uses code from:
 // https://github.com/densh/scala-offheap
-trait Common {
+trait Common extends Definitions {
 
   val c: whitebox.Context
 

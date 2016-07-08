@@ -6,8 +6,9 @@ class SeqOpsMacros(val c: whitebox.Context) extends Common {
   import c.universe._
   import c.universe.definitions._
 
-  def builderType[B: WeakTypeTag]: TypeName = {
-    val B = weakTypeOf[B]
+  lazy val A = c.prefix.tree.tpe.baseType(SeqOpsClass).typeArgs.head
+
+  def builderType(B: Type): TypeName = {
     val typeName = B match {
       case BooleanTpe => "Boolean"
       case CharTpe => "Char"
@@ -21,6 +22,8 @@ class SeqOpsMacros(val c: whitebox.Context) extends Common {
     }
     TypeName("BufferSeq_" + typeName)
   }
+
+  def builderType[B: WeakTypeTag]: TypeName = builderType(weakTypeOf[B])
 
   def map[B: WeakTypeTag](f: Tree) =
     stabilized(c.prefix.tree) { pre =>
@@ -59,8 +62,9 @@ class SeqOpsMacros(val c: whitebox.Context) extends Common {
 
   def filter(f: Tree) =
     stabilized(c.prefix.tree) { pre =>
+      val builder = builderType(A)
       q"""
-        val result = new BufferSeq_Int
+        val result = new $builder
         var i = 0
         while (i < $pre.seq.size) {
           val el = $pre.seq(i)

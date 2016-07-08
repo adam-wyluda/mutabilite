@@ -59,7 +59,7 @@ class SpecializedSeqTest extends FunSuite with BeforeAndAfter with SeqTest {
       r.append(i + 1)
       r
     }
-    val test: Seq_Float = mapped
+    val test: BufferSeq_Float = mapped
 
     assert(mapped.size == 6)
     1 to 6 foreach (i => assert(mapped(i - 1) == i))
@@ -70,7 +70,7 @@ class SpecializedSeqTest extends FunSuite with BeforeAndAfter with SeqTest {
     1 to 10 foreach (seq.append(_))
 
     val filtered = seq filter (i => i % 2 == 0)
-    val test: Seq_Int = filtered
+    val test: BufferSeq_Int = filtered
 
     assert(filtered.size == 5)
     2 to 10 by 2 foreach (i => assert(filtered((i - 1) / 2) == i))
