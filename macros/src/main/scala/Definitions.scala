@@ -10,5 +10,5 @@ trait Definitions {
   import c.universe.definitions._
   import c.universe.rootMirror._
 
-  val SeqOpsClass = staticClass("offheap.collection.SeqOps")
+//  val SeqOpsClass = staticClass("offheap.collection.SeqOps")
 }
