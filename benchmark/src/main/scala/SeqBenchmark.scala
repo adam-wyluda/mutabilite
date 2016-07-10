@@ -335,28 +335,31 @@ class SeqBenchmark {
 //  }
 
   @Benchmark
-  def flatMapSpecialized = specSeq flatMap { i =>
-    val r = new BufferSeq_Int
-    var j = 0
-    while (j < 5) { r.append(i + j); j += 1 }
-    r
-  }
+  def flatMapSpecialized =
+    specSeq flatMap { i =>
+      val r = new BufferSeq_Int
+      var j = 0
+      while (j < 5) { r.append(i + j); j += 1 }
+      r
+    }
 
   @Benchmark
-  def flatMapGeneric = genericSeq flatMap { i =>
-    val r = new BufferSeq[Int]
-    var j = 0
-    while (j < 5) { r.append(i + j); j += 1 }
-    r
-  }
+  def flatMapGeneric =
+    genericSeq flatMap { i =>
+      val r = new BufferSeq[Int]
+      var j = 0
+      while (j < 5) { r.append(i + j); j += 1 }
+      r
+    }
 
   @Benchmark
-  def flatMapStdlib = stdSeq flatMap { i =>
-    val r = StdlibSeq[Int]()
-    var j = 0
-    while (j < 5) { r.append(i + j); j += 1 }
-    r
-  }
+  def flatMapStdlib =
+    stdSeq flatMap { i =>
+      val r = StdlibSeq[Int]()
+      var j = 0
+      while (j < 5) { r.append(i + j); j += 1 }
+      r
+    }
 
 //  @Benchmark
 //  def filterOffheap = freedSeq = offheapSeq.filter(_ % 2 == 0)(malloc)

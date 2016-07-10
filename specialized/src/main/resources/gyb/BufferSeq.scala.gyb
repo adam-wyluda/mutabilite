@@ -22,7 +22,7 @@ trait Seq_${T} extends Any with Seq[${T}] {
 class BufferSeq_${T}(initialSize: Int = 16)(implicit eq: Eq_${T})
   extends Seq_${T} {
 
-  private[this] var array: Array[${T}] = new Array[${T}](initialSize)
+  private[this] var array: Array[${T}] = new Array[${T}](lowestPowOf2GreaterThan(initialSize))
   private[this] var _size = 0
 
   def apply(index: Int): ${T} = array(index)
