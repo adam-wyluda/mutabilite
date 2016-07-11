@@ -17,12 +17,13 @@ trait Seq_${T} extends Any with Seq[${T}] {
   def index(elem: ${T}): Int
   def insert(index: Int, elem: ${T}): Unit
   def foreach(f: ${T} => Unit)
+  def capacity: Int
 }
 
 class BufferSeq_${T}(initialSize: Int = 16)(implicit eq: Eq_${T})
   extends Seq_${T} {
 
-  private[this] var array: Array[${T}] = new Array[${T}](lowestPowOf2GreaterThan(initialSize))
+  private[this] var array: Array[${T}] = new Array[${T}](initialSize)
   private[this] var _size = 0
 
   def apply(index: Int): ${T} = array(index)
@@ -72,19 +73,13 @@ class BufferSeq_${T}(initialSize: Int = 16)(implicit eq: Eq_${T})
 
   private def copy(src: Int, dest: Int, len: Int) = System.arraycopy(array, src, array, dest, len)
 
-  private def shouldGrow(newSize: Int) = newSize > array.size
+  private def shouldGrow(newSize: Int) = newSize > capacity
   private def grow = {
-    val newArray = new Array[${T}](array.size * 2)
+    val newArray = new Array[${T}](capacity * 2)
     System.arraycopy(array, 0, newArray, 0, _size)
     this.array = newArray
   }
   private def growTo(size: Int) = while (shouldGrow(size)) grow
-
-  private def lowestPowOf2GreaterThan(min: Int) = {
-    var result = 1
-    while (result <= min) result *= 2
-    result
-  }
 
   override def empty = _size == 0
   override def size: Int = _size
@@ -95,6 +90,8 @@ class BufferSeq_${T}(initialSize: Int = 16)(implicit eq: Eq_${T})
       i += 1
     }
   }
+
+  def capacity = array.size
 }
 
 % end
