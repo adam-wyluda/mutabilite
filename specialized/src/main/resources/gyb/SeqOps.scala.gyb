@@ -12,8 +12,8 @@ package object collection {
   % for T in types:
 
   implicit class SeqOps_${T}(val seq: Seq_${T}) extends AnyVal {
-    def map[B](f: ${T} => B): Seq[B] = macro offheap.collection.macros.SeqOpsMacros.map[B]
-    def flatMap[B](f: ${T} => Seq[B]): Seq[B] = macro offheap.collection.macros.SeqOpsMacros.flatMap[B]
+    def map[B](f: ${T} => B): Seq[B] = macro offheap.collection.macros.SeqOpsMacros.map[${T}, B]
+    def flatMap[B](f: ${T} => Seq[B]): Seq[B] = macro offheap.collection.macros.SeqOpsMacros.flatMap[${T}, B]
     def filter(f: ${T} => Boolean): Seq_${T} = macro offheap.collection.macros.SeqOpsMacros.filter[${T}]
   }
 

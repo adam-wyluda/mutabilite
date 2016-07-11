@@ -10,5 +10,9 @@ trait Definitions {
   import c.universe.definitions._
   import c.universe.rootMirror._
 
-//  val SeqOpsClass = staticClass("offheap.collection.SeqOps")
+  def SeqClass(elemType: String) =
+    staticClass("offheap.collection.Seq_" + elemType)
+
+  def BufferSeqClass(elemType: String) =
+    staticClass("offheap.collection.BufferSeq_" + elemType)
 }
