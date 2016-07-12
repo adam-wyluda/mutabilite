@@ -6,7 +6,7 @@ trait Definitions {
 
   val c: whitebox.Context
 
-  import c.universe. { weakTypeOf => wt, _ }
+  import c.universe.{weakTypeOf => wt, _}
   import c.universe.definitions._
   import c.universe.rootMirror._
 
@@ -16,11 +16,17 @@ trait Definitions {
   def BufferSeqClass(elemType: String) =
     staticClass("offheap.collection.BufferSeq_" + elemType)
 
-  def seqType[T: WeakTypeTag]: Type =
-    SeqClass(typeName[T]).asType.toType
+  def maybeParametrized[T: WeakTypeTag](clazz: ClassSymbol): Type = {
+    val tpe = wt[T]
+    val prefixedTpe = clazz.toType.dealias
+    if (tpe <:< AnyRefTpe) {
+      prefixedTpe.substituteTypes(prefixedTpe.typeArgs.map(_ typeSymbol), List(tpe))
+    } else prefixedTpe
+  }
 
-  def bufferType[T: WeakTypeTag]: Type =
-    BufferSeqClass(typeName[T]).asType.toType
+  def seqType[T: WeakTypeTag]: Type = maybeParametrized[T](SeqClass(typeName[T]))
+
+  def bufferType[T: WeakTypeTag]: Type = maybeParametrized[T](BufferSeqClass(typeName[T]))
 
   def typeName[B: WeakTypeTag]: String =
     wt[B] match {
