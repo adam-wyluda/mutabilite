@@ -7,12 +7,6 @@ class SeqOpsMacros(val c: whitebox.Context) extends Common {
   import c.universe._
   import c.universe.definitions._
 
-  def seqType[T: WeakTypeTag]: Type =
-    SeqClass(typeName[T]).asType.toType
-
-  def bufferType[T: WeakTypeTag]: Type =
-    BufferSeqClass(typeName[T]).asType.toType
-
   def map[A: WeakTypeTag, B: WeakTypeTag](f: Tree) =
     stabilized(c.prefix.tree) { pre =>
       val seqTpe = seqType[A]

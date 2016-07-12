@@ -71,6 +71,44 @@ class BufferSeq_${T}(initialSize: Int = 16)(implicit eq: Eq_${T})
     _size += 1
   }
 
+  def map_${T}(f: ${T} => ${T}): BufferSeq_${T} = {
+    val builder = new BufferSeq_${T}(initialSize = array.size)
+    var i = 0
+    while (i < _size) {
+      builder.append(f(array(i)))
+      i += 1
+    }
+    builder
+  }
+
+  def flatMap_${T}(f: ${T} => Seq_${T}): BufferSeq_${T} = {
+    val builder = new BufferSeq_${T}
+    var i = 0
+    while (i < _size) {
+      val el = array(i)
+      val result = f(el)
+      val resultSize = result.size
+      var j = 0
+      while (j < resultSize) {
+        builder.append(result(j))
+        j += 1
+      }
+      i += 1
+    }
+    builder
+  }
+
+  def filter_${T}(f: ${T} => Boolean): Seq_${T} = {
+    val result = new BufferSeq_${T}
+    var i = 0
+    while (i < _size) {
+      val el = array(i)
+      if (f(el)) result.append(el)
+      i += 1
+    }
+    result
+  }
+
   private def copy(src: Int, dest: Int, len: Int) = System.arraycopy(array, src, array, dest, len)
 
   private def shouldGrow(newSize: Int) = newSize > capacity

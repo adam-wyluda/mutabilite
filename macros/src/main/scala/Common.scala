@@ -78,17 +78,4 @@ trait Common extends Definitions {
     case _             =>
       q"$f(..$argValues)"
   }
-
-  def typeName[B: WeakTypeTag]: String =
-    weakTypeOf[B] match {
-      case BooleanTpe => "Boolean"
-      case CharTpe => "Char"
-      case ByteTpe => "Byte"
-      case ShortTpe => "Short"
-      case IntTpe => "Int"
-      case LongTpe => "Long"
-      case FloatTpe => "Float"
-      case DoubleTpe => "Double"
-      case _ => "Object"
-    }
 }

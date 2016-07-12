@@ -307,6 +307,9 @@ class SeqBenchmark {
   def mapSpecialized = specSeq map (_ + 1)
 
   @Benchmark
+  def mapSpecOld = specSeq map_Int (_ + 1)
+
+  @Benchmark
   def mapGeneric = genericSeq map (_ + 1)
 
   @Benchmark
@@ -344,6 +347,15 @@ class SeqBenchmark {
     }
 
   @Benchmark
+  def flatMapSpecOld =
+    specSeq flatMap_Int { i =>
+      val r = new BufferSeq_Int
+      var j = 0
+      while (j < 5) { r.append(i + j); j += 1 }
+      r
+    }
+
+  @Benchmark
   def flatMapGeneric =
     genericSeq flatMap { i =>
       val r = new BufferSeq[Int]
@@ -369,6 +381,9 @@ class SeqBenchmark {
 
   @Benchmark
   def filterSpecialized = specSeq filter (_ % 2 == 0)
+
+  @Benchmark
+  def filterSpecOld = specSeq filter_Int (_ % 2 == 0)
 
   @Benchmark
   def filterGeneric = genericSeq filter (_ % 2 == 0)
