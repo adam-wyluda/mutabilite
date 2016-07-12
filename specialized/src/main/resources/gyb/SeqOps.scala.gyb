@@ -4,7 +4,7 @@ import scala.language.experimental.{macros => CanMacro}
 
 %{
 types = ['Boolean', 'Char', 'Byte', 'Short',
-'Int', 'Long', 'Float', 'Double', 'Object']
+'Int', 'Long', 'Float', 'Double']
 }%
 
 package object collection {
@@ -18,4 +18,10 @@ package object collection {
   }
 
   % end
+
+  implicit class SeqOps_Object[A <: AnyRef](val seq: Seq_Object[A]) extends AnyVal {
+    def map[B](f: A => B): Seq[B] = macro offheap.collection.macros.SeqOpsMacros.map[A, B]
+    def flatMap[B](f: A => Seq[B]): Seq[B] = macro offheap.collection.macros.SeqOpsMacros.flatMap[A, B]
+    def filter(f: A => Boolean): Seq_Object[A] = macro offheap.collection.macros.SeqOpsMacros.filter[A]
+  }
 }

@@ -15,7 +15,11 @@ trait Map_${K}_${V} extends Map[${K}, ${V}] {
   def put(key: ${K}, value: ${V}): Opt_${V}
   def remove(key: ${K}): Opt_${V}
   def keys: Set_${K}
+  % if V == 'Object':
+  def values: Seq_${V}[AnyRef]
+  % else:
   def values: Seq_${V}
+  % end
   def contains(key: ${K}): Boolean
 }
 
@@ -151,8 +155,13 @@ class HashMap_${K}_${V}(initialSize: Int = 8)
     result
   }
 
+  % if V == 'Object':
+  def values: Seq_${V}[AnyRef] = {
+    val result = new BufferSeq_${V}[AnyRef]
+  % else:
   def values: Seq_${V} = {
     val result = new BufferSeq_${V}
+  % end
     var i = 0
     while (i < capacity) {
       if (!isInit(hashes(i))) result.append(_values(i))
