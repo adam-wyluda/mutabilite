@@ -47,8 +47,18 @@ lazy val generic = project
     )
   )
 
+lazy val specializedCore = project
+  .in(file("specialized-core"))
+  .dependsOn(api)
+  .settings(
+    defaults ++ Seq(
+      moduleName := "specialized-core"
+    )
+  )
+
 lazy val macros = project
   .in(file("macros"))
+  .dependsOn(specializedCore)
   .settings(
     defaults ++ Seq(
       moduleName := "macros",
