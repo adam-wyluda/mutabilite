@@ -18,19 +18,15 @@ trait Definitions {
   def BufferSeqClass(elemType: String) =
     staticClass("offheap.collection.BufferSeq_" + elemType)
 
-  def seqType[T: WeakTypeTag]: Type = {
-    val tpe = wt[T]
-    if (tpe <:< AnyRefTpe) {
+  def seqType[T: WeakTypeTag]: Type =
+    if (wt[T] <:< AnyRefTpe) {
       wt[Seq_Object[T]]
     } else SeqClass(typeName[T]).toType
-  }
 
-  def bufferType[T: WeakTypeTag]: Type = {
-    val tpe = wt[T]
-    if (tpe <:< AnyRefTpe) {
+  def bufferType[T: WeakTypeTag]: Type =
+    if (wt[T] <:< AnyRefTpe) {
       wt[BufferSeq_Object[T]]
     } else BufferSeqClass(typeName[T]).toType
-  }
 
   def typeName[B: WeakTypeTag]: String =
     wt[B] match {

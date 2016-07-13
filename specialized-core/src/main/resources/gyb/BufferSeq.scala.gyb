@@ -35,24 +35,24 @@ trait Seq_${T}${T_Param} extends Any with Seq[${T_Arg}] {
 
 class BufferSeq_${T}${T_Param_Decl}(initialSize: Int = 16)(implicit eq: Eq_${T}) extends Seq_${T}${T_Param} {
 
-  private[this] var array: Array[${T_Arg}] = new Array[${T_Arg}](initialSize)
-  private[this] var _size = 0
+  var array: Array[${T_Arg}] = new Array[${T_Arg}](initialSize)
+  var size = 0
 
   def apply(index: Int): ${T_Arg} = array(index)
 
   def append(elem: ${T_Arg}): Unit = {
-    val newSize = _size + 1
+    val newSize = size + 1
     growTo(newSize)
-    array(_size) = elem
-    _size += 1
+    array(size) = elem
+    size += 1
   }
 
   def update(index: Int, value: ${T_Arg}): Unit = array(index) = value
 
   def remove(n: Int): ${T_Arg} = {
     val removed = array(n)
-    copy(n + 1, n, _size - n)
-    _size -= 1
+    copy(n + 1, n, size - n)
+    size -= 1
     removed
   }
 
@@ -60,7 +60,7 @@ class BufferSeq_${T}${T_Param_Decl}(initialSize: Int = 16)(implicit eq: Eq_${T})
     var result = -1
     var i = 0
     while ({
-      if (i < _size) {
+      if (i < size) {
         if (eq.eqv(array(i), elem)) {
           result = i
           false
@@ -76,17 +76,17 @@ class BufferSeq_${T}${T_Param_Decl}(initialSize: Int = 16)(implicit eq: Eq_${T})
   }
 
   def insert(index: Int, elem: ${T_Arg}): Unit = {
-    val newSize = _size + 1
+    val newSize = size + 1
     growTo(newSize)
-    copy(index, index + 1, _size - index)
+    copy(index, index + 1, size - index)
     array(index) = elem
-    _size += 1
+    size += 1
   }
 
   def map_${T}(f: ${T_Arg} => ${T_Arg}): BufferSeq_${T}${T_Param} = {
     val builder = new BufferSeq_${T}${T_Param}(initialSize = array.size)
     var i = 0
-    while (i < _size) {
+    while (i < size) {
       builder.append(f(array(i)))
       i += 1
     }
@@ -96,7 +96,7 @@ class BufferSeq_${T}${T_Param_Decl}(initialSize: Int = 16)(implicit eq: Eq_${T})
   def flatMap_${T}(f: ${T_Arg} => Seq_${T}${T_Param}): BufferSeq_${T}${T_Param} = {
     val builder = new BufferSeq_${T}${T_Param}
     var i = 0
-    while (i < _size) {
+    while (i < size) {
       val el = array(i)
       val result = f(el)
       val resultSize = result.size
@@ -113,7 +113,7 @@ class BufferSeq_${T}${T_Param_Decl}(initialSize: Int = 16)(implicit eq: Eq_${T})
   def filter_${T}(f: ${T_Arg} => Boolean): Seq_${T}${T_Param} = {
     val result = new BufferSeq_${T}${T_Param}
     var i = 0
-    while (i < _size) {
+    while (i < size) {
       val el = array(i)
       if (f(el)) result.append(el)
       i += 1
@@ -126,18 +126,17 @@ class BufferSeq_${T}${T_Param_Decl}(initialSize: Int = 16)(implicit eq: Eq_${T})
   private def shouldGrow(newSize: Int) = newSize > capacity
   private def grow = {
     val newArray = new Array[${T_Arg}](capacity * 2)
-    System.arraycopy(array, 0, newArray, 0, _size)
+    System.arraycopy(array, 0, newArray, 0, size)
     this.array = newArray
   }
   private def growTo(size: Int) = while (shouldGrow(size)) grow
 
-  def empty = _size == 0
-  def size: Int = _size
+  def empty = size == 0
   def capacity = array.size
 
   def foreach(f: ${T_Arg} => Unit): Unit = {
     var i = 0
-    while (i < _size) {
+    while (i < size) {
       f(array(i))
       i += 1
     }
