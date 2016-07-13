@@ -14,17 +14,15 @@ types = ['Boolean', 'Char', 'Byte', 'Short',
 %{
   if T == 'Object':
     T_Arg = 'A'
-    T_Param_Trait = '[A <: AnyRef]'
-    T_Param_Decl = '[A <: AnyRef : ClassTag]'
+    T_Param_Decl = '[A: ClassTag]'
     T_Param = '[A]'
   else:
     T_Arg = T
-    T_Param_Trait = ''
     T_Param_Decl = ''
     T_Param = ''
 }%
 
-trait Seq_${T}${T_Param_Trait} extends Any with Seq[${T_Arg}] {
+trait Seq_${T}${T_Param} extends Any with Seq[${T_Arg}] {
   def apply(index: Int): ${T_Arg}
   def append(elem: ${T_Arg}): Unit
   def update(index: Int, value: ${T_Arg}): Unit

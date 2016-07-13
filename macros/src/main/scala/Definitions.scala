@@ -1,5 +1,7 @@
 package offheap.collection.macros
 
+import offheap.collection._
+
 import scala.reflect.macros.whitebox
 
 trait Definitions {
@@ -16,17 +18,19 @@ trait Definitions {
   def BufferSeqClass(elemType: String) =
     staticClass("offheap.collection.BufferSeq_" + elemType)
 
-  def maybeParametrized[T: WeakTypeTag](clazz: ClassSymbol): Type = {
+  def seqType[T: WeakTypeTag]: Type = {
     val tpe = wt[T]
-    val prefixedTpe = clazz.toType.dealias
     if (tpe <:< AnyRefTpe) {
-      prefixedTpe.substituteTypes(prefixedTpe.typeArgs.map(_ typeSymbol), List(tpe))
-    } else prefixedTpe
+      wt[Seq_Object[T]]
+    } else SeqClass(typeName[T]).toType
   }
 
-  def seqType[T: WeakTypeTag]: Type = maybeParametrized[T](SeqClass(typeName[T]))
-
-  def bufferType[T: WeakTypeTag]: Type = maybeParametrized[T](BufferSeqClass(typeName[T]))
+  def bufferType[T: WeakTypeTag]: Type = {
+    val tpe = wt[T]
+    if (tpe <:< AnyRefTpe) {
+      wt[BufferSeq_Object[T]]
+    } else BufferSeqClass(typeName[T]).toType
+  }
 
   def typeName[B: WeakTypeTag]: String =
     wt[B] match {

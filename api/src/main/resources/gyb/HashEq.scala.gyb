@@ -2,7 +2,7 @@ package offheap.collection
 
 %{
 types = ['Boolean', 'Char', 'Byte', 'Short',
-'Int', 'Long', 'Float', 'Double', 'Object']
+'Int', 'Long', 'Float', 'Double']
 }%
 
 object HashEq {
@@ -18,6 +18,14 @@ object HashEq {
   }
 
   % end
+
+  trait Eq_Object extends Eq[Any] {
+    def eqv(a: Any, b: Any): Boolean = a == b
+  }
+
+  trait Hash_Object extends Eq_Object with Hash[Any] {
+    def hash(value: Any): Int
+  }
 
   object Implicits {
     implicit object BooleanHash extends Hash_Boolean {
@@ -56,7 +64,7 @@ object HashEq {
     }
 
     implicit object ObjectHash extends Hash_Object {
-      def hash(value: Object): Int = value.hashCode()
+      def hash(value: Any): Int = value.hashCode()
     }
   }
 }

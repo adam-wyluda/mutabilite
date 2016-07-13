@@ -13,7 +13,7 @@ class SpecializedOptTest extends FunSuite with BeforeAndAfter with OptTest {
 class SpecializedSeqTest extends FunSuite with BeforeAndAfter with SeqTest {
   def provideSeq_Int: Seq[Int] = new BufferSeq_Int
 
-  test("map string") {
+  test("map int to string") {
     val seq = new BufferSeq_Int
     1 to 3 foreach (seq.append(_))
 
@@ -21,6 +21,16 @@ class SpecializedSeqTest extends FunSuite with BeforeAndAfter with SeqTest {
     val test: BufferSeq_Object[String] = mapped
     assert(mapped.size == 3)
     1 to 3 foreach (i => assert(mapped(i - 1) == i.toString))
+  }
+
+  test("map string to int") {
+    val seq = new BufferSeq_Object[String]
+    1 to 3 foreach (i => seq.append(i toString))
+
+    val mapped = seq map { Integer.parseInt(_) }
+    val test: BufferSeq_Int = mapped
+    assert(mapped.size == 3)
+    1 to 3 foreach (i => assert(mapped(i - 1) == i))
   }
 
   test("map int") {
