@@ -14,14 +14,9 @@ trait Set_${T} extends Set[${T}] {
   def add(elem: ${T}): Boolean
   def remove(elem: ${T}): Boolean
 
-  def intersect(that: Set[${T}]): Set[${T}]
-  def union(that: Set[${T}]): Set[${T}]
-  def diff(that: Set[${T}]): Set[${T}]
-
-  def intersect_${T}(that: Set_${T}): Set_${T}
-  def union_${T}(that: Set_${T}): Set_${T}
-  def diff_${T}(that: Set_${T}): Set_${T}
-
+  def intersect(that: Set_${T}): Set_${T}
+  def union(that: Set_${T}): Set_${T}
+  def diff(that: Set_${T}): Set_${T}
 }
 
 class HashSet_${T}(initialSize: Int = 8)(implicit hashK: Hash_${T}) extends Set_${T} {
@@ -127,7 +122,7 @@ class HashSet_${T}(initialSize: Int = 8)(implicit hashK: Hash_${T}) extends Set_
     }
   }
 
-  def intersect(that: Set[${T}]): Set[${T}] = {
+  def intersect(that: Set_${T}): HashSet_${T} = {
     val result = new HashSet_${T}
     foreach { a =>
       if (that(a)) result.add(a)
@@ -135,37 +130,14 @@ class HashSet_${T}(initialSize: Int = 8)(implicit hashK: Hash_${T}) extends Set_
     result
   }
 
-  def intersect_${T}(that: Set_${T}): HashSet_${T} = {
-    val result = new HashSet_${T}
-    foreach { a =>
-      if (that(a)) result.add(a)
-    }
-    result
-  }
-
-  def union(that: Set[${T}]): Set[${T}] = {
+  def union(that: Set_${T}): HashSet_${T} = {
     val result = new HashSet_${T}
     this foreach (result.add(_))
     that foreach (result.add(_))
     result
   }
 
-  def union_${T}(that: Set_${T}): HashSet_${T} = {
-    val result = new HashSet_${T}
-    this foreach (result.add(_))
-    that foreach (result.add(_))
-    result
-  }
-
-  def diff(that: Set[${T}]): Set[${T}] = {
-    val result = new HashSet_${T}
-    foreach { a =>
-      if (!that(a)) result.add(a)
-    }
-    result
-  }
-
-  def diff_${T}(that: Set_${T}): HashSet_${T} = {
+  def diff(that: Set_${T}): HashSet_${T} = {
     val result = new HashSet_${T}
     foreach { a =>
       if (!that(a)) result.add(a)

@@ -2,7 +2,7 @@ package offheap.collection
 
 import scala.reflect.ClassTag
 
-class NaiveSet[A](implicit tag: ClassTag[A]) extends Set[A] {
+class NaiveSet[A](implicit tag: ClassTag[A]) extends GenericSet[A] {
 
   private[this] val seq = new NaiveSeq[A]
 

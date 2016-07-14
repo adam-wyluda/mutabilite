@@ -3,11 +3,11 @@ package test
 import offheap.collection._
 import org.scalatest.{BeforeAndAfter, FunSuite}
 
-trait SetTest { this: FunSuite with BeforeAndAfter =>
+trait SetTest[S <: Set[Int]] { this: FunSuite with BeforeAndAfter =>
 
-  def provideSet_Int: Set[Int]
+  def provideSet_Int: S
 
-  var set: Set[Int] = _
+  var set: S = _
 
   before {
     set = provideSet_Int
@@ -57,6 +57,9 @@ trait SetTest { this: FunSuite with BeforeAndAfter =>
     1 to 10 by 2 foreach (i => assert(!set(i)))
     2 to 10 by 2 foreach (i => assert(set(i)))
   }
+}
+
+trait GenericSetTest extends SetTest[GenericSet[Int]] { this: FunSuite with BeforeAndAfter =>
 
   test("intersect") {
     val other = provideSet_Int

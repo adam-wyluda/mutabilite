@@ -8,7 +8,7 @@ import scala.reflect.ClassTag
 // http://codecapsule.com/2013/11/11/robin-hood-hashing/
 // http://codecapsule.com/2013/11/17/robin-hood-hashing-backward-shift-deletion/
 class HashSet[A](initialSize: Int = 8)(implicit tag: ClassTag[A])
-    extends Set[A] {
+    extends GenericSet[A] {
 
   private[this] var hashes: Array[Int] = new Array[Int](initialSize)
   private[this] var _keys: Array[AnyRef] = new Array[AnyRef](initialSize)

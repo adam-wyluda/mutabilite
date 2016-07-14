@@ -7,8 +7,8 @@ class NaiveSeqTest extends FunSuite with BeforeAndAfter with SeqTest {
   def provideSeq_Int: Seq[Int] = new NaiveSeq[Int]
 }
 
-class NaiveSetTest extends FunSuite with BeforeAndAfter with SetTest {
-  def provideSet_Int: Set[Int] = new NaiveSet[Int]
+class NaiveSetTest extends FunSuite with BeforeAndAfter with GenericSetTest {
+  def provideSet_Int: GenericSet[Int] = new NaiveSet[Int]
 }
 
 class NaiveMapTest extends FunSuite with BeforeAndAfter with MapTest {
