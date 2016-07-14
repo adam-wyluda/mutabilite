@@ -97,7 +97,7 @@ class SpecializedSeqTest extends FunSuite with BeforeAndAfter with SeqTest {
   }
 
   test("foreachMacro") {
-    val seq = new BufferSeq_Int
+    val seq: Seq_Int = new BufferSeq_Int
     1 to 10 foreach (seq.append(_))
 
     var sum = 0

@@ -96,7 +96,7 @@ class SeqOpsMacros(val c: whitebox.Context) extends Common {
     stabilized(c.prefix.tree) { pre =>
       val A = weakTypeOf[A]
       val idx = freshVar("i", IntTpe, q"0")
-      val seqTpe = bufferType[A]
+      val seqTpe = seqType[A]
       val seq = freshVal("seq", seqTpe, q"$pre.seq")
       val size = freshVal("size", IntTpe, q"${seq.symbol}.size")
       q"""
@@ -104,7 +104,7 @@ class SeqOpsMacros(val c: whitebox.Context) extends Common {
         $seq
         $size
         while (${idx.symbol} < ${size.symbol}) {
-          ${app(f, q"${seq.symbol}.array(${idx.symbol})")}
+          ${app(f, q"${seq.symbol}(${idx.symbol})")}
           ${idx.symbol} += 1
         }
       """

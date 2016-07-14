@@ -15,10 +15,7 @@ package object collection {
     def map[B](f: ${T} => B): Seq[B]          = macro offheap.collection.macros.SeqOpsMacros.map[${T}, B]
     def flatMap[B](f: ${T} => Seq[B]): Seq[B] = macro offheap.collection.macros.SeqOpsMacros.flatMap[${T}, B]
     def filter(f: ${T} => Boolean): Seq_${T}  = macro offheap.collection.macros.SeqOpsMacros.filter[${T}]
-  }
-
-  implicit class BufferSeqOps_${T}(val seq: BufferSeq_${T}) extends AnyVal {
-    def foreachMacro(f: ${T} => Unit): Unit = macro offheap.collection.macros.SeqOpsMacros.foreach[${T}]
+    def foreachMacro(f: ${T} => Unit): Unit   = macro offheap.collection.macros.SeqOpsMacros.foreach[${T}]
   }
 
   % end
@@ -27,9 +24,6 @@ package object collection {
     def map[B](f: A => B): Seq[B]              = macro offheap.collection.macros.SeqOpsMacros.map[A, B]
     def flatMap[B](f: A => Seq[B]): Seq[B]     = macro offheap.collection.macros.SeqOpsMacros.flatMap[A, B]
     def filter(f: A => Boolean): Seq_Object[A] = macro offheap.collection.macros.SeqOpsMacros.filter[A]
-  }
-
-  implicit class BufferSeqOps_Object[A](val seq: BufferSeq_Object[A]) extends AnyVal {
-    def foreachMacro(f: ${T} => Unit): Unit = macro offheap.collection.macros.SeqOpsMacros.foreach[${T}]
+    def foreachMacro(f: ${T} => Unit): Unit    = macro offheap.collection.macros.SeqOpsMacros.foreach[${T}]
   }
 }
