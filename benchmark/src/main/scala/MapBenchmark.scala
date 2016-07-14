@@ -22,8 +22,8 @@ class MapBenchmark {
 //    map
 //  }
 
-  val specMap: HashMap_Object_Int = {
-    val map = new HashMap_Object_Int(initialSize)
+  val specMap: HashMap_Object_Int[Key] = {
+    val map = new HashMap_Object_Int[Key](initialSize)
     var i = 0
     while (i < size) {
       map.put(keys(i), i * i)
@@ -97,7 +97,7 @@ class MapBenchmark {
 
   @Benchmark
   def putAllSpecialized = {
-    val m = new HashMap_Object_Int(initialSize)
+    val m = new HashMap_Object_Int[Key](initialSize)
     var i = 0
     while (i < size) {
       m.put(keys(i), i)
@@ -154,7 +154,7 @@ class MapBenchmark {
 
   @Benchmark
   def putRemoveReadSpecialized(blackhole: Blackhole) = {
-    val map = new HashMap_Object_Int(initialSize)
+    val map = new HashMap_Object_Int[Key](initialSize)
     var i = 0
     while (i < size) { map.put(keys(i), i); i += 1 }
     i = 0
@@ -211,11 +211,11 @@ class MapRemoveSpecializedBenchmark {
 
   import Benchmark._
 
-  var map: HashMap_Object_Int = _
+  var map: HashMap_Object_Int[Key] = _
 
   @Setup(Level.Invocation)
   def setup = {
-    map = new HashMap_Object_Int
+    map = new HashMap_Object_Int[Key]
     0 until size foreach (i => map.put(keys(i), i * i))
   }
 

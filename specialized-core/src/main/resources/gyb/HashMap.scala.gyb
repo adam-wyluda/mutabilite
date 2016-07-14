@@ -1,5 +1,7 @@
 package offheap.collection
 
+import scala.reflect.ClassTag
+
 import HashEq._
 
 %{
@@ -10,48 +12,83 @@ types = ['Boolean', 'Char', 'Byte', 'Short',
 % for K in types:
 % for V in types:
 
-trait Map_${K}_${V} extends Map[${K}, ${V}] {
-  def apply(key: ${K}): Opt_${V}
-  def put(key: ${K}, value: ${V}): Opt_${V}
-  def remove(key: ${K}): Opt_${V}
+%{
+  if (K == 'Object' and V == 'Object'):
+    Param = '[K, V]'
+    Param_Decl = '[K: ClassTag, V: ClassTag]'
+  elif K == 'Object':
+    Param = '[K]'
+    Param_Decl = '[K: ClassTag]'
+  elif V == 'Object':
+    Param = '[V]'
+    Param_Decl = '[V: ClassTag]'
+  else:
+    Param = ''
+    Param_Decl = ''
+
+  if K == 'Object':
+    K_Arg = 'K'
+  else:
+    K_Arg = K
+
+  if V == 'Object':
+    V_Arg = 'V'
+    V_Opt = 'Opt[V]'
+    V_None = 'none'
+    V_Some = 'Some'
+  else:
+    V_Arg = V
+    V_Opt = 'Opt_' + V
+    V_None = 'None_' + V
+    V_Some = 'Some_' + V
+}%
+
+trait Map_${K}_${V}${Param} extends Map[${K_Arg}, ${V_Arg}] {
+  def apply(key: ${K_Arg}): ${V_Opt}
+  def put(key: ${K_Arg}, value: ${V_Arg}): ${V_Opt}
+  def remove(key: ${K_Arg}): ${V_Opt}
   % if K == 'Object':
-  def keys: Set_${K}[AnyRef]
+  def keys: Set_Object[K]
   % else:
   def keys: Set_${K}
   % end
   % if V == 'Object':
-  def values: Seq_${V}[AnyRef]
+  def values: Seq_Object[V]
   % else:
   def values: Seq_${V}
   % end
-  def contains(key: ${K}): Boolean
+  def contains(key: ${K_Arg}): Boolean
 }
 
-class HashMap_${K}_${V}(initialSize: Int = 8)
+class HashMap_${K}_${V}${Param_Decl}(initialSize: Int = 8)
   % if K == V:
     (implicit hashK: Hash_${K})
   % else:
     (implicit hashK: Hash_${K}, hashV: Hash_${V})
   % end
-    extends Map_${K}_${V} {
+    extends Map_${K}_${V}${Param} {
 
   private[this] var hashes: Array[Int] = new Array[Int](initialSize)
-  private[this] var _keys: Array[${K}] = new Array[${K}](initialSize)
-  private[this] var _values: Array[${V}] = new Array[${V}](initialSize)
+  private[this] var _keys: Array[${K_Arg}] = new Array[${K_Arg}](initialSize)
+  private[this] var _values: Array[${V_Arg}] = new Array[${V_Arg}](initialSize)
   private[this] var _size = 0
   private[this] var capacity = initialSize
   private[this] var mask = capacity - 1
 
-  def apply(key: ${K}): Opt_${V} = {
+  % if V == 'Object':
+  private[this] val none = new None[V]
+  % end
+
+  def apply(key: ${K_Arg}): ${V_Opt} = {
     val index = indexOf(key)
     if (index == -1) {
-      None_${V}
+      ${V_None}
     } else {
-      new Some_${V}(_values(index))
+      new ${V_Some}(_values(index))
     }
   }
 
-  private[this] def indexOf(key: ${K}): Int = {
+  private[this] def indexOf(key: ${K_Arg}): Int = {
     var hash = hashCode(key)
     var pos = hash
     var dis = 0
@@ -79,14 +116,14 @@ class HashMap_${K}_${V}(initialSize: Int = 8)
     result
   }
 
-  def put(key: ${K}, value: ${V}): Opt_${V} = {
+  def put(key: ${K_Arg}, value: ${V_Arg}): ${V_Opt} = {
     var _key = key
     var _value = value
     var originalHash = hashCode(key)
     var hash = originalHash
     var pos = hash
     var dis = 0
-    var previous: Opt_${V} = None_${V}
+    var previous: ${V_Opt} = ${V_None}
     while ({
       val nextHash = hashes(pos)
       if (isInit(nextHash)) {
@@ -95,7 +132,7 @@ class HashMap_${K}_${V}(initialSize: Int = 8)
         growIfNecessary
         false
       } else if (nextHash == originalHash && hashK.eqv(_keys(pos), key)) {
-        previous = new Some_${V}(_values(pos))
+        previous = new ${V_Some}(_values(pos))
         _values(pos) = value
         false
       } else {
@@ -119,10 +156,10 @@ class HashMap_${K}_${V}(initialSize: Int = 8)
     previous
   }
 
-  def remove(key: ${K}): Opt_${V} = {
+  def remove(key: ${K_Arg}): ${V_Opt} = {
     var index = indexOf(key)
     if (index != -1) {
-      val previous = new Some_${V}(_values(index))
+      val previous = new ${V_Some}(_values(index))
       while ({
         val nextIndex = (index + 1) & mask
         val nextHash = hashes(nextIndex)
@@ -145,14 +182,14 @@ class HashMap_${K}_${V}(initialSize: Int = 8)
       _size -= 1
       previous
     } else {
-      None_${V}
+      ${V_None}
     }
   }
 
 
   % if K == 'Object':
-  def keys: Set_${K}[AnyRef] = {
-    val result = new HashSet_${K}[AnyRef]
+  def keys: Set_Object[K] = {
+    val result = new HashSet_Object[K]
   % else:
   def keys: Set_${K} = {
     val result = new HashSet_${K}
@@ -166,8 +203,8 @@ class HashMap_${K}_${V}(initialSize: Int = 8)
   }
 
   % if V == 'Object':
-  def values: Seq_${V}[AnyRef] = {
-    val result = new BufferSeq_${V}[AnyRef]
+  def values: Seq_Object[V] = {
+    val result = new BufferSeq_Object[V]
   % else:
   def values: Seq_${V} = {
     val result = new BufferSeq_${V}
@@ -180,7 +217,7 @@ class HashMap_${K}_${V}(initialSize: Int = 8)
     result
   }
 
-  def contains(key: ${K}): Boolean = this(key).notEmpty
+  def contains(key: ${K_Arg}): Boolean = this(key).notEmpty
 
   @inline
   private[this] def shouldGrow = _size > capacity * 9 / 10
@@ -194,8 +231,8 @@ class HashMap_${K}_${V}(initialSize: Int = 8)
       capacity *= 2
       mask = capacity - 1
       hashes = new Array[Int](capacity)
-      _keys = new Array[${K}](capacity)
-      _values = new Array[${V}](capacity)
+      _keys = new Array[${K_Arg}](capacity)
+      _values = new Array[${V_Arg}](capacity)
       _size = 0
       var i = 0
       while (i < oldCapacity) {
@@ -210,7 +247,7 @@ class HashMap_${K}_${V}(initialSize: Int = 8)
     }
   }
 
-  private[this] def hashCode(key: ${K}) = {
+  private[this] def hashCode(key: ${K_Arg}) = {
     var hash = hashK.hash(key) & mask
     hash |= (if (hash == 0) 1 else 0)
     hash
@@ -219,7 +256,7 @@ class HashMap_${K}_${V}(initialSize: Int = 8)
   @inline
   private[this] def isInit(hash: Int) = hash == 0
 
-  private[this] def init(pos: Int, hash: Int, key: ${K}, value: ${V}) = {
+  private[this] def init(pos: Int, hash: Int, key: ${K_Arg}, value: ${V_Arg}) = {
     hashes(pos) = hash
     _keys(pos) = key
     _values(pos) = value
@@ -229,7 +266,7 @@ class HashMap_${K}_${V}(initialSize: Int = 8)
 
   override def size: Int = _size
 
-  override def foreach(f: (${K}, ${V}) => Unit): Unit = {
+  override def foreach(f: (${K_Arg}, ${V_Arg}) => Unit): Unit = {
     var i = 0
     while (i < capacity) {
       val hash = hashes(i)
