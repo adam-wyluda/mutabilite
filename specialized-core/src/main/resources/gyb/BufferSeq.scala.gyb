@@ -1,7 +1,5 @@
 package offheap.collection
 
-import scala.reflect.ClassTag
-
 import HashEq._
 
 %{
@@ -14,12 +12,16 @@ types = ['Boolean', 'Char', 'Byte', 'Short',
 %{
   if T == 'Object':
     T_Arg = 'A'
-    T_Param_Decl = '[A: ClassTag]'
     T_Param = '[A]'
+    T_Array = 'AnyRef'
+    Cast_to_T = '.asInstanceOf[' + T_Arg + ']'
+    Cast_from_T = '.asInstanceOf[AnyRef]'
   else:
     T_Arg = T
-    T_Param_Decl = ''
     T_Param = ''
+    T_Array = T
+    Cast_to_T = ''
+    Cast_from_T = ''
 }%
 
 trait Seq_${T}${T_Param} extends Any with Seq[${T_Arg}] {
@@ -33,24 +35,24 @@ trait Seq_${T}${T_Param} extends Any with Seq[${T_Arg}] {
   def capacity: Int
 }
 
-class BufferSeq_${T}${T_Param_Decl}(initialSize: Int = 16)(implicit eq: Eq_${T}) extends Seq_${T}${T_Param} {
+class BufferSeq_${T}${T_Param}(initialSize: Int = 16)(implicit eq: Eq_${T}) extends Seq_${T}${T_Param} {
 
-  var array: Array[${T_Arg}] = new Array[${T_Arg}](initialSize)
+  var array: Array[${T_Array}] = new Array[${T_Array}](initialSize)
   var size = 0
 
-  def apply(index: Int): ${T_Arg} = array(index)
+  def apply(index: Int): ${T_Arg} = array(index)${Cast_to_T}
 
   def append(elem: ${T_Arg}): Unit = {
     val newSize = size + 1
     growTo(newSize)
-    array(size) = elem
+    array(size) = elem${Cast_from_T}
     size += 1
   }
 
-  def update(index: Int, value: ${T_Arg}): Unit = array(index) = value
+  def update(index: Int, value: ${T_Arg}): Unit = array(index) = value${Cast_from_T}
 
   def remove(n: Int): ${T_Arg} = {
-    val removed = array(n)
+    val removed = array(n)${Cast_to_T}
     copy(n + 1, n, size - n)
     size -= 1
     removed
@@ -79,7 +81,7 @@ class BufferSeq_${T}${T_Param_Decl}(initialSize: Int = 16)(implicit eq: Eq_${T})
     val newSize = size + 1
     growTo(newSize)
     copy(index, index + 1, size - index)
-    array(index) = elem
+    array(index) = elem${Cast_from_T}
     size += 1
   }
 
@@ -87,7 +89,7 @@ class BufferSeq_${T}${T_Param_Decl}(initialSize: Int = 16)(implicit eq: Eq_${T})
     val builder = new BufferSeq_${T}${T_Param}(initialSize = array.size)
     var i = 0
     while (i < size) {
-      builder.append(f(array(i)))
+      builder.append(f(array(i)${Cast_to_T}))
       i += 1
     }
     builder
@@ -97,7 +99,7 @@ class BufferSeq_${T}${T_Param_Decl}(initialSize: Int = 16)(implicit eq: Eq_${T})
     val builder = new BufferSeq_${T}${T_Param}
     var i = 0
     while (i < size) {
-      val el = array(i)
+      val el = array(i)${Cast_to_T}
       val result = f(el)
       val resultSize = result.size
       var j = 0
@@ -114,7 +116,7 @@ class BufferSeq_${T}${T_Param_Decl}(initialSize: Int = 16)(implicit eq: Eq_${T})
     val result = new BufferSeq_${T}${T_Param}
     var i = 0
     while (i < size) {
-      val el = array(i)
+      val el = array(i)${Cast_to_T}
       if (f(el)) result.append(el)
       i += 1
     }
@@ -125,7 +127,7 @@ class BufferSeq_${T}${T_Param_Decl}(initialSize: Int = 16)(implicit eq: Eq_${T})
 
   private def shouldGrow(newSize: Int) = newSize > capacity
   private def grow = {
-    val newArray = new Array[${T_Arg}](capacity * 2)
+    val newArray = new Array[${T_Array}](capacity * 2)
     System.arraycopy(array, 0, newArray, 0, size)
     this.array = newArray
   }
@@ -137,7 +139,7 @@ class BufferSeq_${T}${T_Param_Decl}(initialSize: Int = 16)(implicit eq: Eq_${T})
   def foreach(f: ${T_Arg} => Unit): Unit = {
     var i = 0
     while (i < size) {
-      f(array(i))
+      f(array(i)${Cast_to_T})
       i += 1
     }
   }

@@ -1,7 +1,5 @@
 package offheap.collection
 
-import scala.reflect.ClassTag
-
 import HashEq._
 
 %{
@@ -14,12 +12,16 @@ types = ['Boolean', 'Char', 'Byte', 'Short',
 %{
   if T == 'Object':
     T_Arg = 'A'
-    T_Param_Decl = '[A: ClassTag]'
     T_Param = '[A]'
+    T_Array = 'AnyRef'
+    Cast_to_T = '.asInstanceOf[' + T_Arg + ']'
+    Cast_from_T = '.asInstanceOf[AnyRef]'
   else:
     T_Arg = T
-    T_Param_Decl = ''
     T_Param = ''
+    T_Array = T
+    Cast_to_T = ''
+    Cast_from_T = ''
 }%
 
 trait Set_${T}${T_Param} extends Any with Set[${T_Arg}] {
@@ -32,10 +34,10 @@ trait Set_${T}${T_Param} extends Any with Set[${T_Arg}] {
   def diff(that: Set_${T}${T_Param}): Set_${T}${T_Param}
 }
 
-class HashSet_${T}${T_Param_Decl}(initialSize: Int = 8)(implicit hashK: Hash_${T}) extends Set_${T}${T_Param} {
+class HashSet_${T}${T_Param}(initialSize: Int = 8)(implicit hashK: Hash_${T}) extends Set_${T}${T_Param} {
 
   private[this] var hashes: Array[Int] = new Array[Int](initialSize)
-  private[this] var _keys: Array[${T_Arg}] = new Array[${T_Arg}](initialSize)
+  private[this] var _keys: Array[${T_Array}] = new Array[${T_Array}](initialSize)
   private[this] var _size = 0
   private[this] var capacity = initialSize
   private[this] var mask = capacity - 1
@@ -71,7 +73,7 @@ class HashSet_${T}${T_Param_Decl}(initialSize: Int = 8)(implicit hashK: Hash_${T
   }
 
   def add(key: ${T_Arg}): Boolean = {
-    var _key = key
+    var _key = key${Cast_from_T}
     var originalHash = hashCode(key)
     var hash = originalHash
     var pos = hash
@@ -136,7 +138,7 @@ class HashSet_${T}${T_Param_Decl}(initialSize: Int = 8)(implicit hashK: Hash_${T
   }
 
   def intersect(that: Set_${T}${T_Param}): HashSet_${T}${T_Param} = {
-    val result = new HashSet_${T}
+    val result = new HashSet_${T}${T_Param}
     foreach { a =>
       if (that(a)) result.add(a)
     }
@@ -144,14 +146,14 @@ class HashSet_${T}${T_Param_Decl}(initialSize: Int = 8)(implicit hashK: Hash_${T
   }
 
   def union(that: Set_${T}${T_Param}): HashSet_${T}${T_Param} = {
-    val result = new HashSet_${T}
+    val result = new HashSet_${T}${T_Param}
     this foreach (result.add(_))
     that foreach (result.add(_))
     result
   }
 
   def diff(that: Set_${T}${T_Param}): HashSet_${T}${T_Param} = {
-    val result = new HashSet_${T}
+    val result = new HashSet_${T}${T_Param}
     foreach { a =>
       if (!that(a)) result.add(a)
     }
@@ -169,13 +171,13 @@ class HashSet_${T}${T_Param_Decl}(initialSize: Int = 8)(implicit hashK: Hash_${T
       capacity *= 2
       mask = capacity - 1
       hashes = new Array[Int](capacity)
-      _keys = new Array[${T_Arg}](capacity)
+      _keys = new Array[${T_Array}](capacity)
       _size = 0
       var i = 0
       while (i < oldCapacity) {
         val hash = oldHashes(i)
         if (!isInit(hash)) {
-          val key = oldKeys(i)
+          val key = oldKeys(i)${Cast_to_T}
           add(key)
         }
         i += 1
@@ -201,7 +203,7 @@ class HashSet_${T}${T_Param_Decl}(initialSize: Int = 8)(implicit hashK: Hash_${T
     while (i < capacity) {
       val hash = hashes(i)
       if (!isInit(hash)) {
-        val key = _keys(i)
+        val key = _keys(i)${Cast_to_T}
         f(key)
       }
       i += 1

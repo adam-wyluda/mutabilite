@@ -1,7 +1,5 @@
 package offheap.collection
 
-import scala.reflect.ClassTag
-
 import HashEq._
 
 %{
@@ -15,32 +13,40 @@ types = ['Boolean', 'Char', 'Byte', 'Short',
 %{
   if (K == 'Object' and V == 'Object'):
     Param = '[K, V]'
-    Param_Decl = '[K: ClassTag, V: ClassTag]'
   elif K == 'Object':
     Param = '[K]'
-    Param_Decl = '[K: ClassTag]'
   elif V == 'Object':
     Param = '[V]'
-    Param_Decl = '[V: ClassTag]'
   else:
     Param = ''
-    Param_Decl = ''
 
   if K == 'Object':
     K_Arg = 'K'
+    K_Array = 'AnyRef'
+    Cast_to_K = '.asInstanceOf[' + K_Arg + ']'
+    Cast_from_K = '.asInstanceOf[AnyRef]'
   else:
     K_Arg = K
+    K_Array = K
+    Cast_to_K = ''
+    Cast_from_K = ''
 
   if V == 'Object':
     V_Arg = 'V'
     V_Opt = 'Opt[V]'
     V_None = 'none'
     V_Some = 'Some'
+    V_Array = 'AnyRef'
+    Cast_to_V = '.asInstanceOf[' + V_Arg + ']'
+    Cast_from_V = '.asInstanceOf[AnyRef]'
   else:
     V_Arg = V
     V_Opt = 'Opt_' + V
     V_None = 'None_' + V
     V_Some = 'Some_' + V
+    V_Array = V
+    Cast_to_V = ''
+    Cast_from_V = ''
 }%
 
 trait Map_${K}_${V}${Param} extends Map[${K_Arg}, ${V_Arg}] {
@@ -60,7 +66,7 @@ trait Map_${K}_${V}${Param} extends Map[${K_Arg}, ${V_Arg}] {
   def contains(key: ${K_Arg}): Boolean
 }
 
-class HashMap_${K}_${V}${Param_Decl}(initialSize: Int = 8)
+class HashMap_${K}_${V}${Param}(initialSize: Int = 8)
   % if K == V:
     (implicit hashK: Hash_${K})
   % else:
@@ -69,8 +75,8 @@ class HashMap_${K}_${V}${Param_Decl}(initialSize: Int = 8)
     extends Map_${K}_${V}${Param} {
 
   private[this] var hashes: Array[Int] = new Array[Int](initialSize)
-  private[this] var _keys: Array[${K_Arg}] = new Array[${K_Arg}](initialSize)
-  private[this] var _values: Array[${V_Arg}] = new Array[${V_Arg}](initialSize)
+  private[this] var _keys: Array[${K_Array}] = new Array[${K_Array}](initialSize)
+  private[this] var _values: Array[${V_Array}] = new Array[${V_Array}](initialSize)
   private[this] var _size = 0
   private[this] var capacity = initialSize
   private[this] var mask = capacity - 1
@@ -84,7 +90,7 @@ class HashMap_${K}_${V}${Param_Decl}(initialSize: Int = 8)
     if (index == -1) {
       ${V_None}
     } else {
-      new ${V_Some}(_values(index))
+      new ${V_Some}(_values(index)${Cast_to_V})
     }
   }
 
@@ -117,8 +123,8 @@ class HashMap_${K}_${V}${Param_Decl}(initialSize: Int = 8)
   }
 
   def put(key: ${K_Arg}, value: ${V_Arg}): ${V_Opt} = {
-    var _key = key
-    var _value = value
+    var _key = key${Cast_from_K}
+    var _value = value${Cast_from_V}
     var originalHash = hashCode(key)
     var hash = originalHash
     var pos = hash
@@ -127,13 +133,15 @@ class HashMap_${K}_${V}${Param_Decl}(initialSize: Int = 8)
     while ({
       val nextHash = hashes(pos)
       if (isInit(nextHash)) {
-        init(pos, hash, _key, _value)
+        hashes(pos) = hash
+        _keys(pos) = _key
+        _values(pos) = _value
         _size += 1
         growIfNecessary
         false
       } else if (nextHash == originalHash && hashK.eqv(_keys(pos), key)) {
-        previous = new ${V_Some}(_values(pos))
-        _values(pos) = value
+        previous = new ${V_Some}(_values(pos)${Cast_to_V})
+        _values(pos) = value${Cast_from_V}
         false
       } else {
         val nextDis = (capacity + pos - nextHash) & mask
@@ -159,7 +167,7 @@ class HashMap_${K}_${V}${Param_Decl}(initialSize: Int = 8)
   def remove(key: ${K_Arg}): ${V_Opt} = {
     var index = indexOf(key)
     if (index != -1) {
-      val previous = new ${V_Some}(_values(index))
+      val previous = new ${V_Some}(_values(index)${Cast_to_V})
       while ({
         val nextIndex = (index + 1) & mask
         val nextHash = hashes(nextIndex)
@@ -196,7 +204,7 @@ class HashMap_${K}_${V}${Param_Decl}(initialSize: Int = 8)
   % end
     var i = 0
     while (i < capacity) {
-      if (!isInit(hashes(i))) result.add(_keys(i))
+      if (!isInit(hashes(i))) result.add(_keys(i)${Cast_to_K})
       i += 1
     }
     result
@@ -211,7 +219,7 @@ class HashMap_${K}_${V}${Param_Decl}(initialSize: Int = 8)
   % end
     var i = 0
     while (i < capacity) {
-      if (!isInit(hashes(i))) result.append(_values(i))
+      if (!isInit(hashes(i))) result.append(_values(i)${Cast_to_V})
       i += 1
     }
     result
@@ -231,15 +239,15 @@ class HashMap_${K}_${V}${Param_Decl}(initialSize: Int = 8)
       capacity *= 2
       mask = capacity - 1
       hashes = new Array[Int](capacity)
-      _keys = new Array[${K_Arg}](capacity)
-      _values = new Array[${V_Arg}](capacity)
+      _keys = new Array[${K_Array}](capacity)
+      _values = new Array[${V_Array}](capacity)
       _size = 0
       var i = 0
       while (i < oldCapacity) {
         val hash = oldHashes(i)
         if (!isInit(hash)) {
-          val key = oldKeys(i)
-          val value = oldValues(i)
+          val key = oldKeys(i)${Cast_to_K}
+          val value = oldValues(i)${Cast_to_V}
           put(key, value)
         }
         i += 1
@@ -256,12 +264,6 @@ class HashMap_${K}_${V}${Param_Decl}(initialSize: Int = 8)
   @inline
   private[this] def isInit(hash: Int) = hash == 0
 
-  private[this] def init(pos: Int, hash: Int, key: ${K_Arg}, value: ${V_Arg}) = {
-    hashes(pos) = hash
-    _keys(pos) = key
-    _values(pos) = value
-  }
-
   override def empty = _size == 0
 
   override def size: Int = _size
@@ -271,8 +273,8 @@ class HashMap_${K}_${V}${Param_Decl}(initialSize: Int = 8)
     while (i < capacity) {
       val hash = hashes(i)
       if (!isInit(hash)) {
-        val key = _keys(i)
-        val value = _values(i)
+        val key = _keys(i)${Cast_to_K}
+        val value = _values(i)${Cast_to_V}
         f(key, value)
       }
       i += 1
