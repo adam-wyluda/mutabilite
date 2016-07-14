@@ -1,5 +1,7 @@
 package offheap.collection
 
+import scala.reflect.ClassTag
+
 import HashEq._
 
 %{
@@ -9,27 +11,38 @@ types = ['Boolean', 'Char', 'Byte', 'Short',
 
 % for T in types:
 
-trait Set_${T} extends Set[${T}] {
-  def apply(elem: ${T}): Boolean
-  def add(elem: ${T}): Boolean
-  def remove(elem: ${T}): Boolean
+%{
+  if T == 'Object':
+    T_Arg = 'A'
+    T_Param_Decl = '[A: ClassTag]'
+    T_Param = '[A]'
+  else:
+    T_Arg = T
+    T_Param_Decl = ''
+    T_Param = ''
+}%
 
-  def intersect(that: Set_${T}): Set_${T}
-  def union(that: Set_${T}): Set_${T}
-  def diff(that: Set_${T}): Set_${T}
+trait Set_${T}${T_Param} extends Any with Set[${T_Arg}] {
+  def apply(elem: ${T_Arg}): Boolean
+  def add(elem: ${T_Arg}): Boolean
+  def remove(elem: ${T_Arg}): Boolean
+
+  def intersect(that: Set_${T}${T_Param}): Set_${T}${T_Param}
+  def union(that: Set_${T}${T_Param}): Set_${T}${T_Param}
+  def diff(that: Set_${T}${T_Param}): Set_${T}${T_Param}
 }
 
-class HashSet_${T}(initialSize: Int = 8)(implicit hashK: Hash_${T}) extends Set_${T} {
+class HashSet_${T}${T_Param_Decl}(initialSize: Int = 8)(implicit hashK: Hash_${T}) extends Set_${T}${T_Param} {
 
   private[this] var hashes: Array[Int] = new Array[Int](initialSize)
-  private[this] var _keys: Array[${T}] = new Array[${T}](initialSize)
+  private[this] var _keys: Array[${T_Arg}] = new Array[${T_Arg}](initialSize)
   private[this] var _size = 0
   private[this] var capacity = initialSize
   private[this] var mask = capacity - 1
 
-  def apply(key: ${T}): Boolean = indexOf(key) != -1
+  def apply(key: ${T_Arg}): Boolean = indexOf(key) != -1
 
-  private[this] def indexOf(key: ${T}): Int = {
+  private[this] def indexOf(key: ${T_Arg}): Int = {
     var hash = hashCode(key)
     var pos = hash
     var dis = 0
@@ -57,7 +70,7 @@ class HashSet_${T}(initialSize: Int = 8)(implicit hashK: Hash_${T}) extends Set_
     result
   }
 
-  def add(key: ${T}): Boolean = {
+  def add(key: ${T_Arg}): Boolean = {
     var _key = key
     var originalHash = hashCode(key)
     var hash = originalHash
@@ -94,7 +107,7 @@ class HashSet_${T}(initialSize: Int = 8)(implicit hashK: Hash_${T}) extends Set_
     result
   }
 
-  def remove(key: ${T}): Boolean = {
+  def remove(key: ${T_Arg}): Boolean = {
     var index = indexOf(key)
     if (index != -1) {
       while ({
@@ -122,7 +135,7 @@ class HashSet_${T}(initialSize: Int = 8)(implicit hashK: Hash_${T}) extends Set_
     }
   }
 
-  def intersect(that: Set_${T}): HashSet_${T} = {
+  def intersect(that: Set_${T}${T_Param}): HashSet_${T}${T_Param} = {
     val result = new HashSet_${T}
     foreach { a =>
       if (that(a)) result.add(a)
@@ -130,14 +143,14 @@ class HashSet_${T}(initialSize: Int = 8)(implicit hashK: Hash_${T}) extends Set_
     result
   }
 
-  def union(that: Set_${T}): HashSet_${T} = {
+  def union(that: Set_${T}${T_Param}): HashSet_${T}${T_Param} = {
     val result = new HashSet_${T}
     this foreach (result.add(_))
     that foreach (result.add(_))
     result
   }
 
-  def diff(that: Set_${T}): HashSet_${T} = {
+  def diff(that: Set_${T}${T_Param}): HashSet_${T}${T_Param} = {
     val result = new HashSet_${T}
     foreach { a =>
       if (!that(a)) result.add(a)
@@ -156,7 +169,7 @@ class HashSet_${T}(initialSize: Int = 8)(implicit hashK: Hash_${T}) extends Set_
       capacity *= 2
       mask = capacity - 1
       hashes = new Array[Int](capacity)
-      _keys = new Array[${T}](capacity)
+      _keys = new Array[${T_Arg}](capacity)
       _size = 0
       var i = 0
       while (i < oldCapacity) {
@@ -170,7 +183,7 @@ class HashSet_${T}(initialSize: Int = 8)(implicit hashK: Hash_${T}) extends Set_
     }
   }
 
-  private[this] def hashCode(key: ${T}) = {
+  private[this] def hashCode(key: ${T_Arg}) = {
     var hash = hashK.hash(key) & mask
     hash |= (if (hash == 0) 1 else 0)
     hash
@@ -183,7 +196,7 @@ class HashSet_${T}(initialSize: Int = 8)(implicit hashK: Hash_${T}) extends Set_
 
   override def size: Int = _size
 
-  override def foreach(f: ${T} => Unit): Unit = {
+  override def foreach(f: ${T_Arg} => Unit): Unit = {
     var i = 0
     while (i < capacity) {
       val hash = hashes(i)

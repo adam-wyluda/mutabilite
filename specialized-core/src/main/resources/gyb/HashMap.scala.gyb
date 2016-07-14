@@ -14,7 +14,11 @@ trait Map_${K}_${V} extends Map[${K}, ${V}] {
   def apply(key: ${K}): Opt_${V}
   def put(key: ${K}, value: ${V}): Opt_${V}
   def remove(key: ${K}): Opt_${V}
+  % if K == 'Object':
+  def keys: Set_${K}[AnyRef]
+  % else:
   def keys: Set_${K}
+  % end
   % if V == 'Object':
   def values: Seq_${V}[AnyRef]
   % else:
@@ -145,8 +149,14 @@ class HashMap_${K}_${V}(initialSize: Int = 8)
     }
   }
 
+
+  % if K == 'Object':
+  def keys: Set_${K}[AnyRef] = {
+    val result = new HashSet_${K}[AnyRef]
+  % else:
   def keys: Set_${K} = {
     val result = new HashSet_${K}
+  % end
     var i = 0
     while (i < capacity) {
       if (!isInit(hashes(i))) result.add(_keys(i))
