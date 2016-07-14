@@ -33,7 +33,6 @@ class SeqOpsMacros(val c: whitebox.Context) extends Common {
 
   def flatMap[A: WeakTypeTag, B: WeakTypeTag](f: Tree) =
     stabilized(c.prefix.tree) { pre =>
-      val A = weakTypeOf[A]
       val seqTpe = seqType[A]
       val builderTpe = bufferType[B]
       val idx = freshVar("i", IntTpe, q"0")
@@ -43,9 +42,8 @@ class SeqOpsMacros(val c: whitebox.Context) extends Common {
         freshVal("builder",
                  builderTpe,
                  q"new $builderTpe(initialSize = ${seq.symbol}.capacity)")
-      val el = freshVal("el", A, q"${seq.symbol}(${idx.symbol})")
       val result =
-        freshVal("result", builderTpe, q"${app(f, q"${el.symbol}")}")
+        freshVal("result", builderTpe, q"${app(f, q"${seq.symbol}(${idx.symbol})")}")
       val resultSize = freshVal("resultSize", IntTpe, q"${result.symbol}.size")
       val idx2 = freshVar("j", IntTpe, q"0")
       q"""
@@ -54,7 +52,6 @@ class SeqOpsMacros(val c: whitebox.Context) extends Common {
         $size
         $builder
         while (${idx.symbol} < ${size.symbol}) {
-          $el
           $result
           $resultSize
           $idx2
@@ -94,7 +91,6 @@ class SeqOpsMacros(val c: whitebox.Context) extends Common {
 
   def foreach[A: WeakTypeTag](f: Tree) =
     stabilized(c.prefix.tree) { pre =>
-      val A = weakTypeOf[A]
       val idx = freshVar("i", IntTpe, q"0")
       val seqTpe = seqType[A]
       val seq = freshVal("seq", seqTpe, q"$pre.seq")

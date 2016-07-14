@@ -158,6 +158,10 @@ class IntSetBenchmark {
 //    offheapSet foreach (blackhole.consume(_))
 
   @Benchmark
+  def foreachMacro(blackhole: Blackhole) =
+    specSet foreachMacro (blackhole.consume(_))
+
+  @Benchmark
   def foreachSpecialized(blackhole: Blackhole) =
     specSet foreach (blackhole.consume(_))
 
@@ -168,6 +172,51 @@ class IntSetBenchmark {
   @Benchmark
   def foreachStdlib(blackhole: Blackhole) =
     stdSet foreach (blackhole.consume(_))
+
+  @Benchmark
+  def mapSpecialized = specSet map (_ + 1)
+
+  @Benchmark
+  def mapGeneric = genericSet map (_ + 1)
+
+  @Benchmark
+  def mapStdlib = stdSet map (_ + 1)
+
+  @Benchmark
+  def flatMapSpecialized =
+    specSet flatMap { i =>
+      val r = new HashSet_Int
+      var j = 0
+      while (j < 5) { r.add(i + j); j += 1 }
+      r
+    }
+
+  @Benchmark
+  def flatMapGeneric =
+    genericSet flatMap { i =>
+      val r = new HashSet[Int]
+      var j = 0
+      while (j < 5) { r.add(i + j); j += 1 }
+      r
+    }
+
+  @Benchmark
+  def flatMapStdlib =
+    stdSet flatMap { i =>
+      val r = StdlibSet[Int]()
+      var j = 0
+      while (j < 5) { r.add(i + j); j += 1 }
+      r
+    }
+
+  @Benchmark
+  def filterSpecialized = specSet filter (_ % 2 == 0)
+
+  @Benchmark
+  def filterGeneric = genericSet filter (_ % 2 == 0)
+
+  @Benchmark
+  def filterStdlib = stdSet filter (_ % 2 == 0)
 }
 
 //@State(Scope.Thread)

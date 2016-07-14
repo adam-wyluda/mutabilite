@@ -134,6 +134,49 @@ class HashSet[A](initialSize: Int = 8)(implicit tag: ClassTag[A])
     result
   }
 
+  def map[B: ClassTag](f: A => B): HashSet[B] = {
+    val builder = new HashSet[B](initialSize = capacity)
+    var i = 0
+    while (i < capacity) {
+      val hash = hashes(i)
+      if (!isInit(hash)) {
+        val key = _keys(i).asInstanceOf[A]
+        builder.add(f(key))
+      }
+      i += 1
+    }
+    builder
+  }
+
+  def flatMap[B: ClassTag](f: A => Traversable1[B]): HashSet[B] = {
+    val builder = new HashSet[B]
+    var i = 0
+    while (i < capacity) {
+      val hash = hashes(i)
+      if (!isInit(hash)) {
+        val key = _keys(i).asInstanceOf[A]
+        val result = f(key)
+        result foreach (builder.add(_))
+      }
+      i += 1
+    }
+    builder
+  }
+
+  def filter(f: A => Boolean): HashSet[A] = {
+    val result = new HashSet[A]
+    var i = 0
+    while (i < capacity) {
+      val hash = hashes(i)
+      if (!isInit(hash)) {
+        val key = _keys(i).asInstanceOf[A]
+        if (f(key)) result.add(key)
+      }
+      i += 1
+    }
+    result
+  }
+
   @inline
   private[this] def shouldGrow = _size > capacity * 9 / 10
 

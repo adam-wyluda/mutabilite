@@ -28,10 +28,13 @@ trait Set_${T}${T_Param} extends Any with Set[${T_Arg}] {
   def apply(elem: ${T_Arg}): Boolean
   def add(elem: ${T_Arg}): Boolean
   def remove(elem: ${T_Arg}): Boolean
-
   def intersect(that: Set_${T}${T_Param}): Set_${T}${T_Param}
   def union(that: Set_${T}${T_Param}): Set_${T}${T_Param}
   def diff(that: Set_${T}${T_Param}): Set_${T}${T_Param}
+  def capacity: Int
+  def hashAt(index: Int): Int
+  def keyAt(index: Int): ${T_Arg}
+  def isInit(hash: Int): Boolean
 }
 
 class HashSet_${T}${T_Param}(initialSize: Int = 8)(implicit hashK: Hash_${T}) extends Set_${T}${T_Param} {
@@ -39,7 +42,7 @@ class HashSet_${T}${T_Param}(initialSize: Int = 8)(implicit hashK: Hash_${T}) ex
   private[this] var hashes: Array[Int] = new Array[Int](initialSize)
   private[this] var _keys: Array[${T_Array}] = new Array[${T_Array}](initialSize)
   private[this] var _size = 0
-  private[this] var capacity = initialSize
+  var capacity = initialSize
   private[this] var mask = capacity - 1
 
   def apply(key: ${T_Arg}): Boolean = indexOf(key) != -1
@@ -191,14 +194,15 @@ class HashSet_${T}${T_Param}(initialSize: Int = 8)(implicit hashK: Hash_${T}) ex
     hash
   }
 
-  @inline
-  private[this] def isInit(hash: Int) = hash == 0
 
-  override def empty = _size == 0
+  def hashAt(index: Int): Int = hashes(index)
+  def keyAt(index: Int): ${T_Arg} = _keys(index)${Cast_to_T}
+  def isInit(hash: Int) = hash == 0
 
-  override def size: Int = _size
+  def empty = _size == 0
+  def size: Int = _size
 
-  override def foreach(f: ${T_Arg} => Unit): Unit = {
+  def foreach(f: ${T_Arg} => Unit): Unit = {
     var i = 0
     while (i < capacity) {
       val hash = hashes(i)

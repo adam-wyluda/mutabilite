@@ -18,6 +18,12 @@ trait Definitions {
   def BufferSeqClass(elemType: String) =
     staticClass("offheap.collection.BufferSeq_" + elemType)
 
+  def SetClass(elemType: String) =
+    staticClass("offheap.collection.Set_" + elemType)
+
+  def HashSetClass(elemType: String) =
+    staticClass("offheap.collection.HashSet_" + elemType)
+
   def seqType[T: WeakTypeTag]: Type =
     if (wt[T] <:< AnyRefTpe) {
       wt[Seq_Object[T]]
@@ -27,6 +33,16 @@ trait Definitions {
     if (wt[T] <:< AnyRefTpe) {
       wt[BufferSeq_Object[T]]
     } else BufferSeqClass(typeName[T]).toType
+
+  def setType[T: WeakTypeTag]: Type =
+    if (wt[T] <:< AnyRefTpe) {
+      wt[Set_Object[T]]
+    } else SetClass(typeName[T]).toType
+
+  def hashSetType[T: WeakTypeTag]: Type =
+    if (wt[T] <:< AnyRefTpe) {
+      wt[HashSet_Object[T]]
+    } else HashSetClass(typeName[T]).toType
 
   def typeName[B: WeakTypeTag]: String =
     wt[B] match {

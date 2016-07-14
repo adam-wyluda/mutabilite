@@ -37,7 +37,7 @@ trait Seq_${T}${T_Param} extends Any with Seq[${T_Arg}] {
 
 class BufferSeq_${T}${T_Param}(initialSize: Int = 16)(implicit eq: Eq_${T}) extends Seq_${T}${T_Param} {
 
-  var array: Array[${T_Array}] = new Array[${T_Array}](initialSize)
+  private[this] var array: Array[${T_Array}] = new Array[${T_Array}](initialSize)
   var size = 0
 
   def apply(index: Int): ${T_Arg} = array(index)${Cast_to_T}

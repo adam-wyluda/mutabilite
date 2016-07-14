@@ -26,4 +26,22 @@ package object collection {
     def filter(f: A => Boolean): Seq_Object[A] = macro offheap.collection.macros.SeqOpsMacros.filter[A]
     def foreachMacro(f: ${T} => Unit): Unit    = macro offheap.collection.macros.SeqOpsMacros.foreach[${T}]
   }
+
+  % for T in types:
+
+  implicit class SetOps_${T}(val set: Set_${T}) extends AnyVal {
+    def map[B](f: ${T} => B): Set[B]          = macro offheap.collection.macros.SetOpsMacros.map[${T}, B]
+    def flatMap[B](f: ${T} => Set[B]): Set[B] = macro offheap.collection.macros.SetOpsMacros.flatMap[${T}, B]
+    def filter(f: ${T} => Boolean): Set_${T}  = macro offheap.collection.macros.SetOpsMacros.filter[${T}]
+    def foreachMacro(f: ${T} => Unit): Unit   = macro offheap.collection.macros.SetOpsMacros.foreach[${T}]
+  }
+
+  % end
+
+  implicit class SetOps_Object[A](val set: Set_Object[A]) extends AnyVal {
+    def map[B](f: A => B): Set[B]              = macro offheap.collection.macros.SetOpsMacros.map[A, B]
+    def flatMap[B](f: A => Set[B]): Set[B]     = macro offheap.collection.macros.SetOpsMacros.flatMap[A, B]
+    def filter(f: A => Boolean): Set_Object[A] = macro offheap.collection.macros.SetOpsMacros.filter[A]
+    def foreachMacro(f: A => Unit): Unit       = macro offheap.collection.macros.SetOpsMacros.foreach[A]
+  }
 }
