@@ -95,9 +95,21 @@ class SpecializedSeqTest extends FunSuite with BeforeAndAfter with SeqTest {
     assert(filtered.size == 5)
     2 to 10 by 2 foreach (i => assert(filtered((i - 1) / 2) == i))
   }
+
+  test("foreachMacro") {
+    val seq = new BufferSeq_Int
+    1 to 10 foreach (seq.append(_))
+
+    var sum = 0
+    seq foreachMacro (sum += _)
+    assert(sum == 10 * 11 / 2)
+  }
 }
 
-class SpecializedSetTest extends FunSuite with BeforeAndAfter with SetTest[Set_Int] {
+class SpecializedSetTest
+    extends FunSuite
+    with BeforeAndAfter
+    with SetTest[Set_Int] {
   def provideSet_Int: Set_Int = new HashSet_Int
 
   test("intersect") {

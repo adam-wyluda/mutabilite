@@ -134,7 +134,6 @@ class SeqBenchmark {
 //    }
 //  }
 
-
   @Benchmark
   def appendSpecialized = {
     val s = new BufferSeq_Int(initialSize = 16)
@@ -225,6 +224,13 @@ class SeqBenchmark {
 //  }
 
   @Benchmark
+  def foreachMacro = {
+    var sum = 0
+    specSeq foreachMacro (sum += _)
+    sum
+  }
+
+  @Benchmark
   def foreachSpecialized = {
     var sum = 0
     specSeq foreach (sum += _)
@@ -234,7 +240,7 @@ class SeqBenchmark {
   @Benchmark
   def foreachGeneric = {
     var sum = 0
-    genericSeq foreachGeneric (sum += _)
+    genericSeq foreach (sum += _)
     sum
   }
 

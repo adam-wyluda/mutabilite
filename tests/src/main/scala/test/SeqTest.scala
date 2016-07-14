@@ -25,9 +25,7 @@ trait SeqTest { this: FunSuite with BeforeAndAfter =>
 
   test("foreach") {
     var sum = 0
-
     seq.foreach(sum += _)
-
     assert(sum == 10 * 11 / 2)
   }
 

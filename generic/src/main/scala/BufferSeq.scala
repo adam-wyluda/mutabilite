@@ -120,11 +120,4 @@ class BufferSeq[A](initialSize: Int = 16)(implicit tag: ClassTag[A])
       i += 1
     }
   }
-  def foreachGeneric[U](f: (A) => Unit): Unit = {
-    var i = 0
-    while (i < _size) {
-      f(array(i).asInstanceOf[A])
-      i += 1
-    }
-  }
 }
