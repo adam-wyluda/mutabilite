@@ -149,6 +149,52 @@ class HashMap[K, V](initialSize: Int = 8)(
 
   def contains(key: K): Boolean = this(key).notEmpty
 
+  def map[B: ClassTag](f: (K, V) => B): HashSet[B] = {
+    val builder = new HashSet[B](initialSize = capacity)
+    var i = 0
+    while (i < capacity) {
+      val hash = hashes(i)
+      if (!isInit(hash)) {
+        val key = _keys(i).asInstanceOf[K]
+        val value = _values(i).asInstanceOf[V]
+        builder.add(f(key, value))
+      }
+      i += 1
+    }
+    builder
+  }
+
+  def flatMap[B: ClassTag](f: (K, V) => Traversable1[B]): HashSet[B] = {
+    val builder = new HashSet[B]
+    var i = 0
+    while (i < capacity) {
+      val hash = hashes(i)
+      if (!isInit(hash)) {
+        val key = _keys(i).asInstanceOf[K]
+        val value = _values(i).asInstanceOf[V]
+        val result = f(key, value)
+        result foreach (builder.add(_))
+      }
+      i += 1
+    }
+    builder
+  }
+
+  def filter(f: (K, V) => Boolean): HashMap[K, V] = {
+    val result = new HashMap[K, V]
+    var i = 0
+    while (i < capacity) {
+      val hash = hashes(i)
+      if (!isInit(hash)) {
+        val key = _keys(i).asInstanceOf[K]
+        val value = _values(i).asInstanceOf[V]
+        if (f(key, value)) result.put(key, value)
+      }
+      i += 1
+    }
+    result
+  }
+
   @inline
   private[this] def shouldGrow = _size > capacity * 9 / 10
 

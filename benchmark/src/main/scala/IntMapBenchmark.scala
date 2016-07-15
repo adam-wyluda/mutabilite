@@ -5,7 +5,7 @@ import offheap.collection._
 import HashEq.Implicits._
 import org.openjdk.jmh.infra.Blackhole
 
-import scala.collection.mutable.{OpenHashMap => StdlibMap}
+import scala.collection.mutable.{Buffer => StdlibBuffer, OpenHashMap => StdlibMap}
 
 @State(Scope.Thread)
 class IntMapBenchmark {
@@ -231,6 +231,51 @@ class IntMapBenchmark {
     i = 0
     while (i < size) { blackhole.consume(map.get(i)); i += 1 }
   }
+
+  @Benchmark
+  def mapSpecialized = specMap map ((k, v) => k + 1)
+
+  @Benchmark
+  def mapGeneric = genericMap map ((k, v) => k + 1)
+
+  @Benchmark
+  def mapStdlib = stdMap map { case (k, v) => k + 1 }
+
+  @Benchmark
+  def flatMapSpecialized =
+    specMap flatMap { (k, v) =>
+      val r = new BufferSeq_Int
+      var j = 0
+      while (j < 5) { r.append(k + j); j += 1 }
+      r
+    }
+
+  @Benchmark
+  def flatMapGeneric =
+    genericMap flatMap { (k, v) =>
+      val r = new BufferSeq[Int]
+      var j = 0
+      while (j < 5) { r.append(k + j); j += 1 }
+      r
+    }
+
+  @Benchmark
+  def flatMapStdlib =
+    stdMap flatMap { case (k, v) =>
+      val r = StdlibBuffer[Int]()
+      var j = 0
+      while (j < 5) { r.append(k + j); j += 1 }
+      r
+    }
+
+  @Benchmark
+  def filterSpecialized = specMap filter ((k, v) => k % 2 == 0)
+
+  @Benchmark
+  def filterGeneric = genericMap filter ((k, v) => k % 2 == 0)
+
+  @Benchmark
+  def filterStdlib = stdMap filter { case (k, v) => k % 2 == 0 }
 }
 
 //@State(Scope.Thread)
