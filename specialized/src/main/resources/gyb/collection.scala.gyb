@@ -60,7 +60,9 @@ package object collection {
   }%
 
   implicit class MapOps_${K}_${V}${Param}(val map: Map_${K}_${V}${Param}) extends AnyVal {
-    def map[T](f: (${K_Arg}, ${V_Arg}) => T): Seq[T] = macro offheap.collection.macros.MapOpsMacros.map[${K_Arg}, ${V_Arg}, T]
+    def map[T](f: (${K_Arg}, ${V_Arg}) => T): Seq[T]     = macro offheap.collection.macros.MapOpsMacros.map[${K_Arg}, ${V_Arg}, T]
+    def mapKeys[T](f: ${K_Arg} => T): Map[T, ${V_Arg}]   = macro offheap.collection.macros.MapOpsMacros.mapKeys[${K_Arg}, ${V_Arg}, T]
+    def mapValues[T](f: ${V_Arg} => T): Map[${K_Arg}, T] = macro offheap.collection.macros.MapOpsMacros.mapValues[${K_Arg}, ${V_Arg}, T]
   }
 
   % end

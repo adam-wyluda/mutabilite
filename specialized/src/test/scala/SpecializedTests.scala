@@ -262,4 +262,48 @@ class SpecializedMapTest extends FunSuite with BeforeAndAfter with MapTest {
     assert(mapped.size == 10)
     1 to 10 foreach (i => assert(mapped.index(i.toString + (i + 10).toString) != -1))
   }
+
+  test("mapKeys (int, int) to (string, int)") {
+    val map = new HashMap_Int_Int
+    1 to 10 foreach (i => map.put(i, i * 10))
+
+    val mapped = map mapKeys (_ toString)
+    val test: Map_Object_Int[String] = mapped
+
+    assert(mapped.size == 10)
+    1 to 10 foreach (i => assert(mapped.contains(i toString)))
+  }
+
+  test("mapKeys (string, string) to (int, string)") {
+    val map = new HashMap_Object_Object[String, String]
+    1 to 10 foreach (i => map.put(i toString, (i * 10) toString))
+
+    val mapped = map mapKeys (Integer.parseInt(_))
+    val test: Map_Int_Object[String] = mapped
+
+    assert(mapped.size == 10)
+    1 to 10 foreach (i => assert(mapped.contains(i)))
+  }
+
+  test("mapValues (int, int) to (int, string)") {
+    val map = new HashMap_Int_Int
+    1 to 10 foreach (i => map.put(i, i * 10))
+
+    val mapped = map mapValues (_ toString)
+    val test: Map_Int_Object[String] = mapped
+
+    assert(mapped.size == 10)
+    1 to 10 foreach (i => assert(mapped(i).get == (i * 10).toString))
+  }
+
+  test("mapValues (int, string) to (int, int)") {
+    val map = new HashMap_Int_Object[String]
+    1 to 10 foreach (i => map.put(i, (i * 10) toString))
+
+    val mapped = map mapValues (Integer.parseInt(_))
+    val test: Map_Int_Int = mapped
+
+    assert(mapped.size == 10)
+    1 to 10 foreach (i => assert(mapped(i).get == i * 10))
+  }
 }
