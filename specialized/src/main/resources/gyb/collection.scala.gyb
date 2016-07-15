@@ -3,65 +3,65 @@ package offheap
 import scala.language.experimental.{macros => CanMacro}
 
 %{
+from itertools import product
+
 types = ['Boolean', 'Char', 'Byte', 'Short',
-'Int', 'Long', 'Float', 'Double']
+'Int', 'Long', 'Float', 'Double', 'Object']
 }%
 
 package object collection {
 
   % for T in types:
-  implicit class SeqOps_${T}(val seq: Seq_${T}) extends AnyVal {
-    def map[B](f: ${T} => B): Seq[B]          = macro offheap.collection.macros.SeqOpsMacros.map[${T}, B]
-    def flatMap[B](f: ${T} => Seq[B]): Seq[B] = macro offheap.collection.macros.SeqOpsMacros.flatMap[${T}, B]
-    def filter(f: ${T} => Boolean): Seq_${T}  = macro offheap.collection.macros.SeqOpsMacros.filter[${T}]
-    def foreachMacro(f: ${T} => Unit): Unit   = macro offheap.collection.macros.SeqOpsMacros.foreach[${T}]
+  %{
+  if T == 'Object':
+    T_Arg = 'T'
+    T_Param = '[T]'
+  else:
+    T_Arg = T
+    T_Param = ''
+  }%
+
+  implicit class SeqOps_${T}${T_Param}(val seq: Seq_${T}${T_Param}) extends AnyVal {
+    def map[B](f: ${T_Arg} => B): Seq[B]                   = macro offheap.collection.macros.SeqOpsMacros.map[${T_Arg}, B]
+    def flatMap[B](f: ${T_Arg} => Seq[B]): Seq[B]          = macro offheap.collection.macros.SeqOpsMacros.flatMap[${T_Arg}, B]
+    def filter(f: ${T_Arg} => Boolean): Seq_${T}${T_Param} = macro offheap.collection.macros.SeqOpsMacros.filter[${T_Arg}]
+    def foreachMacro(f: ${T_Arg} => Unit): Unit            = macro offheap.collection.macros.SeqOpsMacros.foreach[${T_Arg}]
   }
+
+  implicit class SetOps_${T}${T_Param}(val set: Set_${T}${T_Param}) extends AnyVal {
+    def map[B](f: ${T_Arg} => B): Set[B]                   = macro offheap.collection.macros.SetOpsMacros.map[${T_Arg}, B]
+    def flatMap[B](f: ${T_Arg} => Set[B]): Set[B]          = macro offheap.collection.macros.SetOpsMacros.flatMap[${T_Arg}, B]
+    def filter(f: ${T_Arg} => Boolean): Set_${T}${T_Param} = macro offheap.collection.macros.SetOpsMacros.filter[${T_Arg}]
+    def foreachMacro(f: ${T_Arg} => Unit): Unit            = macro offheap.collection.macros.SetOpsMacros.foreach[${T_Arg}]
+  }
+
   % end
 
-  implicit class SeqOps_Object[A](val seq: Seq_Object[A]) extends AnyVal {
-    def map[B](f: A => B): Seq[B]              = macro offheap.collection.macros.SeqOpsMacros.map[A, B]
-    def flatMap[B](f: A => Seq[B]): Seq[B]     = macro offheap.collection.macros.SeqOpsMacros.flatMap[A, B]
-    def filter(f: A => Boolean): Seq_Object[A] = macro offheap.collection.macros.SeqOpsMacros.filter[A]
-    def foreachMacro(f: ${T} => Unit): Unit    = macro offheap.collection.macros.SeqOpsMacros.foreach[${T}]
+  % for (K, V) in product(types, types):
+  %{
+  if (K == 'Object' and V == 'Object'):
+    Param = '[K, V]'
+  elif K == 'Object':
+    Param = '[K]'
+  elif V == 'Object':
+    Param = '[V]'
+  else:
+    Param = ''
+
+  if K == 'Object':
+    K_Arg = 'K'
+  else:
+    K_Arg = K
+
+  if V == 'Object':
+    V_Arg = 'V'
+  else:
+    V_Arg = V
+  }%
+
+  implicit class MapOps_${K}_${V}${Param}(val map: Map_${K}_${V}${Param}) extends AnyVal {
+    def map[T](f: (${K_Arg}, ${V_Arg}) => T): Seq[T] = macro offheap.collection.macros.MapOpsMacros.map[${K_Arg}, ${V_Arg}, T]
   }
 
-  % for T in types:
-  implicit class SetOps_${T}(val set: Set_${T}) extends AnyVal {
-    def map[B](f: ${T} => B): Set[B]          = macro offheap.collection.macros.SetOpsMacros.map[${T}, B]
-    def flatMap[B](f: ${T} => Set[B]): Set[B] = macro offheap.collection.macros.SetOpsMacros.flatMap[${T}, B]
-    def filter(f: ${T} => Boolean): Set_${T}  = macro offheap.collection.macros.SetOpsMacros.filter[${T}]
-    def foreachMacro(f: ${T} => Unit): Unit   = macro offheap.collection.macros.SetOpsMacros.foreach[${T}]
-  }
   % end
-
-  implicit class SetOps_Object[A](val set: Set_Object[A]) extends AnyVal {
-    def map[B](f: A => B): Set[B]              = macro offheap.collection.macros.SetOpsMacros.map[A, B]
-    def flatMap[B](f: A => Set[B]): Set[B]     = macro offheap.collection.macros.SetOpsMacros.flatMap[A, B]
-    def filter(f: A => Boolean): Set_Object[A] = macro offheap.collection.macros.SetOpsMacros.filter[A]
-    def foreachMacro(f: A => Unit): Unit       = macro offheap.collection.macros.SetOpsMacros.foreach[A]
-  }
-
-  % for K in types:
-  % for V in types:
-  implicit class MapOps_${K}_${V}(val map: Map_${K}_${V}) extends AnyVal {
-    def map[T](f: (${K}, ${V}) => T): Seq[T] = macro offheap.collection.macros.MapOpsMacros.map[${K}, ${V}, T]
-  }
-  % end
-  % end
-
-  % for K in types:
-  implicit class MapOps_${K}_Object[V](val map: Map_${K}_Object[V]) extends AnyVal {
-    def map[T](f: (${K}, V) => T): Seq[T] = macro offheap.collection.macros.MapOpsMacros.map[${K}, V, T]
-  }
-  % end
-
-  % for V in types:
-  implicit class MapOps_Object_${V}[K](val map: Map_Object_${V}[K]) extends AnyVal {
-    def map[T](f: (K, ${V}) => T): Seq[T] = macro offheap.collection.macros.MapOpsMacros.map[K, ${V}, T]
-  }
-  % end
-
-  implicit class MapOps_Object_Object[K, V](val map: Map_Object_Object[K, V]) extends AnyVal {
-    def map[T](f: (K, V) => T): Seq[T] = macro offheap.collection.macros.MapOpsMacros.map[K, V, T]
-  }
 }

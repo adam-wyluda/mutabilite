@@ -3,12 +3,13 @@ package offheap.collection
 import HashEq._
 
 %{
+from itertools import product
+
 types = ['Boolean', 'Char', 'Byte', 'Short',
 'Int', 'Long', 'Float', 'Double', 'Object']
 }%
 
-% for K in types:
-% for V in types:
+% for (K, V) in product(types, types):
 
 %{
   if (K == 'Object' and V == 'Object'):
@@ -278,5 +279,4 @@ class HashMap_${K}_${V}${Param}(initialSize: Int = 8)
   }
 }
 
-% end
 % end
