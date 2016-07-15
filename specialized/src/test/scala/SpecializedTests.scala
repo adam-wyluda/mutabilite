@@ -245,25 +245,31 @@ class SpecializedMapTest extends FunSuite with BeforeAndAfter with MapTest {
     val map = new HashMap_Int_Object[String]
     1 to 10 foreach (i => map.put(i, i toString))
 
-    val mapped = map map { (k, v) => k.toFloat / v.length }
+    val mapped = map map { (k, v) =>
+      k.toFloat / v.length
+    }
     val test: Seq_Float = mapped
 
     assert(mapped.size == 10)
-    1 to 10 foreach (i => assert(mapped.index(i.toFloat / (i.toString.length)) != -1))
+    1 to 10 foreach (i =>
+          assert(mapped.index(i.toFloat / (i.toString.length)) != -1))
   }
 
   test("map (string, int) to string") {
     val map = new HashMap_Object_Int[String]
     1 to 10 foreach (i => map.put(i toString, i + 10))
 
-    val mapped = map map { (k, v) => k + v.toString }
+    val mapped = map map { (k, v) =>
+      k + v.toString
+    }
     val test: Seq_Object[String] = mapped
 
     assert(mapped.size == 10)
-    1 to 10 foreach (i => assert(mapped.index(i.toString + (i + 10).toString) != -1))
+    1 to 10 foreach (i =>
+          assert(mapped.index(i.toString + (i + 10).toString) != -1))
   }
 
-  test("mapKeys (int, int) to (string, int)") {
+  test("mapKeys (int, _) to (string, _)") {
     val map = new HashMap_Int_Int
     1 to 10 foreach (i => map.put(i, i * 10))
 
@@ -274,7 +280,7 @@ class SpecializedMapTest extends FunSuite with BeforeAndAfter with MapTest {
     1 to 10 foreach (i => assert(mapped.contains(i toString)))
   }
 
-  test("mapKeys (string, string) to (int, string)") {
+  test("mapKeys (string, _) to (int, _)") {
     val map = new HashMap_Object_Object[String, String]
     1 to 10 foreach (i => map.put(i toString, (i * 10) toString))
 
@@ -285,7 +291,7 @@ class SpecializedMapTest extends FunSuite with BeforeAndAfter with MapTest {
     1 to 10 foreach (i => assert(mapped.contains(i)))
   }
 
-  test("mapValues (int, int) to (int, string)") {
+  test("mapValues (_, int) to (_, string)") {
     val map = new HashMap_Int_Int
     1 to 10 foreach (i => map.put(i, i * 10))
 
@@ -296,7 +302,7 @@ class SpecializedMapTest extends FunSuite with BeforeAndAfter with MapTest {
     1 to 10 foreach (i => assert(mapped(i).get == (i * 10).toString))
   }
 
-  test("mapValues (int, string) to (int, int)") {
+  test("mapValues (_, string) to (_, int)") {
     val map = new HashMap_Int_Object[String]
     1 to 10 foreach (i => map.put(i, (i * 10) toString))
 
@@ -305,5 +311,26 @@ class SpecializedMapTest extends FunSuite with BeforeAndAfter with MapTest {
 
     assert(mapped.size == 10)
     1 to 10 foreach (i => assert(mapped(i).get == i * 10))
+  }
+
+  test("flatMap") {
+    val map = new HashMap_Int_Object[String]
+    1 to 10 foreach (i => map.put(i * 3, (i * 3) toString))
+
+    val mapped = map flatMap { (k, v) =>
+      val seq = new BufferSeq_Int
+      seq.append(k + v.length)
+      seq.append(k + v.length + 128)
+      seq.append(k + v.length + 512)
+      seq
+    }
+    val test: Seq_Int = mapped
+
+    assert(mapped.size == 30)
+    1 to 10 map (_ * 3) foreach { i =>
+      assert(mapped.index(i + (i toString).length) != -1)
+      assert(mapped.index(i + (i toString).length + 128) != -1)
+      assert(mapped.index(i + (i toString).length + 512) != -1)
+    }
   }
 }

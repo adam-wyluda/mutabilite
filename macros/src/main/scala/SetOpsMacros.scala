@@ -25,7 +25,8 @@ class SetOpsMacros(val c: whitebox.Context) extends Common {
         $builder
         while (${idx.symbol} < ${size.symbol}) {
           if (!${set.symbol}.isInit(${set.symbol}.hashAt(${idx.symbol}))) {
-            ${builder.symbol}.add(${app(f, q"${set.symbol}.keyAt(${idx.symbol})")})
+            ${builder.symbol}.add(
+              ${app(f, q"${set.symbol}.keyAt(${idx.symbol})")})
           }
           ${idx.symbol} += 1
         }
@@ -36,6 +37,7 @@ class SetOpsMacros(val c: whitebox.Context) extends Common {
   def flatMap[A: WeakTypeTag, B: WeakTypeTag](f: Tree) =
     stabilized(c.prefix.tree) { pre =>
       val setTpe = setType[A]
+      val resultTpe = setType[B]
       val builderTpe = hashSetType[B]
       val idx = freshVar("i", IntTpe, q"0")
       val set = freshVal("set", setTpe, q"$pre.set")
@@ -43,7 +45,7 @@ class SetOpsMacros(val c: whitebox.Context) extends Common {
       val builder = freshVal("builder", builderTpe, q"new $builderTpe")
       val result =
         freshVal("result",
-                 builderTpe,
+                 resultTpe,
                  q"${app(f, q"${set.symbol}.keyAt(${idx.symbol})")}")
       val resultSize =
         freshVal("resultSize", IntTpe, q"${result.symbol}.capacity")
