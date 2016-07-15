@@ -333,4 +333,17 @@ class SpecializedMapTest extends FunSuite with BeforeAndAfter with MapTest {
       assert(mapped.index(i + (i toString).length + 512) != -1)
     }
   }
+
+  test("filter") {
+    val map = new HashMap_Int_Object[String]
+    1 to 10 foreach (i => map.put(i, i toString))
+
+    val filtered = map filter { (k, _) =>
+      k % 2 == 0
+    }
+    val test: Map_Int_Object[String] = filtered
+
+    assert(filtered.size == 5)
+    2 to 10 by 2 foreach (i => assert(filtered(i).get == i.toString))
+  }
 }

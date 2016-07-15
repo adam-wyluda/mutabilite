@@ -127,4 +127,34 @@ class MapOpsMacros(val c: whitebox.Context) extends Common {
         ${builder.symbol}
       """
     }
+
+  def filter[K: WeakTypeTag, V: WeakTypeTag](f: Tree) =
+    stabilized(c.prefix.tree) { pre =>
+      val K = weakTypeOf[K]
+      val V = weakTypeOf[V]
+      val mapTpe = mapType[K, V]
+      val builderTpe = hashMapType[K, V]
+      val idx = freshVar("i", IntTpe, q"0")
+      val map = freshVal("map", mapTpe, q"$pre.map")
+      val size = freshVal("size", IntTpe, q"${map.symbol}.capacity")
+      val builder = freshVal("builder", builderTpe, q"new $builderTpe")
+      val key = freshVal("key", K, q"${map.symbol}.keyAt(${idx.symbol})")
+      val value = freshVal("value", V, q"${map.symbol}.valueAt(${idx.symbol})")
+      q"""
+        $idx
+        $map
+        $size
+        $builder
+        while (${idx.symbol} < ${size.symbol}) {
+          if (!${map.symbol}.isInit(${map.symbol}.hashAt(${idx.symbol}))) {
+            $key
+            $value
+            if (${app(f, q"${key.symbol}", q"${value.symbol}")})
+              ${builder.symbol}.put(${key.symbol}, ${value.symbol})
+          }
+          ${idx.symbol} += 1
+        }
+        ${builder.symbol}
+      """
+    }
 }
