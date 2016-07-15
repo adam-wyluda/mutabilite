@@ -25,9 +25,7 @@ class SetOpsMacros(val c: whitebox.Context) extends Common {
         $builder
         while (${idx.symbol} < ${size.symbol}) {
           if (!${set.symbol}.isInit(${set.symbol}.hashAt(${idx.symbol}))) {
-            ${builder.symbol}.add(${app(
-          f,
-          q"${set.symbol}.keyAt(${idx.symbol})")})
+            ${builder.symbol}.add(${app(f, q"${set.symbol}.keyAt(${idx.symbol})")})
           }
           ${idx.symbol} += 1
         }

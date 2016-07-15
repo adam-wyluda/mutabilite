@@ -240,4 +240,26 @@ class SpecializedSetTest
 class SpecializedMapTest extends FunSuite with BeforeAndAfter with MapTest {
   def provideMap_Int_Object: Map[Int, Object] = new HashMap_Int_Object
   def provideMap_Object_Int: Map[Object, Int] = new HashMap_Object_Int
+
+  test("map (int, string) to float") {
+    val map = new HashMap_Int_Object[String]
+    1 to 10 foreach (i => map.put(i, i toString))
+
+    val mapped = map map { (k, v) => k.toFloat / v.length }
+    val test: Seq_Float = mapped
+
+    assert(mapped.size == 10)
+    1 to 10 foreach (i => assert(mapped.index(i.toFloat / (i.toString.length)) != -1))
+  }
+
+  test("map (string, int) to string") {
+    val map = new HashMap_Object_Int[String]
+    1 to 10 foreach (i => map.put(i toString, i + 10))
+
+    val mapped = map map { (k, v) => k + v.toString }
+    val test: Seq_Object[String] = mapped
+
+    assert(mapped.size == 10)
+    1 to 10 foreach (i => assert(mapped.index(i.toString + (i + 10).toString) != -1))
+  }
 }

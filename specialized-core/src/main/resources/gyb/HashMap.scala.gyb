@@ -23,11 +23,15 @@ types = ['Boolean', 'Char', 'Byte', 'Short',
   if K == 'Object':
     K_Arg = 'K'
     K_Array = 'AnyRef'
+    K_Set = 'Set_Object[K]'
+    K_HashSet = 'HashSet_Object[K]'
     Cast_to_K = '.asInstanceOf[' + K_Arg + ']'
     Cast_from_K = '.asInstanceOf[AnyRef]'
   else:
     K_Arg = K
     K_Array = K
+    K_Set = 'Set_' + K
+    K_HashSet = 'HashSet_' + K
     Cast_to_K = ''
     Cast_from_K = ''
 
@@ -37,6 +41,8 @@ types = ['Boolean', 'Char', 'Byte', 'Short',
     V_None = 'none'
     V_Some = 'Some'
     V_Array = 'AnyRef'
+    V_Seq = 'Seq_Object[V]'
+    V_BufferSeq = 'BufferSeq_Object[V]'
     Cast_to_V = '.asInstanceOf[' + V_Arg + ']'
     Cast_from_V = '.asInstanceOf[AnyRef]'
   else:
@@ -45,6 +51,8 @@ types = ['Boolean', 'Char', 'Byte', 'Short',
     V_None = 'None_' + V
     V_Some = 'Some_' + V
     V_Array = V
+    V_Seq = 'Seq_' + V
+    V_BufferSeq = 'BufferSeq_' + V
     Cast_to_V = ''
     Cast_from_V = ''
 }%
@@ -53,17 +61,15 @@ trait Map_${K}_${V}${Param} extends Map[${K_Arg}, ${V_Arg}] {
   def apply(key: ${K_Arg}): ${V_Opt}
   def put(key: ${K_Arg}, value: ${V_Arg}): ${V_Opt}
   def remove(key: ${K_Arg}): ${V_Opt}
-  % if K == 'Object':
-  def keys: Set_Object[K]
-  % else:
-  def keys: Set_${K}
-  % end
-  % if V == 'Object':
-  def values: Seq_Object[V]
-  % else:
-  def values: Seq_${V}
-  % end
+  def keys: ${K_Set}
+  def values: ${V_Seq}
   def contains(key: ${K_Arg}): Boolean
+
+  def capacity: Int
+  def hashAt(index: Int): Int
+  def keyAt(index: Int): ${K_Arg}
+  def valueAt(index: Int): ${V_Arg}
+  def isInit(hash: Int): Boolean
 }
 
 class HashMap_${K}_${V}${Param}(initialSize: Int = 8)
@@ -78,7 +84,7 @@ class HashMap_${K}_${V}${Param}(initialSize: Int = 8)
   private[this] var _keys: Array[${K_Array}] = new Array[${K_Array}](initialSize)
   private[this] var _values: Array[${V_Array}] = new Array[${V_Array}](initialSize)
   private[this] var _size = 0
-  private[this] var capacity = initialSize
+  var capacity = initialSize
   private[this] var mask = capacity - 1
 
   % if V == 'Object':
@@ -194,14 +200,8 @@ class HashMap_${K}_${V}${Param}(initialSize: Int = 8)
     }
   }
 
-
-  % if K == 'Object':
-  def keys: Set_Object[K] = {
-    val result = new HashSet_Object[K]
-  % else:
-  def keys: Set_${K} = {
-    val result = new HashSet_${K}
-  % end
+  def keys: ${K_Set} = {
+    val result = new ${K_HashSet}
     var i = 0
     while (i < capacity) {
       if (!isInit(hashes(i))) result.add(_keys(i)${Cast_to_K})
@@ -210,13 +210,8 @@ class HashMap_${K}_${V}${Param}(initialSize: Int = 8)
     result
   }
 
-  % if V == 'Object':
-  def values: Seq_Object[V] = {
-    val result = new BufferSeq_Object[V]
-  % else:
-  def values: Seq_${V} = {
-    val result = new BufferSeq_${V}
-  % end
+  def values: ${V_Seq} = {
+    val result = new ${V_BufferSeq}
     var i = 0
     while (i < capacity) {
       if (!isInit(hashes(i))) result.append(_values(i)${Cast_to_V})
@@ -261,14 +256,15 @@ class HashMap_${K}_${V}${Param}(initialSize: Int = 8)
     hash
   }
 
-  @inline
-  private[this] def isInit(hash: Int) = hash == 0
+  def hashAt(index: Int): Int = hashes(index)
+  def keyAt(index: Int): ${K_Arg} = _keys(index)${Cast_to_K}
+  def valueAt(index: Int): ${V_Arg} = _values(index)${Cast_to_V}
+  def isInit(hash: Int) = hash == 0
 
-  override def empty = _size == 0
+  def empty = _size == 0
+  def size: Int = _size
 
-  override def size: Int = _size
-
-  override def foreach(f: (${K_Arg}, ${V_Arg}) => Unit): Unit = {
+  def foreach(f: (${K_Arg}, ${V_Arg}) => Unit): Unit = {
     var i = 0
     while (i < capacity) {
       val hash = hashes(i)

@@ -32,6 +32,7 @@ trait Seq_${T}${T_Param} extends Any with Seq[${T_Arg}] {
   def index(elem: ${T_Arg}): Int
   def insert(index: Int, elem: ${T_Arg}): Unit
   def foreach(f: ${T_Arg} => Unit)
+
   def capacity: Int
 }
 

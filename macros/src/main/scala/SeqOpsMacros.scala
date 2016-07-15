@@ -42,8 +42,9 @@ class SeqOpsMacros(val c: whitebox.Context) extends Common {
         freshVal("builder",
                  builderTpe,
                  q"new $builderTpe(initialSize = ${seq.symbol}.capacity)")
-      val result =
-        freshVal("result", builderTpe, q"${app(f, q"${seq.symbol}(${idx.symbol})")}")
+      val result = freshVal("result",
+                            builderTpe,
+                            q"${app(f, q"${seq.symbol}(${idx.symbol})")}")
       val resultSize = freshVal("resultSize", IntTpe, q"${result.symbol}.size")
       val idx2 = freshVar("j", IntTpe, q"0")
       q"""
