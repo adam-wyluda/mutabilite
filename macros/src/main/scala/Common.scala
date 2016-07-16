@@ -78,4 +78,32 @@ trait Common extends Definitions {
     case _             =>
       q"$f(..$argValues)"
   }
+
+  def iterateSeq(seq: Tree, body: Tree => Tree) = {
+    val idx = freshVar("i", IntTpe, q"0")
+    val size = freshVal("size", IntTpe, q"$seq.size")
+    q"""
+      $idx
+      $size
+      while (${idx.symbol} < ${size.symbol}) {
+        ..${body(q"${idx.symbol}")}
+        ${idx.symbol} += 1
+      }
+    """
+  }
+
+  def iterateHash(hash: Tree, body: Tree => Tree) = {
+    val idx = freshVar("i", IntTpe, q"0")
+    val size = freshVal("size", IntTpe, q"$hash.capacity")
+    q"""
+        $idx
+        $size
+        while (${idx.symbol} < ${size.symbol}) {
+          if (!$hash.isInit($hash.hashAt(${idx.symbol}))) {
+            ..${body(q"${idx.symbol}")}
+          }
+          ${idx.symbol} += 1
+        }
+      """
+  }
 }

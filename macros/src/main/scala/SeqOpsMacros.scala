@@ -11,22 +11,19 @@ class SeqOpsMacros(val c: whitebox.Context) extends Common {
     stabilized(c.prefix.tree) { pre =>
       val seqTpe = seqType[A]
       val builderTpe = bufferType[B]
-      val idx = freshVar("i", IntTpe, q"0")
       val seq = freshVal("seq", seqTpe, q"$pre.seq")
-      val size = freshVal("size", IntTpe, q"${seq.symbol}.size")
       val builder =
         freshVal("builder",
                  builderTpe,
                  q"new $builderTpe(initialSize = ${seq.symbol}.capacity)")
+      val body = iterateSeq(
+          q"${seq.symbol}",
+          idx => q"${builder.symbol}.append(${app(f, q"${seq.symbol}($idx)")})"
+      )
       q"""
-        $idx
         $seq
-        $size
         $builder
-        while (${idx.symbol} < ${size.symbol}) {
-          ${builder.symbol}.append(${app(f, q"${seq.symbol}(${idx.symbol})")})
-          ${idx.symbol} += 1
-        }
+        ..$body
         ${builder.symbol}
       """
     }
@@ -35,33 +32,27 @@ class SeqOpsMacros(val c: whitebox.Context) extends Common {
     stabilized(c.prefix.tree) { pre =>
       val seqTpe = seqType[A]
       val builderTpe = bufferType[B]
-      val idx = freshVar("i", IntTpe, q"0")
       val seq = freshVal("seq", seqTpe, q"$pre.seq")
-      val size = freshVal("size", IntTpe, q"${seq.symbol}.size")
       val builder =
         freshVal("builder",
                  builderTpe,
                  q"new $builderTpe(initialSize = ${seq.symbol}.capacity)")
-      val result = freshVal("result",
-                            builderTpe,
-                            q"${app(f, q"${seq.symbol}(${idx.symbol})")}")
-      val resultSize = freshVal("resultSize", IntTpe, q"${result.symbol}.size")
-      val idx2 = freshVar("j", IntTpe, q"0")
-      q"""
-        $idx
-        $seq
-        $size
-        $builder
-        while (${idx.symbol} < ${size.symbol}) {
+      val body = iterateSeq(q"${seq.symbol}", idx => {
+        val result =
+          freshVal("result", builderTpe, q"${app(f, q"${seq.symbol}($idx)")}")
+        val inner = iterateSeq(
+            q"${result.symbol}",
+            idx2 => q"${builder.symbol}.append(${result.symbol}($idx2))"
+        )
+        q"""
           $result
-          $resultSize
-          $idx2
-          while (${idx2.symbol} < ${resultSize.symbol}) {
-            ${builder.symbol}.append(${result.symbol}(${idx2.symbol}))
-            ${idx2.symbol} += 1
-          }
-          ${idx.symbol} += 1
-        }
+          ..$inner
+        """
+      })
+      q"""
+        $seq
+        $builder
+        ..$body
         ${builder.symbol}
       """
     }
@@ -71,39 +62,32 @@ class SeqOpsMacros(val c: whitebox.Context) extends Common {
       val A = weakTypeOf[A]
       val seqTpe = seqType[A]
       val builderTpe = bufferType[A]
-      val idx = freshVar("i", IntTpe, q"0")
       val seq = freshVal("seq", seqTpe, q"$pre.seq")
-      val size = freshVal("size", IntTpe, q"${seq.symbol}.size")
       val builder = freshVal("builder", builderTpe, q"new $builderTpe")
-      val el = freshVal("el", A, q"${seq.symbol}(${idx.symbol})")
-      q"""
-        $idx
-        $seq
-        $size
-        $builder
-        while (${idx.symbol} < ${size.symbol}) {
+      val body = iterateSeq(q"${seq.symbol}", idx => {
+        val el = freshVal("el", A, q"${seq.symbol}($idx)")
+        q"""
           $el
           if (${app(f, q"${el.symbol}")}) ${builder.symbol}.append(${el.symbol})
-          ${idx.symbol} += 1
-        }
+        """
+      })
+      q"""
+        $seq
+        $builder
+        ..$body
         ${builder.symbol}
       """
     }
 
   def foreach[A: WeakTypeTag](f: Tree) =
     stabilized(c.prefix.tree) { pre =>
-      val idx = freshVar("i", IntTpe, q"0")
       val seqTpe = seqType[A]
       val seq = freshVal("seq", seqTpe, q"$pre.seq")
-      val size = freshVal("size", IntTpe, q"${seq.symbol}.size")
+      val body = iterateSeq(q"${seq.symbol}",
+                            idx => q"${app(f, q"${seq.symbol}($idx)")}")
       q"""
-        $idx
         $seq
-        $size
-        while (${idx.symbol} < ${size.symbol}) {
-          ${app(f, q"${seq.symbol}(${idx.symbol})")}
-          ${idx.symbol} += 1
-        }
+        ..$body
       """
     }
 }

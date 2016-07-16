@@ -11,27 +11,26 @@ class MapOpsMacros(val c: whitebox.Context) extends Common {
     stabilized(c.prefix.tree) { pre =>
       val mapTpe = mapType[K, V]
       val builderTpe = bufferType[T]
-      val idx = freshVar("i", IntTpe, q"0")
       val map = freshVal("map", mapTpe, q"$pre.map")
-      val size = freshVal("size", IntTpe, q"${map.symbol}.capacity")
       val builder =
         freshVal("builder",
                  builderTpe,
                  q"new $builderTpe(initialSize = ${map.symbol}.capacity)")
+      val body = iterateHash(
+          q"${map.symbol}",
+          idx =>
+            q"""
+              ${builder.symbol}.append(
+                ${app(f,
+                      q"${map.symbol}.keyAt($idx)",
+                      q"${map.symbol}.valueAt($idx)")}
+              )
+            """
+      )
       q"""
-        $idx
         $map
-        $size
         $builder
-        while (${idx.symbol} < ${size.symbol}) {
-          if (!${map.symbol}.isInit(${map.symbol}.hashAt(${idx.symbol}))) {
-            ${builder.symbol}.append(
-              ${app(f,
-                    q"${map.symbol}.keyAt(${idx.symbol})",
-                    q"${map.symbol}.valueAt(${idx.symbol})")})
-          }
-          ${idx.symbol} += 1
-        }
+        ..$body
         ${builder.symbol}
       """
     }
@@ -40,26 +39,24 @@ class MapOpsMacros(val c: whitebox.Context) extends Common {
     stabilized(c.prefix.tree) { pre =>
       val mapTpe = mapType[K, V]
       val builderTpe = hashMapType[T, V]
-      val idx = freshVar("i", IntTpe, q"0")
       val map = freshVal("map", mapTpe, q"$pre.map")
-      val size = freshVal("size", IntTpe, q"${map.symbol}.capacity")
       val builder =
         freshVal("builder",
                  builderTpe,
                  q"new $builderTpe(initialSize = ${map.symbol}.capacity)")
-      q"""
-        $idx
-        $map
-        $size
-        $builder
-        while (${idx.symbol} < ${size.symbol}) {
-          if (!${map.symbol}.isInit(${map.symbol}.hashAt(${idx.symbol}))) {
+      val body = iterateHash(
+          q"${map.symbol}",
+          idx => q"""
             ${builder.symbol}.put(
-              ${app(f, q"${map.symbol}.keyAt(${idx.symbol})")},
-              ${map.symbol}.valueAt(${idx.symbol}))
-          }
-          ${idx.symbol} += 1
-        }
+              ${app(f, q"${map.symbol}.keyAt($idx)")},
+              ${map.symbol}.valueAt($idx)
+            )
+          """
+      )
+      q"""
+        $map
+        $builder
+        ..$body
         ${builder.symbol}
       """
     }
@@ -68,26 +65,24 @@ class MapOpsMacros(val c: whitebox.Context) extends Common {
     stabilized(c.prefix.tree) { pre =>
       val mapTpe = mapType[K, V]
       val builderTpe = hashMapType[K, T]
-      val idx = freshVar("i", IntTpe, q"0")
       val map = freshVal("map", mapTpe, q"$pre.map")
-      val size = freshVal("size", IntTpe, q"${map.symbol}.capacity")
       val builder =
         freshVal("builder",
                  builderTpe,
                  q"new $builderTpe(initialSize = ${map.symbol}.capacity)")
-      q"""
-        $idx
-        $map
-        $size
-        $builder
-        while (${idx.symbol} < ${size.symbol}) {
-          if (!${map.symbol}.isInit(${map.symbol}.hashAt(${idx.symbol}))) {
+      val body = iterateHash(
+          q"${map.symbol}",
+          idx => q"""
             ${builder.symbol}.put(
-              ${map.symbol}.keyAt(${idx.symbol}),
-              ${app(f, q"${map.symbol}.valueAt(${idx.symbol})")})
-          }
-          ${idx.symbol} += 1
-        }
+              ${map.symbol}.keyAt($idx),
+              ${app(f, q"${map.symbol}.valueAt($idx)")}
+            )
+          """
+      )
+      q"""
+        $map
+        $builder
+        ..$body
         ${builder.symbol}
       """
     }
@@ -97,33 +92,29 @@ class MapOpsMacros(val c: whitebox.Context) extends Common {
       val mapTpe = mapType[K, V]
       val resultTpe = seqType[T]
       val builderTpe = bufferType[T]
-      val idx = freshVar("i", IntTpe, q"0")
       val map = freshVal("map", mapTpe, q"$pre.map")
-      val size = freshVal("size", IntTpe, q"${map.symbol}.capacity")
       val builder = freshVal("builder", resultTpe, q"new $builderTpe")
-      val result = freshVal(
-          "result",
-          resultTpe,
-          q"${app(f, q"${map.symbol}.keyAt(${idx.symbol})", q"${map.symbol}.valueAt(${idx.symbol})")}")
-      val resultSize = freshVal("resultSize", IntTpe, q"${result.symbol}.size")
-      val idx2 = freshVar("j", IntTpe, q"0")
+      val body = iterateHash(q"${map.symbol}", idx => {
+        val result = freshVal("result",
+                              resultTpe,
+                              q"""
+                                ${app(f,
+                                      q"${map.symbol}.keyAt($idx)",
+                                      q"${map.symbol}.valueAt($idx)")}
+                                """)
+        val inner = iterateSeq(
+            q"${result.symbol}",
+            idx2 => q"${builder.symbol}.append(${result.symbol}($idx2))"
+        )
+        q"""
+          $result
+          ..$inner
+        """
+      })
       q"""
-        $idx
         $map
-        $size
         $builder
-        while (${idx.symbol} < ${size.symbol}) {
-          if (!${map.symbol}.isInit(${map.symbol}.hashAt(${idx.symbol}))) {
-            $result
-            $resultSize
-            $idx2
-            while (${idx2.symbol} < ${resultSize.symbol}) {
-              ${builder.symbol}.append(${result.symbol}(${idx2.symbol}))
-              ${idx2.symbol} += 1
-            }
-          }
-          ${idx.symbol} += 1
-        }
+        ..$body
         ${builder.symbol}
       """
     }
@@ -134,26 +125,22 @@ class MapOpsMacros(val c: whitebox.Context) extends Common {
       val V = weakTypeOf[V]
       val mapTpe = mapType[K, V]
       val builderTpe = hashMapType[K, V]
-      val idx = freshVar("i", IntTpe, q"0")
       val map = freshVal("map", mapTpe, q"$pre.map")
-      val size = freshVal("size", IntTpe, q"${map.symbol}.capacity")
       val builder = freshVal("builder", builderTpe, q"new $builderTpe")
-      val key = freshVal("key", K, q"${map.symbol}.keyAt(${idx.symbol})")
-      val value = freshVal("value", V, q"${map.symbol}.valueAt(${idx.symbol})")
+      val body = iterateHash(q"${map.symbol}", idx => {
+        val key = freshVal("key", K, q"${map.symbol}.keyAt($idx)")
+        val value = freshVal("value", V, q"${map.symbol}.valueAt($idx)")
+        q"""
+          $key
+          $value
+          if (${app(f, q"${key.symbol}", q"${value.symbol}")})
+            ${builder.symbol}.put(${key.symbol}, ${value.symbol})
+        """
+      })
       q"""
-        $idx
         $map
-        $size
         $builder
-        while (${idx.symbol} < ${size.symbol}) {
-          if (!${map.symbol}.isInit(${map.symbol}.hashAt(${idx.symbol}))) {
-            $key
-            $value
-            if (${app(f, q"${key.symbol}", q"${value.symbol}")})
-              ${builder.symbol}.put(${key.symbol}, ${value.symbol})
-          }
-          ${idx.symbol} += 1
-        }
+        ..$body
         ${builder.symbol}
       """
     }
