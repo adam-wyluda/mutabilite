@@ -7,28 +7,31 @@ class MapOpsMacros(val c: whitebox.Context) extends Common {
   import c.universe._
   import c.universe.definitions._
 
-  def map[K: WeakTypeTag, V: WeakTypeTag, T: WeakTypeTag](f: Tree) =
+  def stabilizedMap[K: WeakTypeTag, V: WeakTypeTag](f: Tree => Tree): Tree =
     stabilized(c.prefix.tree) { pre =>
       val mapTpe = mapType[K, V]
-      val builderTpe = bufferType[T]
       val map = freshVal("map", mapTpe, q"$pre.map")
-      val builder =
-        freshVal("builder",
-                 builderTpe,
-                 q"new $builderTpe(initialSize = ${map.symbol}.capacity)")
+      q"""
+        $map
+        ..${f(q"${map.symbol}")}
+      """
+    }
+
+  def map[K: WeakTypeTag, V: WeakTypeTag, T: WeakTypeTag](f: Tree) =
+    stabilizedMap[K, V] { map =>
+      val builderTpe = bufferType[T]
+      val builder = freshVal("builder",
+                             builderTpe,
+                             q"new $builderTpe(initialSize = $map.capacity)")
       val body = iterateHash(
-          q"${map.symbol}",
-          idx =>
-            q"""
+          map,
+          idx => q"""
               ${builder.symbol}.append(
-                ${app(f,
-                      q"${map.symbol}.keyAt($idx)",
-                      q"${map.symbol}.valueAt($idx)")}
+                ${app(f, q"$map.keyAt($idx)", q"$map.valueAt($idx)")}
               )
             """
       )
       q"""
-        $map
         $builder
         ..$body
         ${builder.symbol}
@@ -36,25 +39,21 @@ class MapOpsMacros(val c: whitebox.Context) extends Common {
     }
 
   def mapKeys[K: WeakTypeTag, V: WeakTypeTag, T: WeakTypeTag](f: Tree) =
-    stabilized(c.prefix.tree) { pre =>
-      val mapTpe = mapType[K, V]
+    stabilizedMap[K, V] { map =>
       val builderTpe = hashMapType[T, V]
-      val map = freshVal("map", mapTpe, q"$pre.map")
-      val builder =
-        freshVal("builder",
-                 builderTpe,
-                 q"new $builderTpe(initialSize = ${map.symbol}.capacity)")
+      val builder = freshVal("builder",
+                             builderTpe,
+                             q"new $builderTpe(initialSize = $map.capacity)")
       val body = iterateHash(
-          q"${map.symbol}",
+          map,
           idx => q"""
             ${builder.symbol}.put(
-              ${app(f, q"${map.symbol}.keyAt($idx)")},
-              ${map.symbol}.valueAt($idx)
+              ${app(f, q"$map.keyAt($idx)")},
+              $map.valueAt($idx)
             )
           """
       )
       q"""
-        $map
         $builder
         ..$body
         ${builder.symbol}
@@ -62,25 +61,21 @@ class MapOpsMacros(val c: whitebox.Context) extends Common {
     }
 
   def mapValues[K: WeakTypeTag, V: WeakTypeTag, T: WeakTypeTag](f: Tree) =
-    stabilized(c.prefix.tree) { pre =>
-      val mapTpe = mapType[K, V]
+    stabilizedMap[K, V] { map =>
       val builderTpe = hashMapType[K, T]
-      val map = freshVal("map", mapTpe, q"$pre.map")
-      val builder =
-        freshVal("builder",
-                 builderTpe,
-                 q"new $builderTpe(initialSize = ${map.symbol}.capacity)")
+      val builder = freshVal("builder",
+                             builderTpe,
+                             q"new $builderTpe(initialSize = $map.capacity)")
       val body = iterateHash(
-          q"${map.symbol}",
+          map,
           idx => q"""
             ${builder.symbol}.put(
-              ${map.symbol}.keyAt($idx),
-              ${app(f, q"${map.symbol}.valueAt($idx)")}
+              $map.keyAt($idx),
+              ${app(f, q"$map.valueAt($idx)")}
             )
           """
       )
       q"""
-        $map
         $builder
         ..$body
         ${builder.symbol}
@@ -88,19 +83,17 @@ class MapOpsMacros(val c: whitebox.Context) extends Common {
     }
 
   def flatMap[K: WeakTypeTag, V: WeakTypeTag, T: WeakTypeTag](f: Tree) =
-    stabilized(c.prefix.tree) { pre =>
-      val mapTpe = mapType[K, V]
+    stabilizedMap[K, V] { map =>
       val resultTpe = seqType[T]
       val builderTpe = bufferType[T]
-      val map = freshVal("map", mapTpe, q"$pre.map")
       val builder = freshVal("builder", resultTpe, q"new $builderTpe")
-      val body = iterateHash(q"${map.symbol}", idx => {
+      val body = iterateHash(map, idx => {
         val result = freshVal("result",
                               resultTpe,
                               q"""
                                 ${app(f,
-                                      q"${map.symbol}.keyAt($idx)",
-                                      q"${map.symbol}.valueAt($idx)")}
+                                      q"$map.keyAt($idx)",
+                                      q"$map.valueAt($idx)")}
                                 """)
         val inner = iterateSeq(
             q"${result.symbol}",
@@ -112,7 +105,6 @@ class MapOpsMacros(val c: whitebox.Context) extends Common {
         """
       })
       q"""
-        $map
         $builder
         ..$body
         ${builder.symbol}
@@ -120,16 +112,14 @@ class MapOpsMacros(val c: whitebox.Context) extends Common {
     }
 
   def filter[K: WeakTypeTag, V: WeakTypeTag](f: Tree) =
-    stabilized(c.prefix.tree) { pre =>
+    stabilizedMap[K, V] { map =>
       val K = weakTypeOf[K]
       val V = weakTypeOf[V]
-      val mapTpe = mapType[K, V]
       val builderTpe = hashMapType[K, V]
-      val map = freshVal("map", mapTpe, q"$pre.map")
       val builder = freshVal("builder", builderTpe, q"new $builderTpe")
-      val body = iterateHash(q"${map.symbol}", idx => {
-        val key = freshVal("key", K, q"${map.symbol}.keyAt($idx)")
-        val value = freshVal("value", V, q"${map.symbol}.valueAt($idx)")
+      val body = iterateHash(map, idx => {
+        val key = freshVal("key", K, q"$map.keyAt($idx)")
+        val value = freshVal("value", V, q"$map.valueAt($idx)")
         q"""
           $key
           $value
@@ -138,7 +128,6 @@ class MapOpsMacros(val c: whitebox.Context) extends Common {
         """
       })
       q"""
-        $map
         $builder
         ..$body
         ${builder.symbol}

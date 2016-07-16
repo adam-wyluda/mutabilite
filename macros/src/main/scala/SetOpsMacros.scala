@@ -7,22 +7,28 @@ class SetOpsMacros(val c: whitebox.Context) extends Common {
   import c.universe._
   import c.universe.definitions._
 
-  def map[A: WeakTypeTag, B: WeakTypeTag](f: Tree) =
+  def stabilizedSet[A: WeakTypeTag](f: Tree => Tree): Tree =
     stabilized(c.prefix.tree) { pre =>
       val setTpe = setType[A]
-      val builderTpe = hashSetType[B]
-      val set = freshVal("set", setTpe, q"$pre.set")
-      val builder =
-        freshVal("builder",
-                 builderTpe,
-                 q"new $builderTpe(initialSize = ${set.symbol}.capacity)")
-      val body = iterateHash(
-          q"${set.symbol}",
-          idx =>
-            q"${builder.symbol}.add(${app(f, q"${set.symbol}.keyAt(${idx.symbol})")})"
-      )
+      val set = freshVal("seq", setTpe, q"$pre.set")
       q"""
         $set
+        ..${f(q"${set.symbol}")}
+      """
+    }
+
+  def map[A: WeakTypeTag, B: WeakTypeTag](f: Tree) =
+    stabilizedSet[A] { set =>
+      val builderTpe = hashSetType[B]
+      val builder = freshVal("builder",
+                             builderTpe,
+                             q"new $builderTpe(initialSize = $set.capacity)")
+      val body = iterateHash(
+          set,
+          idx =>
+            q"${builder.symbol}.add(${app(f, q"$set.keyAt(${idx.symbol})")})"
+      )
+      q"""
         $builder
         ..$body
         ${builder.symbol}
@@ -30,16 +36,13 @@ class SetOpsMacros(val c: whitebox.Context) extends Common {
     }
 
   def flatMap[A: WeakTypeTag, B: WeakTypeTag](f: Tree) =
-    stabilized(c.prefix.tree) { pre =>
-      val setTpe = setType[A]
+    stabilizedSet[A] { set =>
       val resultTpe = setType[B]
       val builderTpe = hashSetType[B]
-      val set = freshVal("set", setTpe, q"$pre.set")
       val builder = freshVal("builder", builderTpe, q"new $builderTpe")
-      val body = iterateHash(q"${set.symbol}", idx => {
-        val result = freshVal("result",
-                              resultTpe,
-                              q"${app(f, q"${set.symbol}.keyAt($idx)")}")
+      val body = iterateHash(set, idx => {
+        val result =
+          freshVal("result", resultTpe, q"${app(f, q"$set.keyAt($idx)")}")
         val inner = iterateHash(
             q"${result.symbol}",
             idx2 => q"${builder.symbol}.add(${result.symbol}.keyAt($idx2))")
@@ -49,7 +52,6 @@ class SetOpsMacros(val c: whitebox.Context) extends Common {
           """
       })
       q"""
-        $set
         $builder
         ..$body
         ${builder.symbol}
@@ -57,21 +59,18 @@ class SetOpsMacros(val c: whitebox.Context) extends Common {
     }
 
   def filter[A: WeakTypeTag](f: Tree) =
-    stabilized(c.prefix.tree) { pre =>
+    stabilizedSet[A] { set =>
       val A = weakTypeOf[A]
-      val setTpe = setType[A]
       val builderTpe = hashSetType[A]
-      val set = freshVal("set", setTpe, q"$pre.set")
       val builder = freshVal("builder", builderTpe, q"new $builderTpe")
-      val body = iterateHash(q"${set.symbol}", idx => {
-        val el = freshVal("el", A, q"${set.symbol}.keyAt($idx)")
+      val body = iterateHash(set, idx => {
+        val el = freshVal("el", A, q"$set.keyAt($idx)")
         q"""
           $el
           if (${app(f, q"${el.symbol}")}) ${builder.symbol}.add(${el.symbol})
         """
       })
       q"""
-        $set
         $builder
         ..$body
         ${builder.symbol}
@@ -79,14 +78,10 @@ class SetOpsMacros(val c: whitebox.Context) extends Common {
     }
 
   def foreach[A: WeakTypeTag](f: Tree) =
-    stabilized(c.prefix.tree) { pre =>
+    stabilizedSet[A] { set =>
       val idx = freshVar("i", IntTpe, q"0")
-      val setTpe = setType[A]
-      val set = freshVal("set", setTpe, q"$pre.set")
-      val body = iterateHash(q"${set.symbol}",
-                             idx => q"${app(f, q"${set.symbol}.keyAt($idx)")}")
+      val body = iterateHash(set, idx => q"${app(f, q"$set.keyAt($idx)")}")
       q"""
-        $set
         ..$body
       """
     }
