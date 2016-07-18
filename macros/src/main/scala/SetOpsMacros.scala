@@ -79,10 +79,23 @@ class SetOpsMacros(val c: whitebox.Context) extends Common {
 
   def foreach[A: WeakTypeTag](f: Tree) =
     stabilizedSet[A] { set =>
-      val idx = freshVar("i", IntTpe, q"0")
-      val body = iterateHash(set, idx => q"${app(f, q"$set.keyAt($idx)")}")
-      q"""
-        ..$body
-      """
+      iterateHash(set, idx => app(f, q"$set.keyAt($idx)"))
+    }
+
+  def fold[A: WeakTypeTag, B: WeakTypeTag](z: Tree)(op: Tree) =
+    stabilizedSet[A] { set =>
+      stabilized(z) { z =>
+        val accTpe = weakTypeOf[B]
+        val acc = freshVar("acc", accTpe, q"$z")
+        val body = iterateHash(
+          set,
+          idx =>
+            q"${acc.symbol} = ${app(op, q"${acc.symbol}", q"$set.keyAt($idx)")}")
+        q"""
+          $acc
+          ..$body
+          ${acc.symbol}
+        """
+      }
     }
 }

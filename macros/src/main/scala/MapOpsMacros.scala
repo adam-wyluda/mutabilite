@@ -133,4 +133,27 @@ class MapOpsMacros(val c: whitebox.Context) extends Common {
         ${builder.symbol}
       """
     }
+
+  def foreach[K: WeakTypeTag, V: WeakTypeTag](f: Tree) =
+    stabilizedMap[K, V] { map =>
+      iterateHash(map,
+                  idx => app(f, q"$map.keyAt($idx)", q"$map.valueAt($idx)"))
+    }
+
+  def fold[K: WeakTypeTag, V: WeakTypeTag, B: WeakTypeTag](z: Tree)(op: Tree) =
+    stabilizedMap[K, V] { map =>
+      stabilized(z) { z =>
+        val accTpe = weakTypeOf[B]
+        val acc = freshVar("acc", accTpe, q"$z")
+        val body = iterateHash(
+            map,
+            idx =>
+              q"${acc.symbol} = ${app(op, q"${acc.symbol}", q"$map.keyAt($idx)", q"$map.valueAt($idx)")}")
+        q"""
+          $acc
+          ..$body
+          ${acc.symbol}
+        """
+      }
+    }
 }

@@ -164,6 +164,10 @@ class IntMapBenchmark {
 //    offheapMap foreach ((k, v) => blackhole.consume(k))
 
   @Benchmark
+  def foreachMacro(blackhole: Blackhole) =
+    specMap foreachMacro ((k, v) => blackhole.consume(k))
+
+  @Benchmark
   def foreachSpecialized(blackhole: Blackhole) =
     specMap foreach ((k, v) => blackhole.consume(k))
 
@@ -240,6 +244,14 @@ class IntMapBenchmark {
 
   @Benchmark
   def mapStdlib = stdMap map { case (k, v) => k + 1 }
+
+  @Benchmark
+  def flatMapFold =
+    specMap.fold (new BufferSeq_Int) { (r, k, v) =>
+      var j = 0
+      while (j < 5) { r.append(k + j); j += 1 }
+      r
+    }
 
   @Benchmark
   def flatMapSpecialized =

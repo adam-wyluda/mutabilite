@@ -92,6 +92,17 @@ trait Common extends Definitions {
     """
   }
 
+  def iterateSeqReverse(seq: Tree, body: Tree => Tree) = {
+    val idx = freshVar("i", IntTpe, q"$seq.size - 1")
+    q"""
+      $idx
+      while (${idx.symbol} >= 0) {
+        ..${body(q"${idx.symbol}")}
+        ${idx.symbol} -= 1
+      }
+    """
+  }
+
   def iterateHash(hash: Tree, body: Tree => Tree) = {
     val idx = freshVar("i", IntTpe, q"0")
     val size = freshVal("size", IntTpe, q"$hash.capacity")

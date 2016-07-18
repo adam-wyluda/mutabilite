@@ -224,6 +224,9 @@ class SeqBenchmark {
 //  }
 
   @Benchmark
+  def foreachFold = specSeq.foldLeft (0) (_ + _)
+
+  @Benchmark
   def foreachMacro = {
     var sum = 0
     specSeq foreachMacro (sum += _)
@@ -342,6 +345,14 @@ class SeqBenchmark {
 //      s
 //    }
 //  }
+
+  @Benchmark
+  def flatMapFold =
+    specSeq.foldLeft(new BufferSeq_Int) { (r, i) =>
+      var j = 0
+      while (j < 5) { r.append(i + j); j += 1 }
+      r
+    }
 
   @Benchmark
   def flatMapSpecialized =

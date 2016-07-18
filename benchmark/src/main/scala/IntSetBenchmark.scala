@@ -183,6 +183,14 @@ class IntSetBenchmark {
   def mapStdlib = stdSet map (_ + 1)
 
   @Benchmark
+  def flatMapFold =
+    specSet.fold (new HashSet_Int) { (r, i) =>
+      var j = 0
+      while (j < 5) { r.add(i + j); j += 1 }
+      r
+    }
+
+  @Benchmark
   def flatMapSpecialized =
     specSet flatMap { i =>
       val r = new HashSet_Int

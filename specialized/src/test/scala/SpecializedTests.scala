@@ -104,6 +104,22 @@ class SpecializedSeqTest extends FunSuite with BeforeAndAfter with SeqTest {
     seq foreachMacro (sum += _)
     assert(sum == 10 * 11 / 2)
   }
+
+  test("foldLeft") {
+    val seq: Seq_Int = new BufferSeq_Int
+    1 to 3 foreach (seq.append(_))
+
+    assert(seq.foldLeft(0)((acc, el) => (acc + el) * el) == 27)
+    assert(new BufferSeq_Int().foldLeft[Int](3)((_, _) => 1) == 3)
+  }
+
+  test("foldRight") {
+    val seq: Seq_Int = new BufferSeq_Int
+    1 to 3 foreach (seq.append(_))
+
+    assert(seq.foldRight(0)((el, acc) => (acc + el) * el) == 23)
+    assert(new BufferSeq_Int().foldRight[Int](3)((_, _) => 1) == 3)
+  }
 }
 
 class SpecializedSetTest
@@ -235,6 +251,14 @@ class SpecializedSetTest
     set foreachMacro (sum += _)
     assert(sum == 10 * 11 / 2)
   }
+
+  test("fold") {
+    val set: Set_Int = new HashSet_Int
+    1 to 3 foreach (set.add(_))
+
+    assert(set.fold(0)((acc, el) => (acc + el) * el) == 27)
+    assert(new HashSet_Int().fold[Int](3)((_, _) => 1) == 3)
+  }
 }
 
 class SpecializedMapTest extends FunSuite with BeforeAndAfter with MapTest {
@@ -345,5 +369,15 @@ class SpecializedMapTest extends FunSuite with BeforeAndAfter with MapTest {
 
     assert(filtered.size == 5)
     2 to 10 by 2 foreach (i => assert(filtered(i).get == i.toString))
+  }
+
+  test("fold") {
+    val map = new HashMap_Int_Object[String]
+    1 to 5 foreach (i => map.put(i, i toString))
+
+    val sum = map.fold (0) { (acc, k, v) => acc + k + v.length }
+    assert(sum == 5 * 6 / 2 + 5)
+
+    assert(new HashMap_Short_Boolean().fold(7) { (acc, k, v) => acc + k + (if (v) 1 else 0) } == 7)
   }
 }
