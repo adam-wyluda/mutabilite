@@ -116,4 +116,44 @@ class SeqOpsMacros(val c: whitebox.Context) extends Common {
         """
       }
     }
+
+  def reduceLeft[A: WeakTypeTag](op: Tree) =
+    stabilizedSeq[A] { seq =>
+      val accTpe = weakTypeOf[A]
+      val acc = freshVar("acc", accTpe, q"$seq(0)")
+      val idx = freshVar("i", IntTpe, q"1")
+      val size = freshVal("size", IntTpe, q"$seq.size")
+      q"""
+        $acc
+        $idx
+        $size
+        if (${size.symbol} == 0) ${throwUnsupportedOperation("empty.reduce")}
+        while (${idx.symbol} < ${size.symbol}) {
+          ${acc.symbol} = ${app(op,
+                                q"${acc.symbol}",
+                                q"${seq.symbol}(${idx.symbol})")}
+          ${idx.symbol} += 1
+        }
+        ${acc.symbol}
+      """
+    }
+
+  def reduceRight[A: WeakTypeTag](op: Tree) =
+    stabilizedSeq[A] { seq =>
+      val accTpe = weakTypeOf[A]
+      val acc = freshVar("acc", accTpe, q"$seq($seq.size - 1)")
+      val idx = freshVar("i", IntTpe, q"$seq.size - 2")
+      q"""
+        $acc
+        $idx
+        if ($seq.size == 0) ${throwUnsupportedOperation("empty.reduce")}
+        while (${idx.symbol} >= 0) {
+          ${acc.symbol} = ${app(op,
+                                q"${seq.symbol}(${idx.symbol})",
+                                q"${acc.symbol}")}
+          ${idx.symbol} -= 1
+        }
+        ${acc.symbol}
+      """
+    }
 }

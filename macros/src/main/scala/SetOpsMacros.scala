@@ -88,14 +88,19 @@ class SetOpsMacros(val c: whitebox.Context) extends Common {
         val accTpe = weakTypeOf[B]
         val acc = freshVar("acc", accTpe, q"$z")
         val body = iterateHash(
-          set,
-          idx =>
-            q"${acc.symbol} = ${app(op, q"${acc.symbol}", q"$set.keyAt($idx)")}")
+            set,
+            idx =>
+              q"${acc.symbol} = ${app(op, q"${acc.symbol}", q"$set.keyAt($idx)")}")
         q"""
           $acc
           ..$body
           ${acc.symbol}
         """
       }
+    }
+
+  def reduce[A: WeakTypeTag](op: Tree) =
+    stabilizedSet[A] { set =>
+      reduceHash(set, op, TermName("keyAt"))
     }
 }

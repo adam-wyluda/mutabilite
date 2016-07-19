@@ -120,6 +120,20 @@ class SpecializedSeqTest extends FunSuite with BeforeAndAfter with SeqTest {
     assert(seq.foldRight(0)((el, acc) => (acc + el) * el) == 23)
     assert(new BufferSeq_Int().foldRight[Int](3)((_, _) => 1) == 3)
   }
+
+  test("reduceLeft") {
+    val seq: Seq_Int = new BufferSeq_Int
+    1 to 3 foreach (seq.append(_))
+
+    assert(seq.reduceLeft((acc, el) => (acc + el) * el) == 27)
+  }
+
+  test("reduceRight") {
+    val seq: Seq_Int = new BufferSeq_Int
+    1 to 3 foreach (seq.append(_))
+
+    assert(seq.reduceRight((el, acc) => (acc + el) * el) == 11)
+  }
 }
 
 class SpecializedSetTest
@@ -256,8 +270,15 @@ class SpecializedSetTest
     val set: Set_Int = new HashSet_Int
     1 to 3 foreach (set.add(_))
 
-    assert(set.fold(0)((acc, el) => (acc + el) * el) == 27)
+    assert(set.fold(0)(_ + _) == 6)
     assert(new HashSet_Int().fold[Int](3)((_, _) => 1) == 3)
+  }
+
+  test("reduce") {
+    val set: Set_Int = new HashSet_Int
+    1 to 3 foreach (set.add(_))
+
+    assert(set.reduce(_ + _) == 6)
   }
 }
 
@@ -375,9 +396,33 @@ class SpecializedMapTest extends FunSuite with BeforeAndAfter with MapTest {
     val map = new HashMap_Int_Object[String]
     1 to 5 foreach (i => map.put(i, i toString))
 
-    val sum = map.fold (0) { (acc, k, v) => acc + k + v.length }
+    val sum = map.fold(0) { (acc, k, v) =>
+      acc + k + v.length
+    }
     assert(sum == 5 * 6 / 2 + 5)
 
-    assert(new HashMap_Short_Boolean().fold(7) { (acc, k, v) => acc + k + (if (v) 1 else 0) } == 7)
+    assert(new HashMap_Short_Boolean().fold(7) { (acc, k, v) =>
+      acc + k + (if (v) 1 else 0)
+    } == 7)
+  }
+
+  test("reduceKeys") {
+    val map = new HashMap_Int_Object[String]
+    1 to 5 foreach (i => map.put(i, i toString))
+
+    val sum = map.reduceKeys { (acc, k) =>
+      acc + k
+    }
+    assert(sum == 5 * 6 / 2)
+  }
+
+  test("reduceValues") {
+    val map = new HashMap_Int_Object[String]
+    1 to 5 foreach (i => map.put(i, i toString))
+
+    val sum = map.reduceValues { (acc: String, v: String) =>
+      acc + v
+    }
+    assert(sum == "12345")
   }
 }

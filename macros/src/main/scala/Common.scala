@@ -10,9 +10,15 @@ trait Common extends Definitions {
   import c.universe.definitions._
   import c.internal._, decorators._
 
+  def throwUnsupportedOperation(msg: String) =
+    q"throw new $UnsupportedOperationExceptionClass($msg)"
+
   class SemiStable
 
-  def freshVal(pre: String, tpe: Type, value: Tree, flags: FlagSet = NoFlags): ValDef = {
+  def freshVal(pre: String,
+               tpe: Type,
+               value: Tree,
+               flags: FlagSet = NoFlags): ValDef = {
     val name = fresh(pre)
     val sym = enclosingOwner.newTermSymbol(name).setFlag(flags).setInfo(tpe)
     sym.updateAttachment(new SemiStable)
@@ -26,9 +32,9 @@ trait Common extends Definitions {
   def fresh(pre: String): TermName = TermName(c.freshName(pre))
 
   def stabilized(tree: Tree)(f: Tree => Tree) = tree match {
-    case q"${const: Literal}" =>
+    case q"${ const: Literal }" =>
       f(const)
-    case q"${refTree: RefTree}" if isSemiStable(refTree.symbol) =>
+    case q"${ refTree: RefTree }" if isSemiStable(refTree.symbol) =>
       f(refTree)
     case _ =>
       if (tree.tpe == null) {
@@ -42,26 +48,32 @@ trait Common extends Definitions {
   }
 
   def isSemiStable(sym: Symbol) =
-    (sym.isTerm && sym.asTerm.isStable) || sym.attachments.get[SemiStable].nonEmpty
+    (sym.isTerm && sym.asTerm.isStable) || sym.attachments
+      .get[SemiStable]
+      .nonEmpty
 
   def app(f: Tree, argValues: Tree*) = f match {
     case q"(..$params => $body)" =>
       changeOwner(body, f.symbol, enclosingOwner)
-      val args = params zip(argValues) map { case (param, argValue) =>
-        val q"$_ val $_: $argTpt = $_" = param
-        argValue match {
-          case rt: RefTree if isSemiStable(rt.symbol) =>
-            (rt, q"")
-          case _ =>
-            val vd = freshVal("arg", argTpt.tpe, argValue)
-            (q"${vd.symbol}", vd)
-        }
+      val args = params zip (argValues) map {
+        case (param, argValue) =>
+          val q"$_ val $_: $argTpt = $_" = param
+          argValue match {
+            case rt: RefTree if isSemiStable(rt.symbol) =>
+              (rt, q"")
+            case _ =>
+              val vd = freshVal("arg", argTpt.tpe, argValue)
+              (q"${vd.symbol}", vd)
+          }
       }
       val argVals = args map (_._1)
-      val argDefs = args map (_._2) filter { case q"" => false; case _ => true }
+      val argDefs = args map (_._2) filter {
+        case q"" => false; case _ => true
+      }
 
-      val param2Val = params zip (argVals) map { case (param, arg) =>
-        (param.symbol, arg)
+      val param2Val = params zip (argVals) map {
+        case (param, arg) =>
+          (param.symbol, arg)
       } toMap
 
       val transformedBody = typingTransform(body) { (tree, api) =>
@@ -75,7 +87,7 @@ trait Common extends Definitions {
       }
 
       q"..$argDefs; $transformedBody"
-    case _             =>
+    case _ =>
       q"$f(..$argValues)"
   }
 
@@ -115,6 +127,36 @@ trait Common extends Definitions {
           }
           ${idx.symbol} += 1
         }
+      """
+  }
+
+  def reduceHash[T: WeakTypeTag](hash: Tree, op: Tree, read: TermName) = {
+    val accTpe = weakTypeOf[T]
+    val idx = freshVar("i", IntTpe, q"0")
+    val size = freshVal("size", IntTpe, q"$hash.capacity")
+    val acc = freshVar("acc", accTpe, q"$hash.$read(${idx.symbol})")
+    q"""
+        $idx
+        $size
+        if (${size.symbol} == 0) ${throwUnsupportedOperation("empty.reduce")}
+        while ({
+          if (!$hash.isInit($hash.hashAt(${idx.symbol}))) false
+          else {
+            ${idx.symbol} += 1
+            true
+          }
+        }) ()
+        $acc
+        ${idx.symbol} += 1
+        while (${idx.symbol} < ${size.symbol}) {
+          if (!$hash.isInit($hash.hashAt(${idx.symbol}))) {
+            ${acc.symbol} = ${app(op,
+                                  q"${acc.symbol}",
+                                  q"$hash.$read(${idx.symbol})")}
+          }
+          ${idx.symbol} += 1
+        }
+        ${acc.symbol}
       """
   }
 }

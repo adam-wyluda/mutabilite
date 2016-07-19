@@ -156,4 +156,14 @@ class MapOpsMacros(val c: whitebox.Context) extends Common {
         """
       }
     }
+
+  def reduceKeys[K: WeakTypeTag, V: WeakTypeTag](op: Tree) =
+    stabilizedMap[K, V] { map =>
+      reduceHash[K](map, op, TermName("keyAt"))
+    }
+
+  def reduceValues[K: WeakTypeTag, V: WeakTypeTag](op: Tree) =
+    stabilizedMap[K, V] { map =>
+      reduceHash[V](map, op, TermName("valueAt"))
+    }
 }

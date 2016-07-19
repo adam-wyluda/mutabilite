@@ -12,6 +12,9 @@ trait Definitions {
   import c.universe.definitions._
   import c.universe.rootMirror._
 
+  val UnsupportedOperationExceptionClass = staticClass(
+      "java.lang.UnsupportedOperationException")
+
   def SeqClass(elemType: String) =
     staticClass("offheap.collection.Seq_" + elemType)
 
@@ -81,7 +84,8 @@ trait Definitions {
     }
 
   def hashMapType[K: WeakTypeTag, V: WeakTypeTag]: Type =
-    if (wt[K] <:< AnyRefTpe && wt[V] <:< AnyRefTpe) wt[HashMap_Object_Object[K, V]]
+    if (wt[K] <:< AnyRefTpe && wt[V] <:< AnyRefTpe)
+      wt[HashMap_Object_Object[K, V]]
     else if (wt[K] <:< AnyRefTpe) hashMap_object_v[K, V]
     else if (wt[V] <:< AnyRefTpe) hashMap_k_object[K, V]
     else HashMapClass(typeName[K], typeName[V]).toType
