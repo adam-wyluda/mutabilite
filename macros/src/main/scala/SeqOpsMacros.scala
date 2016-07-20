@@ -189,4 +189,21 @@ class SeqOpsMacros(val c: whitebox.Context) extends Common {
         ${result.symbol}
       """
     }
+
+  def sameElements[A: WeakTypeTag](other: Tree) =
+    stabilizedSeq[A] { seq =>
+      stabilized(other) { other =>
+        val result =
+          freshVar("result", BooleanTpe, q"$seq.size == $other.size")
+        val body = iterateSeqWhile(
+            seq,
+            q"${result.symbol}",
+            idx => q"${result.symbol} = ($seq($idx) == $other($idx))")
+        q"""
+          $result
+          ..$body
+          ${result.symbol}
+        """
+      }
+    }
 }

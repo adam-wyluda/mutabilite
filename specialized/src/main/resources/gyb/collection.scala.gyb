@@ -33,6 +33,7 @@ package object collection {
     def transform(f: ${T_Arg} => ${T_Arg}): Unit                    = macro offheap.collection.macros.SeqOpsMacros.transform[${T_Arg}]
     def forall(p: ${T_Arg} => Boolean): Boolean                     = macro offheap.collection.macros.SeqOpsMacros.forall[${T_Arg}]
     def exists(p: ${T_Arg} => Boolean): Boolean                     = macro offheap.collection.macros.SeqOpsMacros.exists[${T_Arg}]
+    def sameElements(other: Seq_${T}${T_Param}): Boolean            = macro offheap.collection.macros.SeqOpsMacros.sameElements[${T_Arg}]
   }
 
   implicit class SetOps_${T}${T_Param}(val set: Set_${T}${T_Param}) extends AnyVal {

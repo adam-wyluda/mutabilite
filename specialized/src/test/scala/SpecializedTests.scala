@@ -159,6 +159,24 @@ class SpecializedSeqTest extends FunSuite with BeforeAndAfter with SeqTest {
     assert(seq.exists(_ == 62))
     assert(!seq.exists(_ % 2 == 1))
   }
+
+  test("sameElements") {
+    val seq: Seq_Int = new BufferSeq_Int
+    1 to 10 foreach (seq.append(_))
+
+    val same: Seq_Int = new BufferSeq_Int
+    1 to 10 foreach (same.append(_))
+    assert(seq sameElements same)
+
+    val different: Seq_Int = new BufferSeq_Int
+    1 to 10 foreach (i => different.append(i * i))
+    assert(!seq.sameElements(different))
+
+    val smaller: Seq_Int = new BufferSeq_Int
+    1 to 5 foreach (smaller.append(_))
+    assert(!seq.sameElements(smaller))
+    assert(!smaller.sameElements(seq))
+  }
 }
 
 class SpecializedSetTest
