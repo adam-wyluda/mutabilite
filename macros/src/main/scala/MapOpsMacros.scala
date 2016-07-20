@@ -166,4 +166,9 @@ class MapOpsMacros(val c: whitebox.Context) extends Common {
     stabilizedMap[K, V] { map =>
       reduceHash[V](map, op, TermName("valueAt"))
     }
+
+  def transformValues[K: WeakTypeTag, V: WeakTypeTag](f: Tree) =
+    stabilizedMap[K, V] { map =>
+      iterateHash(map, idx => q"$map.updateValue($idx, ${app(f, q"$map.valueAt($idx)")})")
+    }
 }

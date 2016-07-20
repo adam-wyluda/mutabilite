@@ -156,4 +156,9 @@ class SeqOpsMacros(val c: whitebox.Context) extends Common {
         ${acc.symbol}
       """
     }
+
+  def transform[A: WeakTypeTag](f: Tree) =
+    stabilizedSeq[A] { seq =>
+      iterateSeq(seq, idx => q"$seq($idx) = ${app(f, q"$seq($idx)")}")
+    }
 }

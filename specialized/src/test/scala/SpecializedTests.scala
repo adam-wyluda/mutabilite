@@ -134,6 +134,15 @@ class SpecializedSeqTest extends FunSuite with BeforeAndAfter with SeqTest {
 
     assert(seq.reduceRight((el, acc) => (acc + el) * el) == 11)
   }
+
+  test("transform") {
+    val seq: Seq_Int = new BufferSeq_Int
+    1 to 10 foreach (seq.append(_))
+
+    seq.transform(_ * 10)
+
+    1 to 10 foreach (i => assert(seq(i - 1) == i * 10))
+  }
 }
 
 class SpecializedSetTest
@@ -424,5 +433,14 @@ class SpecializedMapTest extends FunSuite with BeforeAndAfter with MapTest {
       acc + v
     }
     assert(sum == "12345")
+  }
+
+  test("transformValues") {
+    val map = new HashMap_Int_Int
+    1 to 10 foreach (i => map.put(i, i))
+
+    map.transformValues(_ * 10)
+
+    1 to 10 foreach (i => assert(map(i).get == i * 10))
   }
 }

@@ -30,6 +30,7 @@ package object collection {
     def foldRight[B](z: B)(op: (${T_Arg}, B) => B): B               = macro offheap.collection.macros.SeqOpsMacros.foldRight[${T_Arg}, B]
     def reduceLeft(op: (${T_Arg}, ${T_Arg}) => ${T_Arg}): ${T_Arg}  = macro offheap.collection.macros.SeqOpsMacros.reduceLeft[${T_Arg}]
     def reduceRight(op: (${T_Arg}, ${T_Arg}) => ${T_Arg}): ${T_Arg} = macro offheap.collection.macros.SeqOpsMacros.reduceRight[${T_Arg}]
+    def transform(f: ${T_Arg} => ${T_Arg}): Unit                    = macro offheap.collection.macros.SeqOpsMacros.transform[${T_Arg}]
   }
 
   implicit class SetOps_${T}${T_Param}(val set: Set_${T}${T_Param}) extends AnyVal {
@@ -75,6 +76,7 @@ package object collection {
     def fold[B](z: B)(op: (B, ${K_Arg}, ${V_Arg}) => B): B                  = macro offheap.collection.macros.MapOpsMacros.fold[${K_Arg}, ${V_Arg}, B]
     def reduceKeys(op: (${K_Arg}, ${K_Arg}) => ${K_Arg}): ${K_Arg}          = macro offheap.collection.macros.MapOpsMacros.reduceKeys[${K_Arg}, ${V_Arg}]
     def reduceValues(op: (${V_Arg}, ${V_Arg}) => ${V_Arg}): ${V_Arg}        = macro offheap.collection.macros.MapOpsMacros.reduceValues[${K_Arg}, ${V_Arg}]
+    def transformValues(f: ${V_Arg} => ${V_Arg}): Unit                      = macro offheap.collection.macros.MapOpsMacros.transformValues[${K_Arg}, ${V_Arg}]
   }
 
   % end
