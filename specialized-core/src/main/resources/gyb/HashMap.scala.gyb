@@ -203,7 +203,7 @@ class HashMap_${K}_${V}${Param}(initialSize: Int = 8)
   }
 
   def keys: ${K_Set} = {
-    val result = new ${K_HashSet}
+    val result = new ${K_HashSet}(initialSize = capacity)
     var i = 0
     while (i < capacity) {
       if (!isInit(hashes(i))) result.add(_keys(i)${Cast_to_K})
@@ -213,7 +213,7 @@ class HashMap_${K}_${V}${Param}(initialSize: Int = 8)
   }
 
   def values: ${V_Seq} = {
-    val result = new ${V_BufferSeq}
+    val result = new ${V_BufferSeq}(initialSize = capacity)
     var i = 0
     while (i < capacity) {
       if (!isInit(hashes(i))) result.append(_values(i)${Cast_to_V})
