@@ -161,4 +161,32 @@ class SeqOpsMacros(val c: whitebox.Context) extends Common {
     stabilizedSeq[A] { seq =>
       iterateSeq(seq, idx => q"$seq($idx) = ${app(f, q"$seq($idx)")}")
     }
+
+  def forall[A: WeakTypeTag](p: Tree) =
+    stabilizedSeq[A] { seq =>
+      val result = freshVar("result", BooleanTpe, q"true")
+      val body = iterateSeqWhile(
+          seq,
+          q"${result.symbol}",
+          idx => q"${result.symbol} = ${app(p, q"$seq(${idx.symbol})")}")
+      q"""
+        $result
+        ..$body
+        ${result.symbol}
+      """
+    }
+
+  def exists[A: WeakTypeTag](p: Tree) =
+    stabilizedSeq[A] { seq =>
+      val result = freshVar("result", BooleanTpe, q"false")
+      val body = iterateSeqWhile(
+          seq,
+          q"!${result.symbol}",
+          idx => q"${result.symbol} = ${app(p, q"$seq(${idx.symbol})")}")
+      q"""
+        $result
+        ..$body
+        ${result.symbol}
+      """
+    }
 }

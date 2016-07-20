@@ -103,4 +103,32 @@ class SetOpsMacros(val c: whitebox.Context) extends Common {
     stabilizedSet[A] { set =>
       reduceHash(set, op, TermName("keyAt"))
     }
+
+  def forall[A: WeakTypeTag](p: Tree) =
+    stabilizedSet[A] { set =>
+      val result = freshVar("result", BooleanTpe, q"true")
+      val body = iterateHashWhile(
+          set,
+          q"${result.symbol}",
+          idx => q"${result.symbol} = ${app(p, q"$set.keyAt(${idx.symbol})")}")
+      q"""
+        $result
+        ..$body
+        ${result.symbol}
+      """
+    }
+
+  def exists[A: WeakTypeTag](p: Tree) =
+    stabilizedSet[A] { set =>
+      val result = freshVar("result", BooleanTpe, q"false")
+      val body = iterateHashWhile(
+          set,
+          q"!${result.symbol}",
+          idx => q"${result.symbol} = ${app(p, q"$set.keyAt(${idx.symbol})")}")
+      q"""
+        $result
+        ..$body
+        ${result.symbol}
+      """
+    }
 }

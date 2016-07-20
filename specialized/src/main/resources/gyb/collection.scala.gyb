@@ -31,6 +31,8 @@ package object collection {
     def reduceLeft(op: (${T_Arg}, ${T_Arg}) => ${T_Arg}): ${T_Arg}  = macro offheap.collection.macros.SeqOpsMacros.reduceLeft[${T_Arg}]
     def reduceRight(op: (${T_Arg}, ${T_Arg}) => ${T_Arg}): ${T_Arg} = macro offheap.collection.macros.SeqOpsMacros.reduceRight[${T_Arg}]
     def transform(f: ${T_Arg} => ${T_Arg}): Unit                    = macro offheap.collection.macros.SeqOpsMacros.transform[${T_Arg}]
+    def forall(p: ${T_Arg} => Boolean): Boolean                     = macro offheap.collection.macros.SeqOpsMacros.forall[${T_Arg}]
+    def exists(p: ${T_Arg} => Boolean): Boolean                     = macro offheap.collection.macros.SeqOpsMacros.exists[${T_Arg}]
   }
 
   implicit class SetOps_${T}${T_Param}(val set: Set_${T}${T_Param}) extends AnyVal {
@@ -40,6 +42,8 @@ package object collection {
     def foreachMacro(f: ${T_Arg} => Unit): Unit                 = macro offheap.collection.macros.SetOpsMacros.foreach[${T_Arg}]
     def fold[B](z: B)(op: (B, ${T_Arg}) => B): B                = macro offheap.collection.macros.SetOpsMacros.fold[${T_Arg}, B]
     def reduce(op: (${T_Arg}, ${T_Arg}) => ${T_Arg}): ${T_Arg}  = macro offheap.collection.macros.SetOpsMacros.reduce[${T_Arg}]
+    def forall(p: ${T_Arg} => Boolean): Boolean                 = macro offheap.collection.macros.SetOpsMacros.forall[${T_Arg}]
+    def exists(p: ${T_Arg} => Boolean): Boolean                 = macro offheap.collection.macros.SetOpsMacros.exists[${T_Arg}]
   }
 
   % end
@@ -77,6 +81,8 @@ package object collection {
     def reduceKeys(op: (${K_Arg}, ${K_Arg}) => ${K_Arg}): ${K_Arg}          = macro offheap.collection.macros.MapOpsMacros.reduceKeys[${K_Arg}, ${V_Arg}]
     def reduceValues(op: (${V_Arg}, ${V_Arg}) => ${V_Arg}): ${V_Arg}        = macro offheap.collection.macros.MapOpsMacros.reduceValues[${K_Arg}, ${V_Arg}]
     def transformValues(f: ${V_Arg} => ${V_Arg}): Unit                      = macro offheap.collection.macros.MapOpsMacros.transformValues[${K_Arg}, ${V_Arg}]
+    def forall(p: (${K_Arg}, ${V_Arg}) => Boolean): Boolean                 = macro offheap.collection.macros.MapOpsMacros.forall[${K_Arg}, ${V_Arg}]
+    def exists(p: (${K_Arg}, ${V_Arg}) => Boolean): Boolean                 = macro offheap.collection.macros.MapOpsMacros.exists[${K_Arg}, ${V_Arg}]
   }
 
   % end

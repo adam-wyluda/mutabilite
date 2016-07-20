@@ -115,19 +115,47 @@ trait Common extends Definitions {
     """
   }
 
+  def iterateSeqWhile(seq: Tree, condition: Tree, body: Tree => Tree) = {
+    val idx = freshVar("i", IntTpe, q"0")
+    val size = freshVal("size", IntTpe, q"$seq.size")
+    q"""
+      $idx
+      $size
+      while ($condition && ${idx.symbol} < ${size.symbol}) {
+        ..${body(q"${idx.symbol}")}
+        ${idx.symbol} += 1
+      }
+    """
+  }
+
   def iterateHash(hash: Tree, body: Tree => Tree) = {
     val idx = freshVar("i", IntTpe, q"0")
     val size = freshVal("size", IntTpe, q"$hash.capacity")
     q"""
-        $idx
-        $size
-        while (${idx.symbol} < ${size.symbol}) {
-          if (!$hash.isInit($hash.hashAt(${idx.symbol}))) {
-            ..${body(q"${idx.symbol}")}
-          }
-          ${idx.symbol} += 1
+      $idx
+      $size
+      while (${idx.symbol} < ${size.symbol}) {
+        if (!$hash.isInit($hash.hashAt(${idx.symbol}))) {
+          ..${body(q"${idx.symbol}")}
         }
-      """
+        ${idx.symbol} += 1
+      }
+    """
+  }
+
+  def iterateHashWhile(hash: Tree, condition: Tree, body: Tree => Tree) = {
+    val idx = freshVar("i", IntTpe, q"0")
+    val size = freshVal("size", IntTpe, q"$hash.capacity")
+    q"""
+      $idx
+      $size
+      while ($condition && ${idx.symbol} < ${size.symbol}) {
+        if (!$hash.isInit($hash.hashAt(${idx.symbol}))) {
+          ..${body(q"${idx.symbol}")}
+        }
+        ${idx.symbol} += 1
+      }
+    """
   }
 
   def reduceHash[T: WeakTypeTag](hash: Tree, op: Tree, read: TermName) = {
@@ -136,27 +164,27 @@ trait Common extends Definitions {
     val size = freshVal("size", IntTpe, q"$hash.capacity")
     val acc = freshVar("acc", accTpe, q"$hash.$read(${idx.symbol})")
     q"""
-        $idx
-        $size
-        if (${size.symbol} == 0) ${throwUnsupportedOperation("empty.reduce")}
-        while ({
-          if (!$hash.isInit($hash.hashAt(${idx.symbol}))) false
-          else {
-            ${idx.symbol} += 1
-            true
-          }
-        }) ()
-        $acc
-        ${idx.symbol} += 1
-        while (${idx.symbol} < ${size.symbol}) {
-          if (!$hash.isInit($hash.hashAt(${idx.symbol}))) {
-            ${acc.symbol} = ${app(op,
-                                  q"${acc.symbol}",
-                                  q"$hash.$read(${idx.symbol})")}
-          }
+      $idx
+      $size
+      if (${size.symbol} == 0) ${throwUnsupportedOperation("empty.reduce")}
+      while ({
+        if (!$hash.isInit($hash.hashAt(${idx.symbol}))) false
+        else {
           ${idx.symbol} += 1
+          true
         }
-        ${acc.symbol}
-      """
+      }) ()
+      $acc
+      ${idx.symbol} += 1
+      while (${idx.symbol} < ${size.symbol}) {
+        if (!$hash.isInit($hash.hashAt(${idx.symbol}))) {
+          ${acc.symbol} = ${app(op,
+                                q"${acc.symbol}",
+                                q"$hash.$read(${idx.symbol})")}
+        }
+        ${idx.symbol} += 1
+      }
+      ${acc.symbol}
+    """
   }
 }

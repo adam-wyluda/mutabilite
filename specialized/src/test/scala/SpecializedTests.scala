@@ -143,6 +143,22 @@ class SpecializedSeqTest extends FunSuite with BeforeAndAfter with SeqTest {
 
     1 to 10 foreach (i => assert(seq(i - 1) == i * 10))
   }
+
+  test("forall") {
+    val seq: Seq_Int = new BufferSeq_Int
+    2 to 100 by 2 foreach (seq.append(_))
+
+    assert(seq.forall(_ % 2 == 0))
+    assert(!seq.forall(_ > 50))
+  }
+
+  test("exists") {
+    val seq: Seq_Int = new BufferSeq_Int
+    2 to 100 by 2 foreach (seq.append(_))
+
+    assert(seq.exists(_ == 62))
+    assert(!seq.exists(_ % 2 == 1))
+  }
 }
 
 class SpecializedSetTest
@@ -279,7 +295,7 @@ class SpecializedSetTest
     val set: Set_Int = new HashSet_Int
     1 to 3 foreach (set.add(_))
 
-    assert(set.fold(0)(_ + _) == 6)
+    assert(set.fold(5)(_ + _) == 11)
     assert(new HashSet_Int().fold[Int](3)((_, _) => 1) == 3)
   }
 
@@ -288,6 +304,22 @@ class SpecializedSetTest
     1 to 3 foreach (set.add(_))
 
     assert(set.reduce(_ + _) == 6)
+  }
+
+  test("forall") {
+    val set: Set_Int = new HashSet_Int
+    2 to 100 by 2 foreach (set.add(_))
+
+    assert(set.forall(_ % 2 == 0))
+    assert(!set.forall(_ > 50))
+  }
+
+  test("exists") {
+    val set: Set_Int = new HashSet_Int
+    2 to 100 by 2 foreach (set.add(_))
+
+    assert(set.exists(_ == 62))
+    assert(!set.exists(_ % 2 == 1))
   }
 }
 
@@ -405,10 +437,10 @@ class SpecializedMapTest extends FunSuite with BeforeAndAfter with MapTest {
     val map = new HashMap_Int_Object[String]
     1 to 5 foreach (i => map.put(i, i toString))
 
-    val sum = map.fold(0) { (acc, k, v) =>
+    val sum = map.fold(3) { (acc, k, v) =>
       acc + k + v.length
     }
-    assert(sum == 5 * 6 / 2 + 5)
+    assert(sum == 3 + 5 * 6 / 2 + 5)
 
     assert(new HashMap_Short_Boolean().fold(7) { (acc, k, v) =>
       acc + k + (if (v) 1 else 0)
@@ -442,5 +474,22 @@ class SpecializedMapTest extends FunSuite with BeforeAndAfter with MapTest {
     map.transformValues(_ * 10)
 
     1 to 10 foreach (i => assert(map(i).get == i * 10))
+  }
+
+  test("forall") {
+    val map = new HashMap_Int_Int
+    1 to 100 foreach (i => map.put(i * 2 + 1, i * 2))
+
+    assert(map.forall((k, v) => k % 2 == 1 && v % 2 == 0))
+    assert(map.forall(_ == _ + 1))
+    assert(!map.forall((k, _) => k == 30))
+  }
+
+  test("exists") {
+    val map = new HashMap_Int_Int
+    1 to 100 foreach (i => map.put(i * 2 + 1, i * 2))
+
+    assert(map.exists((k, v) => k == 21 && v == 20))
+    assert(!map.exists(_ == _))
   }
 }

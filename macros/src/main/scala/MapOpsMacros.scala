@@ -169,6 +169,38 @@ class MapOpsMacros(val c: whitebox.Context) extends Common {
 
   def transformValues[K: WeakTypeTag, V: WeakTypeTag](f: Tree) =
     stabilizedMap[K, V] { map =>
-      iterateHash(map, idx => q"$map.updateValue($idx, ${app(f, q"$map.valueAt($idx)")})")
+      iterateHash(
+          map,
+          idx => q"$map.updateValue($idx, ${app(f, q"$map.valueAt($idx)")})")
+    }
+
+  def forall[K: WeakTypeTag, V: WeakTypeTag](p: Tree) =
+    stabilizedMap[K, V] { map =>
+      val result = freshVar("result", BooleanTpe, q"true")
+      val body = iterateHashWhile(
+          map,
+          q"${result.symbol}",
+          idx =>
+            q"${result.symbol} = ${app(p, q"$map.keyAt(${idx.symbol})", q"$map.valueAt(${idx.symbol})")}")
+      q"""
+        $result
+        ..$body
+        ${result.symbol}
+      """
+    }
+
+  def exists[K: WeakTypeTag, V: WeakTypeTag](p: Tree) =
+    stabilizedMap[K, V] { map =>
+      val result = freshVar("result", BooleanTpe, q"false")
+      val body = iterateHashWhile(
+          map,
+          q"!${result.symbol}",
+          idx =>
+            q"${result.symbol} = ${app(p, q"$map.keyAt(${idx.symbol})", q"$map.valueAt(${idx.symbol})")}")
+      q"""
+        $result
+        ..$body
+        ${result.symbol}
+      """
     }
 }
