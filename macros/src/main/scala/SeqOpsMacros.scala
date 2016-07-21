@@ -85,36 +85,32 @@ class SeqOpsMacros(val c: whitebox.Context) extends Common {
 
   def foldLeft[A: WeakTypeTag, B: WeakTypeTag](z: Tree)(op: Tree) =
     stabilizedSeq[A] { seq =>
-      stabilized(z) { z =>
-        val accTpe = weakTypeOf[B]
-        val acc = freshVar("acc", accTpe, q"$z")
-        val body = iterateSeq(
-            seq,
-            idx =>
-              q"${acc.symbol} = ${app(op, q"${acc.symbol}", q"$seq($idx)")}")
-        q"""
-          $acc
-          ..$body
-          ${acc.symbol}
-        """
-      }
+      val accTpe = weakTypeOf[B]
+      val acc = freshVar("acc", accTpe, q"$z")
+      val body = iterateSeq(
+          seq,
+          idx =>
+            q"${acc.symbol} = ${app(op, q"${acc.symbol}", q"$seq($idx)")}")
+      q"""
+        $acc
+        ..$body
+        ${acc.symbol}
+      """
     }
 
   def foldRight[A: WeakTypeTag, B: WeakTypeTag](z: Tree)(op: Tree) =
     stabilizedSeq[A] { seq =>
-      stabilized(z) { z =>
-        val accTpe = weakTypeOf[B]
-        val acc = freshVar("acc", accTpe, q"$z")
-        val body = iterateSeqReverse(
-            seq,
-            idx =>
-              q"${acc.symbol} = ${app(op, q"$seq($idx)", q"${acc.symbol}")}")
-        q"""
-          $acc
-          ..$body
-          ${acc.symbol}
-        """
-      }
+      val accTpe = weakTypeOf[B]
+      val acc = freshVar("acc", accTpe, q"$z")
+      val body = iterateSeqReverse(
+          seq,
+          idx =>
+            q"${acc.symbol} = ${app(op, q"$seq($idx)", q"${acc.symbol}")}")
+      q"""
+        $acc
+        ..$body
+        ${acc.symbol}
+      """
     }
 
   def reduceLeft[A: WeakTypeTag](op: Tree) =
