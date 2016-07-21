@@ -202,4 +202,27 @@ class SeqOpsMacros(val c: whitebox.Context) extends Common {
         """
       }
     }
+
+  def zipToMap[A: WeakTypeTag, B: WeakTypeTag](values: Tree) =
+    stabilizedSeq[A] { keys =>
+      stabilized(values) { values =>
+        val idx = freshVar("i", IntTpe, q"0")
+        val size = freshVal("size", IntTpe, q"$keys.size min $values.size")
+        val builderTpe = hashMapType[A, B]
+        val builder = freshVal(
+            "builder",
+            builderTpe,
+            q"new $builderTpe(initialSize = $keys.capacity min $values.capacity)")
+        q"""
+          $idx
+          $size
+          $builder
+          while (${idx.symbol} < ${size.symbol}) {
+            ${builder.symbol}.put($keys(${idx.symbol}), $values(${idx.symbol}))
+            ${idx.symbol} += 1
+          }
+          ${builder.symbol}
+        """
+      }
+    }
 }

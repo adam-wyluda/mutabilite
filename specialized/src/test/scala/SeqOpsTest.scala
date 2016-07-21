@@ -170,4 +170,27 @@ class SeqOpsTest extends FunSuite {
     assert(!seq.sameElements(smaller))
     assert(!smaller.sameElements(seq))
   }
+
+  test("zipToMap") {
+    val seq: Seq_Int = new BufferSeq_Int
+    1 to 10 foreach (seq.append(_))
+
+    val smallSeq = new BufferSeq_Int
+    1 to 5 foreach (smallSeq.append(_))
+
+    val strings = new BufferSeq_Object[String]
+    1 to 10 foreach (i => strings.append(i toString))
+
+    val smallStrings = new BufferSeq_Object[String]
+    1 to 5 foreach (i => smallStrings.append(i toString))
+
+    val zip = seq zipToMap strings
+    val test: Map_Int_Object[String] = zip
+
+    assert(zip.size == 10)
+    1 to 10 foreach (i => assert(zip(i).get == i.toString))
+
+    assert(smallSeq.zipToMap(strings).size == 5)
+    assert(seq.zipToMap(smallStrings).size == 5)
+  }
 }

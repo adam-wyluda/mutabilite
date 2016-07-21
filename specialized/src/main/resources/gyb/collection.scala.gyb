@@ -34,6 +34,7 @@ package object collection {
     def forall(p: ${T_Arg} => Boolean): Boolean                     = macro offheap.collection.macros.SeqOpsMacros.forall[${T_Arg}]
     def exists(p: ${T_Arg} => Boolean): Boolean                     = macro offheap.collection.macros.SeqOpsMacros.exists[${T_Arg}]
     def sameElements(other: Seq_${T}${T_Param}): Boolean            = macro offheap.collection.macros.SeqOpsMacros.sameElements[${T_Arg}]
+    def zipToMap[B](values: Seq[B]): Map[${T_Arg}, B]               = macro offheap.collection.macros.SeqOpsMacros.zipToMap[${T_Arg}, B]
   }
 
   implicit class SetOps_${T}${T_Param}(val set: Set_${T}${T_Param}) extends AnyVal {
