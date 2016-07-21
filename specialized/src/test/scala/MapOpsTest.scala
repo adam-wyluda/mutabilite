@@ -5,10 +5,7 @@ import org.scalatest.{BeforeAndAfter, FunSuite}
 
 import HashEq.Implicits._
 
-class SpecializedMapTest extends FunSuite with BeforeAndAfter with MapTest {
-  def provideMap_Int_Object: Map[Int, Object] = new HashMap_Int_Object
-  def provideMap_Object_Int: Map[Object, Int] = new HashMap_Object_Int
-
+class MapOpsTest extends FunSuite {
   test("map (int, string) to float") {
     val map = new HashMap_Int_Object[String]
     1 to 10 foreach (i => map.put(i, i toString))
@@ -20,7 +17,7 @@ class SpecializedMapTest extends FunSuite with BeforeAndAfter with MapTest {
 
     assert(mapped.size == 10)
     1 to 10 foreach (i =>
-      assert(mapped.index(i.toFloat / (i.toString.length)) != -1))
+          assert(mapped.index(i.toFloat / (i.toString.length)) != -1))
   }
 
   test("map (string, int) to string") {
@@ -34,7 +31,7 @@ class SpecializedMapTest extends FunSuite with BeforeAndAfter with MapTest {
 
     assert(mapped.size == 10)
     1 to 10 foreach (i =>
-      assert(mapped.index(i.toString + (i + 10).toString) != -1))
+          assert(mapped.index(i.toString + (i + 10).toString) != -1))
   }
 
   test("mapKeys (int, _) to (string, _)") {
