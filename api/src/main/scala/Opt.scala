@@ -3,6 +3,7 @@ package offheap.collection
 trait Opt[A] extends Any with Traversable1[A] {
   def get: A
   def size: Int
+  def capacity = 1
 }
 
 class Some[A](value: A) extends Opt[A] {

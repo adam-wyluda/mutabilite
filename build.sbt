@@ -49,7 +49,7 @@ lazy val generic = project
 
 lazy val specializedCore = project
   .in(file("specialized-core"))
-  .dependsOn(api)
+  .dependsOn(api, tests % "test")
   .settings(
     defaults ++ Seq(
       moduleName := "specialized-core"

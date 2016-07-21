@@ -2,6 +2,7 @@ package offheap.collection
 
 sealed trait Traversable extends Any {
   def size: Int
+  def capacity: Int
   def empty: Boolean
   def notEmpty: Boolean = !empty
 }

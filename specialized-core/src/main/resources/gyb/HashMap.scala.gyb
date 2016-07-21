@@ -66,7 +66,6 @@ trait Map_${K}_${V}${Param} extends Map[${K_Arg}, ${V_Arg}] {
   def values: ${V_Seq}
   def contains(key: ${K_Arg}): Boolean
 
-  def capacity: Int
   def hashAt(index: Int): Int
   def keyAt(index: Int): ${K_Arg}
   def valueAt(index: Int): ${V_Arg}

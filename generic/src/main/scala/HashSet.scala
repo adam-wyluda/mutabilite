@@ -13,7 +13,7 @@ class HashSet[A](initialSize: Int = 8)(implicit tag: ClassTag[A])
   private[this] var hashes: Array[Int] = new Array[Int](initialSize)
   private[this] var _keys: Array[AnyRef] = new Array[AnyRef](initialSize)
   private[this] var _size = 0
-  private[this] var capacity = initialSize
+  var capacity = initialSize
   private[this] var mask = capacity - 1
 
   def apply(key: A): Boolean = indexOf(key) != -1

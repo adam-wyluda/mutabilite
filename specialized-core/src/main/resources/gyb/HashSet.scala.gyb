@@ -32,7 +32,6 @@ trait Set_${T}${T_Param} extends Any with Set[${T_Arg}] {
   def union(that: Set_${T}${T_Param}): Set_${T}${T_Param}
   def diff(that: Set_${T}${T_Param}): Set_${T}${T_Param}
 
-  def capacity: Int
   def hashAt(index: Int): Int
   def keyAt(index: Int): ${T_Arg}
   def isInit(hash: Int): Boolean

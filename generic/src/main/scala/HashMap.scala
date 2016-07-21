@@ -15,7 +15,7 @@ class HashMap[K, V](initialSize: Int = 8)(
   private[this] var _keys: Array[AnyRef] = new Array[AnyRef](initialSize)
   private[this] var _values: Array[AnyRef] = new Array[AnyRef](initialSize)
   private[this] var _size = 0
-  private[this] var capacity = initialSize
+  var capacity = initialSize
   private[this] var mask = capacity - 1
 
   private[this] val emptyOpt = new None[V]
