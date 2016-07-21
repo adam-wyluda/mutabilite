@@ -31,7 +31,9 @@ trait Seq_${T}${T_Param} extends Any with Seq[${T_Arg}] {
   def remove(n: Int): ${T_Arg}
   def index(elem: ${T_Arg}): Int
   def insert(index: Int, elem: ${T_Arg}): Unit
-  def foreach(f: ${T_Arg} => Unit)
+  def foreach(f: ${T_Arg} => Unit): Unit
+
+  def compact: Unit
 }
 
 class BufferSeq_${T}${T_Param}(initialSize: Int = 16)(implicit eq: Eq_${T}) extends Seq_${T}${T_Param} {
@@ -120,6 +122,16 @@ class BufferSeq_${T}${T_Param}(initialSize: Int = 16)(implicit eq: Eq_${T}) exte
       i += 1
     }
     result
+  }
+
+  def compact: Unit = {
+    var newSize = 1
+    while (newSize < size) newSize *= 2
+    if (newSize != array.size) {
+      val newArray = new Array[${T_Array}](newSize)
+      System.arraycopy(array, 0, newArray, 0, size)
+      this.array = newArray
+    }
   }
 
   private def copy(src: Int, dest: Int, len: Int) = System.arraycopy(array, src, array, dest, len)

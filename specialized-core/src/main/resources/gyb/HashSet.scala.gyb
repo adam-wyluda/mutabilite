@@ -32,6 +32,7 @@ trait Set_${T}${T_Param} extends Any with Set[${T_Arg}] {
   def union(that: Set_${T}${T_Param}): Set_${T}${T_Param}
   def diff(that: Set_${T}${T_Param}): Set_${T}${T_Param}
 
+  def compact: Unit
   def hashAt(index: Int): Int
   def keyAt(index: Int): ${T_Arg}
   def isInit(hash: Int): Boolean
@@ -186,25 +187,25 @@ class HashSet_${T}${T_Param}(initialSize: Int = 8)(implicit hashK: Hash_${T}) ex
   @inline
   private[this] def shouldGrow = _size > capacity * 9 / 10
 
-  private[this] def growIfNecessary: Unit = {
-    if (shouldGrow) {
-      val oldCapacity = capacity
-      val oldHashes = hashes
-      val oldKeys = _keys
-      capacity *= 2
-      mask = capacity - 1
-      hashes = new Array[Int](capacity)
-      _keys = new Array[${T_Array}](capacity)
-      _size = 0
-      var i = 0
-      while (i < oldCapacity) {
-        val hash = oldHashes(i)
-        if (!isInit(hash)) {
-          val key = oldKeys(i)${Cast_to_T}
-          add(key)
-        }
-        i += 1
+  private[this] def growIfNecessary: Unit = if (shouldGrow) growToNewCapacity(capacity * 2)
+
+  private[this] def growToNewCapacity(newCapacity: Int) = {
+    val oldCapacity = capacity
+    val oldHashes = hashes
+    val oldKeys = _keys
+    capacity = newCapacity
+    mask = capacity - 1
+    hashes = new Array[Int](capacity)
+    _keys = new Array[${T_Array}](capacity)
+    _size = 0
+    var i = 0
+    while (i < oldCapacity) {
+      val hash = oldHashes(i)
+      if (!isInit(hash)) {
+        val key = oldKeys(i)${Cast_to_T}
+        add(key)
       }
+      i += 1
     }
   }
 
@@ -214,6 +215,11 @@ class HashSet_${T}${T_Param}(initialSize: Int = 8)(implicit hashK: Hash_${T}) ex
     hash
   }
 
+  def compact: Unit = {
+    var newCapacity = 1
+    while (newCapacity < size) newCapacity *= 2
+    if (newCapacity != capacity) growToNewCapacity(newCapacity)
+  }
 
   def hashAt(index: Int): Int = hashes(index)
   def keyAt(index: Int): ${T_Arg} = _keys(index)${Cast_to_T}

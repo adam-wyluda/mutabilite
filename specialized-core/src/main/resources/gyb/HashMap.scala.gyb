@@ -66,6 +66,7 @@ trait Map_${K}_${V}${Param} extends Map[${K_Arg}, ${V_Arg}] {
   def values: ${V_Seq}
   def contains(key: ${K_Arg}): Boolean
 
+  def compact: Unit
   def hashAt(index: Int): Int
   def keyAt(index: Int): ${K_Arg}
   def valueAt(index: Int): ${V_Arg}
@@ -226,28 +227,28 @@ class HashMap_${K}_${V}${Param}(initialSize: Int = 8)
   @inline
   private[this] def shouldGrow = _size > capacity * 9 / 10
 
-  private[this] def growIfNecessary: Unit = {
-    if (shouldGrow) {
-      val oldCapacity = capacity
-      val oldHashes = hashes
-      val oldKeys = _keys
-      val oldValues = _values
-      capacity *= 2
-      mask = capacity - 1
-      hashes = new Array[Int](capacity)
-      _keys = new Array[${K_Array}](capacity)
-      _values = new Array[${V_Array}](capacity)
-      _size = 0
-      var i = 0
-      while (i < oldCapacity) {
-        val hash = oldHashes(i)
-        if (!isInit(hash)) {
-          val key = oldKeys(i)${Cast_to_K}
-          val value = oldValues(i)${Cast_to_V}
-          put(key, value)
-        }
-        i += 1
+  private[this] def growIfNecessary: Unit = if (shouldGrow) growToNewCapacity(capacity * 2)
+
+  private[this] def growToNewCapacity(newCapacity: Int) = {
+    val oldCapacity = capacity
+    val oldHashes = hashes
+    val oldKeys = _keys
+    val oldValues = _values
+    capacity = newCapacity
+    mask = capacity - 1
+    hashes = new Array[Int](capacity)
+    _keys = new Array[${K_Array}](capacity)
+    _values = new Array[${V_Array}](capacity)
+    _size = 0
+    var i = 0
+    while (i < oldCapacity) {
+      val hash = oldHashes(i)
+      if (!isInit(hash)) {
+        val key = oldKeys(i)${Cast_to_K}
+        val value = oldValues(i)${Cast_to_V}
+        put(key, value)
       }
+      i += 1
     }
   }
 
@@ -255,6 +256,12 @@ class HashMap_${K}_${V}${Param}(initialSize: Int = 8)
     var hash = hashK.hash(key) & mask
     hash |= (if (hash == 0) 1 else 0)
     hash
+  }
+
+  def compact: Unit = {
+    var newCapacity = 1
+    while (newCapacity < size) newCapacity *= 2
+    if (newCapacity != capacity) growToNewCapacity(newCapacity)
   }
 
   def hashAt(index: Int): Int = hashes(index)

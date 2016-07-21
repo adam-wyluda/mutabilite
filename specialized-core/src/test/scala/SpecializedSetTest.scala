@@ -42,4 +42,23 @@ class SpecializedSetTest
     5 to 10 foreach (i => assert(!diff(i)))
     11 to 15 foreach (i => assert(diff(i)))
   }
+
+  test("compact") {
+    val set = provideSet_Int
+    1 to 50 foreach (set.add(_))
+    assert(set.capacity == 64)
+
+    1 to 25 foreach (set.remove(_))
+    assert(set.capacity == 64)
+    set.compact
+    assert(set.capacity == 32)
+
+    25 to 40 foreach (set.remove(_))
+    assert(set.capacity == 32)
+    set.compact
+    assert(set.capacity == 16)
+
+    assert(set.size == 10)
+    41 to 50 foreach (i => assert(set(i)))
+  }
 }
