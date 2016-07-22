@@ -64,7 +64,7 @@ class MapOpsTest extends FunSuite {
     val test: Map_Int_Object[String] = mapped
 
     assert(mapped.size == 10)
-    1 to 10 foreach (i => assert(mapped(i).get == (i * 10).toString))
+    1 to 10 foreach (i => assert(mapped(i) == (i * 10).toString))
   }
 
   test("mapValues (_, string) to (_, int)") {
@@ -75,7 +75,7 @@ class MapOpsTest extends FunSuite {
     val test: Map_Int_Int = mapped
 
     assert(mapped.size == 10)
-    1 to 10 foreach (i => assert(mapped(i).get == i * 10))
+    1 to 10 foreach (i => assert(mapped(i) == i * 10))
   }
 
   test("flatMap") {
@@ -109,7 +109,7 @@ class MapOpsTest extends FunSuite {
     val test: Map_Int_Object[String] = filtered
 
     assert(filtered.size == 5)
-    2 to 10 by 2 foreach (i => assert(filtered(i).get == i.toString))
+    2 to 10 by 2 foreach (i => assert(filtered(i) == i.toString))
   }
 
   test("fold") {
@@ -152,7 +152,7 @@ class MapOpsTest extends FunSuite {
 
     map.transformValues(_ * 10)
 
-    1 to 10 foreach (i => assert(map(i).get == i * 10))
+    1 to 10 foreach (i => assert(map(i) == i * 10))
   }
 
   test("forall") {

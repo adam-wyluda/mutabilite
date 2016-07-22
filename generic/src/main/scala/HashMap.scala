@@ -20,7 +20,16 @@ class HashMap[K, V](initialSize: Int = 8)(
 
   private[this] val emptyOpt = new None[V]
 
-  def apply(key: K): Opt[V] = {
+  def apply(key: K): V = {
+    val index = indexOf(key)
+    if (index == -1) {
+      throw new NoSuchElementException(s"key not found: $key")
+    } else {
+      _values(index).asInstanceOf[V]
+    }
+  }
+
+  def get(key: K): Opt[V] = {
     val index = indexOf(key)
     if (index == -1) {
       emptyOpt
@@ -147,7 +156,7 @@ class HashMap[K, V](initialSize: Int = 8)(
     result
   }
 
-  def contains(key: K): Boolean = this(key).notEmpty
+  def contains(key: K): Boolean = indexOf(key) != -1
 
   def map[B: ClassTag](f: (K, V) => B): HashSet[B] = {
     val builder = new HashSet[B](initialSize = capacity)

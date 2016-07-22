@@ -49,21 +49,21 @@ trait MapTest { this: FunSuite with BeforeAndAfter =>
   }
 
   test("apply") {
-    1 to 3 foreach (i => assert(map(i).get == expected(i)))
-    assert(map(0).empty)
-    assert(map(4).empty)
+    1 to 3 foreach (i => assert(map(i) == expected(i)))
+    assert(map.get(0).empty)
+    assert(map.get(4).empty)
   }
 
   test("put") {
     val nothing = map.put(4, "for")
     assert(map.size == 4)
     assert(nothing.empty)
-    assert(map(4).get == "for")
+    assert(map(4) == "for")
 
     val previous = map.put(4, "four")
     assert(map.size == 4)
     assert(previous.get == "for")
-    assert(map(4).get == "four")
+    assert(map(4) == "four")
   }
 
   test("put and apply") {
@@ -72,7 +72,7 @@ trait MapTest { this: FunSuite with BeforeAndAfter =>
       map.put(i toString, i)
     }
     1 to 100 foreach { i =>
-      val opt = map(i toString)
+      val opt = map.get(i toString)
       assert(opt.notEmpty)
       assert(opt.get == i)
     }
@@ -82,12 +82,12 @@ trait MapTest { this: FunSuite with BeforeAndAfter =>
     val previous = map.remove(2)
     assert(map.size == 2)
     assert(previous.get == "two")
-    assert(map(2).empty)
+    assert(map.get(2).empty)
 
     val nothing = map.remove(2)
     assert(map.size == 2)
     assert(nothing.empty)
-    assert(map(2).empty)
+    assert(map.get(2).empty)
   }
 
   test("put and remove") {
@@ -109,7 +109,7 @@ trait MapTest { this: FunSuite with BeforeAndAfter =>
     }
     assert(map.size == 50)
     2 to 100 by 2 foreach { i =>
-      val opt = map(i toString)
+      val opt = map.get(i toString)
       assert(opt.notEmpty)
       assert(opt.get == i)
     }

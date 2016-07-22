@@ -9,7 +9,9 @@ class NaiveMap[K, V](implicit tag: ClassTag[(K, V)],
 
   private[this] val seq = new NaiveSeq[(K, V)]
 
-  def apply(key: K): Opt[V] = {
+  def apply(key: K): V = get(key).get
+
+  def get(key: K): Opt[V] = {
     var result: Opt[V] = new None[V]
     seq foreach {
       case (k, v) =>
@@ -25,7 +27,7 @@ class NaiveMap[K, V](implicit tag: ClassTag[(K, V)],
   }
 
   def remove(key: K): Opt[V] = {
-    val previous = this(key)
+    val previous = get(key)
     if (contains(key)) {
       val index = keyIndex(key)
       seq.remove(index)
@@ -45,7 +47,7 @@ class NaiveMap[K, V](implicit tag: ClassTag[(K, V)],
     result
   }
 
-  def contains(key: K): Boolean = this(key).notEmpty
+  def contains(key: K): Boolean = keyIndex(key) != -1
 
   private def keyIndex(key: K) = {
     var result = -1

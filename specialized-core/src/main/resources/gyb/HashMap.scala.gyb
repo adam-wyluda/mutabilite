@@ -59,7 +59,8 @@ types = ['Boolean', 'Char', 'Byte', 'Short',
 }%
 
 trait Map_${K}_${V}${Param} extends Map[${K_Arg}, ${V_Arg}] {
-  def apply(key: ${K_Arg}): ${V_Opt}
+  def apply(key: ${K_Arg}): ${V_Arg}
+  def get(key: ${K_Arg}): ${V_Opt}
   def put(key: ${K_Arg}, value: ${V_Arg}): ${V_Opt}
   def remove(key: ${K_Arg}): ${V_Opt}
   def keys: ${K_Set}
@@ -93,7 +94,16 @@ class HashMap_${K}_${V}${Param}(initialSize: Int = 8)
   private[this] val none = new None[V]
   % end
 
-  def apply(key: ${K_Arg}): ${V_Opt} = {
+  def apply(key: ${K_Arg}): ${V_Arg} = {
+    val index = indexOf(key)
+    if (index == -1) {
+      throw new NoSuchElementException(s"key not found: $key")
+    } else {
+      _values(index)${Cast_to_V}
+    }
+  }
+
+  def get(key: ${K_Arg}): ${V_Opt} = {
     val index = indexOf(key)
     if (index == -1) {
       ${V_None}
@@ -222,7 +232,7 @@ class HashMap_${K}_${V}${Param}(initialSize: Int = 8)
     result
   }
 
-  def contains(key: ${K_Arg}): Boolean = this(key).notEmpty
+  def contains(key: ${K_Arg}): Boolean = indexOf(key) != -1
 
   @inline
   private[this] def shouldGrow = _size > capacity * 9 / 10

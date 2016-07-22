@@ -188,7 +188,7 @@ class SeqOpsTest extends FunSuite {
     val test: Map_Int_Object[String] = zip
 
     assert(zip.size == 10)
-    1 to 10 foreach (i => assert(zip(i).get == i.toString))
+    1 to 10 foreach (i => assert(zip(i) == i.toString))
 
     assert(smallSeq.zipToMap(strings).size == 5)
     assert(seq.zipToMap(smallStrings).size == 5)

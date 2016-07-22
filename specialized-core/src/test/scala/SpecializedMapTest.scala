@@ -25,6 +25,6 @@ class SpecializedMapTest extends FunSuite with BeforeAndAfter with MapTest {
     assert(map.capacity == 16)
 
     assert(map.size == 10)
-    41 to 50 foreach (i => assert(map(i).get == i * i))
+    41 to 50 foreach (i => assert(map(i) == i * i))
   }
 }
