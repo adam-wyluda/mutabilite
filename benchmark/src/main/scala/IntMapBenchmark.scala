@@ -84,13 +84,22 @@ class IntMapBenchmark {
 //  }
 
   @Benchmark
-  def getRandomSpecialized = specMap(randKey)
+  def getRandomSpecialized = specMap.get(randKey)
 
   @Benchmark
-  def getRandomGeneric = genericMap(randKey)
+  def getRandomGeneric = genericMap.get(randKey)
 
   @Benchmark
   def getRandomStdlib = stdMap.get(randKey)
+
+  @Benchmark
+  def getDirectSpecialized = specMap(randKey)
+
+  @Benchmark
+  def getDirectGeneric = genericMap(randKey)
+
+  @Benchmark
+  def getDirectStdlib = stdMap(randKey)
 
 //  @Benchmark
 //  def getNonExistingOffheap = {
