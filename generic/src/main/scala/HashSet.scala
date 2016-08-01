@@ -238,4 +238,6 @@ class HashSet[A](initialSize: Int = 8)(implicit tag: ClassTag[A])
       i += 1
     }
   }
+
+  def compact = ???
 }

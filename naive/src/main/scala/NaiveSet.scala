@@ -53,4 +53,6 @@ class NaiveSet[A](implicit tag: ClassTag[A]) extends GenericSet[A] {
   override def size: Int = seq.size
   override def capacity: Int = seq.capacity
   override def foreach(f: A => Unit): Unit = seq foreach f
+
+  def compact = ???
 }

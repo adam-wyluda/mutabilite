@@ -276,4 +276,6 @@ class HashMap[K, V](initialSize: Int = 8)(
       i += 1
     }
   }
+
+  def compact = ???
 }

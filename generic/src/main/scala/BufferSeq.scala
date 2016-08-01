@@ -124,4 +124,6 @@ class BufferSeq[A](initialSize: Int = 16)(implicit tag: ClassTag[A])
       i += 1
     }
   }
+
+  def compact = ???
 }

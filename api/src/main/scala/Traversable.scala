@@ -5,6 +5,7 @@ sealed trait Traversable extends Any {
   def capacity: Int
   def empty: Boolean
   def notEmpty: Boolean = !empty
+  def compact: Unit
 }
 
 trait Traversable1[A] extends Any with Traversable {

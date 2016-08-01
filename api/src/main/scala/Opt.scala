@@ -4,6 +4,8 @@ trait Opt[A] extends Any with Traversable1[A] {
   def get: A
   def size: Int
   def capacity = 1
+
+  def compact = ()
 }
 
 class Some[A](value: A) extends Opt[A] {

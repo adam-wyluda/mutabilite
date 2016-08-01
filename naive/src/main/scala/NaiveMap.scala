@@ -60,4 +60,6 @@ class NaiveMap[K, V](implicit tag: ClassTag[(K, V)],
   override def size: Int = seq.size
   override def capacity: Int = seq.capacity
   override def foreach(f: (K, V) => Unit): Unit = seq foreach f.tupled
+
+  def compact = ???
 }
