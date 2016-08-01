@@ -62,6 +62,14 @@ trait SeqTest { this: FunSuite with BeforeAndAfter =>
     assert(seq.size == 8)
   }
 
+  test("remove at capacity") {
+    val newSeq = provideSeq_Int
+    1 to newSeq.capacity foreach (newSeq.append(_))
+
+    assert(newSeq.size == newSeq.capacity)
+    assert(newSeq.remove(newSeq.size - 1) == newSeq.capacity)
+  }
+
   test("index") {
     for (i <- 1 to 10) {
       assert(seq.index(i) == i - 1)

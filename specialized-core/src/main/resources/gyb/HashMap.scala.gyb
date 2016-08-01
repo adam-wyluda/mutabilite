@@ -205,6 +205,12 @@ class HashMap_${K}_${V}${Param}(initialSize: Int = 8)
         }
       }) ()
       hashes(index) = 0
+      % if K == 'Object':
+      _keys(index) = null
+      % end
+      % if V == 'Object':
+      _values(index) = null
+      % end
       _size -= 1
       previous
     } else {

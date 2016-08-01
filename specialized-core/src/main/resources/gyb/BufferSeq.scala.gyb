@@ -54,7 +54,12 @@ class BufferSeq_${T}${T_Param}(initialSize: Int = 16)(implicit eq: Eq_${T}) exte
 
   def remove(n: Int): ${T_Arg} = {
     val removed = array(n)${Cast_to_T}
-    copy(n + 1, n, size - n)
+    % if T == 'Object':
+    array(n) = null
+    % end
+    if (n != capacity - 1) {
+      copy (n + 1, n, size - n)
+    }
     size -= 1
     removed
   }

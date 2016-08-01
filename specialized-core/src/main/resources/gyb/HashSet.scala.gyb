@@ -134,6 +134,9 @@ class HashSet_${T}${T_Param}(initialSize: Int = 8)(implicit hashK: Hash_${T}) ex
         }
       }) ()
       hashes(index) = 0
+      % if T == 'Object':
+      _keys(index) = null
+      % end
       _size -= 1
       true
     } else {

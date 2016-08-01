@@ -30,7 +30,10 @@ class BufferSeq[A](initialSize: Int = 16)(implicit tag: ClassTag[A])
 
   def remove(n: Int): A = {
     val removed = array(n)
-    copy(n + 1, n, _size - n)
+    array(n) = null
+    if (n != capacity - 1) {
+      copy(n + 1, n, _size - n)
+    }
     _size -= 1
     removed.asInstanceOf[A]
   }
