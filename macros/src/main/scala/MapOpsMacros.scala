@@ -7,18 +7,18 @@ class MapOpsMacros(val c: whitebox.Context) extends Common {
   import c.universe._
   import c.universe.definitions._
 
-  def stabilizedMap[K: WeakTypeTag, V: WeakTypeTag](f: Tree => Tree): Tree =
-    stabilized(c.prefix.tree) { pre =>
-      val mapTpe = mapType[K, V]
-      val map = freshVal("map", mapTpe, q"$pre.map")
-      q"""
-        $map
-        ..${f(q"${map.symbol}")}
-      """
+  def stabilizedMap(f: Tree => Tree): Tree =
+    c.prefix.tree match {
+      case Apply(_, List(map)) =>
+        stabilized(map) { map =>
+          q"""
+            ..${f(q"${map.symbol}")}
+          """
+        }
     }
 
-  def map[K: WeakTypeTag, V: WeakTypeTag, T: WeakTypeTag](f: Tree) =
-    stabilizedMap[K, V] { map =>
+  def map[T: WeakTypeTag](f: Tree) =
+    stabilizedMap { map =>
       val builderTpe = bufferType[T]
       val builder = freshVal("builder",
                              builderTpe,
@@ -38,8 +38,8 @@ class MapOpsMacros(val c: whitebox.Context) extends Common {
       """
     }
 
-  def mapKeys[K: WeakTypeTag, V: WeakTypeTag, T: WeakTypeTag](f: Tree) =
-    stabilizedMap[K, V] { map =>
+  def mapKeys[V: WeakTypeTag, T: WeakTypeTag](f: Tree) =
+    stabilizedMap { map =>
       val builderTpe = hashMapType[T, V]
       val builder = freshVal("builder",
                              builderTpe,
@@ -60,8 +60,8 @@ class MapOpsMacros(val c: whitebox.Context) extends Common {
       """
     }
 
-  def mapValues[K: WeakTypeTag, V: WeakTypeTag, T: WeakTypeTag](f: Tree) =
-    stabilizedMap[K, V] { map =>
+  def mapValues[K: WeakTypeTag, T: WeakTypeTag](f: Tree) =
+    stabilizedMap { map =>
       val builderTpe = hashMapType[K, T]
       val builder = freshVal("builder",
                              builderTpe,
@@ -82,8 +82,8 @@ class MapOpsMacros(val c: whitebox.Context) extends Common {
       """
     }
 
-  def flatMap[K: WeakTypeTag, V: WeakTypeTag, T: WeakTypeTag](f: Tree) =
-    stabilizedMap[K, V] { map =>
+  def flatMap[T: WeakTypeTag](f: Tree) =
+    stabilizedMap { map =>
       val resultTpe = seqType[T]
       val builderTpe = bufferType[T]
       val builder = freshVal("builder", resultTpe, q"new $builderTpe")
@@ -112,7 +112,7 @@ class MapOpsMacros(val c: whitebox.Context) extends Common {
     }
 
   def filter[K: WeakTypeTag, V: WeakTypeTag](f: Tree) =
-    stabilizedMap[K, V] { map =>
+    stabilizedMap { map =>
       val K = weakTypeOf[K]
       val V = weakTypeOf[V]
       val builderTpe = hashMapType[K, V]
@@ -134,14 +134,14 @@ class MapOpsMacros(val c: whitebox.Context) extends Common {
       """
     }
 
-  def foreach[K: WeakTypeTag, V: WeakTypeTag](f: Tree) =
-    stabilizedMap[K, V] { map =>
+  def foreach(f: Tree) =
+    stabilizedMap { map =>
       iterateHash(map,
                   idx => app(f, q"$map.keyAt($idx)", q"$map.valueAt($idx)"))
     }
 
-  def fold[K: WeakTypeTag, V: WeakTypeTag, B: WeakTypeTag](z: Tree)(op: Tree) =
-    stabilizedMap[K, V] { map =>
+  def fold[B: WeakTypeTag](z: Tree)(op: Tree) =
+    stabilizedMap { map =>
       val accTpe = weakTypeOf[B]
       val acc = freshVar("acc", accTpe, q"$z")
       val body = iterateHash(
@@ -155,25 +155,25 @@ class MapOpsMacros(val c: whitebox.Context) extends Common {
       """
     }
 
-  def reduceKeys[K: WeakTypeTag, V: WeakTypeTag](op: Tree) =
-    stabilizedMap[K, V] { map =>
+  def reduceKeys[K: WeakTypeTag](op: Tree) =
+    stabilizedMap { map =>
       reduceHash[K](map, op, TermName("keyAt"))
     }
 
-  def reduceValues[K: WeakTypeTag, V: WeakTypeTag](op: Tree) =
-    stabilizedMap[K, V] { map =>
+  def reduceValues[V: WeakTypeTag](op: Tree) =
+    stabilizedMap { map =>
       reduceHash[V](map, op, TermName("valueAt"))
     }
 
-  def transformValues[K: WeakTypeTag, V: WeakTypeTag](f: Tree) =
-    stabilizedMap[K, V] { map =>
+  def transformValues(f: Tree) =
+    stabilizedMap { map =>
       iterateHash(
           map,
           idx => q"$map.updateValue($idx, ${app(f, q"$map.valueAt($idx)")})")
     }
 
-  def forall[K: WeakTypeTag, V: WeakTypeTag](p: Tree) =
-    stabilizedMap[K, V] { map =>
+  def forall(p: Tree) =
+    stabilizedMap { map =>
       val result = freshVar("result", BooleanTpe, q"true")
       val body = iterateHashWhile(
           map,
@@ -187,8 +187,8 @@ class MapOpsMacros(val c: whitebox.Context) extends Common {
       """
     }
 
-  def exists[K: WeakTypeTag, V: WeakTypeTag](p: Tree) =
-    stabilizedMap[K, V] { map =>
+  def exists(p: Tree) =
+    stabilizedMap { map =>
       val result = freshVar("result", BooleanTpe, q"false")
       val body = iterateHashWhile(
           map,
