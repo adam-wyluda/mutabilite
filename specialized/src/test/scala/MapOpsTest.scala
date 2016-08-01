@@ -1,6 +1,7 @@
 package test
 
 import offheap.collection._
+import offheap.collection.ops._
 import org.scalatest.{BeforeAndAfter, FunSuite}
 
 import HashEq.Implicits._

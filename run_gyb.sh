@@ -10,7 +10,7 @@ python project/gyb.py ./specialized-core/src/main/resources/gyb/HashMap.scala.gy
 python project/gyb.py ./specialized-core/src/main/resources/gyb/HashSet.scala.gyb   > ./specialized-core/src/main/scala/codegen/SpecializedHashSet.scala
 
 mkdir -p ./specialized/src/main/scala/codegen
-python project/gyb.py ./specialized/src/main/resources/gyb/collection.scala.gyb > ./specialized/src/main/scala/codegen/collection.scala
+python project/gyb.py ./specialized/src/main/resources/gyb/ops.scala.gyb > ./specialized/src/main/scala/codegen/ops.scala
 
 # mkdir -p ./offheap/src/main/scala/codegen
 python project/gyb.py ./offheap/src/main/resources/gyb/BufferSeq.scala.gyb > ./offheap/src/test/scala/AnOffheapBufferSeq.scala

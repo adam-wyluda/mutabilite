@@ -1,4 +1,4 @@
-package offheap
+package offheap.collection
 
 import scala.language.experimental.{macros => CanMacro}
 
@@ -9,7 +9,7 @@ types = ['Boolean', 'Char', 'Byte', 'Short',
 'Int', 'Long', 'Float', 'Double', 'Object']
 }%
 
-package object collection {
+package object ops {
 
   % for T in types:
   %{
