@@ -91,6 +91,11 @@ trait Common extends Definitions {
       q"$f(..$argValues)"
   }
 
+  def unapplyValueClass(tree: Tree): Tree =
+    tree match {
+      case Apply(_, List(value)) => value
+    }
+
   def iterateSeq(seq: Tree, body: Tree => Tree) = {
     val idx = freshVar("i", IntTpe, q"0")
     val size = freshVal("size", IntTpe, q"$seq.size")

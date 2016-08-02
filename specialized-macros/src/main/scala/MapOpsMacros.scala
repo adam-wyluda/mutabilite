@@ -8,13 +8,10 @@ class MapOpsMacros(val c: whitebox.Context) extends Common {
   import c.universe.definitions._
 
   def stabilizedMap(f: Tree => Tree): Tree =
-    c.prefix.tree match {
-      case Apply(_, List(map)) =>
-        stabilized(map) { map =>
-          q"""
-            ..${f(q"${map.symbol}")}
-          """
-        }
+    stabilized(unapplyValueClass(c.prefix.tree)) { map =>
+      q"""
+        ..${f(q"${map.symbol}")}
+      """
     }
 
   def map[T: WeakTypeTag](f: Tree) =

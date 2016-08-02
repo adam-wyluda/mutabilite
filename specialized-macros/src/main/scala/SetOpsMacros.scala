@@ -8,13 +8,10 @@ class SetOpsMacros(val c: whitebox.Context) extends Common {
   import c.universe.definitions._
 
   def stabilizedSet(f: Tree => Tree): Tree =
-    c.prefix.tree match {
-      case Apply(_, List(set)) =>
-        stabilized(set) { set =>
-          q"""
-            ..${f(q"${set.symbol}")}
-          """
-        }
+    stabilized(unapplyValueClass(c.prefix.tree)) { set =>
+      q"""
+        ..${f(q"${set.symbol}")}
+      """
     }
 
   def map[B: WeakTypeTag](f: Tree) =

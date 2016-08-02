@@ -8,13 +8,10 @@ class SeqOpsMacros(val c: whitebox.Context) extends Common {
   import c.universe.definitions._
 
   def stabilizedSeq(f: Tree => Tree): Tree =
-    c.prefix.tree match {
-      case Apply(_, List(seq)) =>
-        stabilized(seq) { seq =>
-          q"""
-            ..${f(q"${seq.symbol}")}
-          """
-        }
+    stabilized(unapplyValueClass(c.prefix.tree)) { seq =>
+      q"""
+        ..${f(q"${seq.symbol}")}
+      """
     }
 
   def map[B: WeakTypeTag](f: Tree) =
