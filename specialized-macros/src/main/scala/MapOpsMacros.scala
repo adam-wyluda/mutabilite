@@ -14,9 +14,9 @@ class MapOpsMacros(val c: whitebox.Context) extends Common {
       """
     }
 
-  def map[T: WeakTypeTag](f: Tree) =
+  def map[B: WeakTypeTag](f: Tree) =
     stabilizedMap { map =>
-      val builderTpe = bufferType[T]
+      val builderTpe = bufferType[B]
       val builder = freshVal("builder",
                              builderTpe,
                              q"new $builderTpe(initialSize = $map.capacity)")
@@ -35,9 +35,9 @@ class MapOpsMacros(val c: whitebox.Context) extends Common {
       """
     }
 
-  def mapKeys[V: WeakTypeTag, T: WeakTypeTag](f: Tree) =
+  def mapKeys[V: WeakTypeTag, B: WeakTypeTag](f: Tree) =
     stabilizedMap { map =>
-      val builderTpe = hashMapType[T, V]
+      val builderTpe = hashMapType[B, V]
       val builder = freshVal("builder",
                              builderTpe,
                              q"new $builderTpe(initialSize = $map.capacity)")
@@ -57,9 +57,9 @@ class MapOpsMacros(val c: whitebox.Context) extends Common {
       """
     }
 
-  def mapValues[K: WeakTypeTag, T: WeakTypeTag](f: Tree) =
+  def mapValues[K: WeakTypeTag, B: WeakTypeTag](f: Tree) =
     stabilizedMap { map =>
-      val builderTpe = hashMapType[K, T]
+      val builderTpe = hashMapType[K, B]
       val builder = freshVal("builder",
                              builderTpe,
                              q"new $builderTpe(initialSize = $map.capacity)")
@@ -79,10 +79,10 @@ class MapOpsMacros(val c: whitebox.Context) extends Common {
       """
     }
 
-  def flatMap[T: WeakTypeTag](f: Tree) =
+  def flatMap[B: WeakTypeTag](f: Tree) =
     stabilizedMap { map =>
-      val resultTpe = seqType[T]
-      val builderTpe = bufferType[T]
+      val resultTpe = seqType[B]
+      val builderTpe = bufferType[B]
       val builder = freshVal("builder", resultTpe, q"new $builderTpe")
       val body = iterateHash(map, idx => {
         val result = freshVal("result",
