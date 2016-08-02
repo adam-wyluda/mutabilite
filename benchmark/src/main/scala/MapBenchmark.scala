@@ -12,28 +12,8 @@ class MapBenchmark {
 
   import Benchmark._
 
-//  val offheapMap: OffheapHashMap_Object_Int = {
-//    val map = new OffheapHashMap_Object_Int(initialSize)
-//    var i = 0
-//    while (i < size) {
-//      map.put(keys(i), i * i)
-//      i += 1
-//    }
-//    map
-//  }
-
   val specMap: HashMap_Object_Int[Key] = {
     val map = new HashMap_Object_Int[Key](initialSize)
-    var i = 0
-    while (i < size) {
-      map.put(keys(i), i * i)
-      i += 1
-    }
-    map
-  }
-
-  val genericMap: HashMap[Object, Int] = {
-    val map = new HashMap[Object, Int](initialSize)
     var i = 0
     while (i < size) {
       map.put(keys(i), i * i)
@@ -61,14 +41,8 @@ class MapBenchmark {
     nonExistingKey = Key.generate
   }
 
-//  @Benchmark
-//  def getRandomOffheap = offheapMap(randKey)
-
   @Benchmark
   def getRandomSpecialized = specMap.get(randKey)
-
-  @Benchmark
-  def getRandomGeneric = genericMap.get(randKey)
 
   @Benchmark
   def getRandomStdlib = stdMap.get(randKey)
@@ -77,46 +51,17 @@ class MapBenchmark {
   def getDirectSpecialized = specMap(randKey)
 
   @Benchmark
-  def getDirectGeneric = genericMap(randKey)
-
-  @Benchmark
   def getDirectStdlib = stdMap(randKey)
-
-//  @Benchmark
-//  def getNonExistingOffheap = offheapMap(nonExistingKey)
 
   @Benchmark
   def getNonExistingSpecialized = specMap(nonExistingKey)
 
   @Benchmark
-  def getNonExistingGeneric = genericMap(nonExistingKey)
-
-  @Benchmark
   def getNonExistingStdlib = stdMap.get(nonExistingKey)
-
-//  @Benchmark
-//  def putAllOffheap = {
-//    val m = new OffheapHashMap_Object_Int(initialSize)
-//    var i = 0
-//    while (i < size) {
-//      m.put(keys(i), i)
-//      i += 1
-//    }
-//  }
 
   @Benchmark
   def putAllSpecialized = {
     val m = new HashMap_Object_Int[Key](initialSize)
-    var i = 0
-    while (i < size) {
-      m.put(keys(i), i)
-      i += 1
-    }
-  }
-
-  @Benchmark
-  def putAllGeneric = {
-    val m = new HashMap[Object, Int](initialSize)
     var i = 0
     while (i < size) {
       m.put(keys(i), i)
@@ -134,47 +79,17 @@ class MapBenchmark {
     }
   }
 
-//  @Benchmark
-//  def foreachOffheap(blackhole: Blackhole) =
-//    offheapMap foreach ((k, v) => blackhole.consume(k))
-
   @Benchmark
   def foreachSpecialized(blackhole: Blackhole) =
     specMap foreach ((k, v) => blackhole.consume(k))
 
   @Benchmark
-  def foreachGeneric(blackhole: Blackhole) =
-    genericMap foreachGeneric (blackhole.consume(_))
-
-  @Benchmark
   def foreachStdlib(blackhole: Blackhole) =
     stdMap foreach (blackhole.consume(_))
-
-//  @Benchmark
-//  def putRemoveReadOffheap(blackhole: Blackhole) = {
-//    val map = new OffheapHashMap_Object_Int(initialSize)
-//    var i = 0
-//    while (i < size) { map.put(keys(i), i); i += 1 }
-//    i = 0
-//    while (i < size / 10) { map.remove(keys(i * 10)); i += 1 }
-//    i = 0
-//    while (i < size) { blackhole.consume(map(keys(i))); i += 1 }
-//  }
 
   @Benchmark
   def putRemoveReadSpecialized(blackhole: Blackhole) = {
     val map = new HashMap_Object_Int[Key](initialSize)
-    var i = 0
-    while (i < size) { map.put(keys(i), i); i += 1 }
-    i = 0
-    while (i < size / 10) { map.remove(keys(i * 10)); i += 1 }
-    i = 0
-    while (i < size) { blackhole.consume(map(keys(i))); i += 1 }
-  }
-
-  @Benchmark
-  def putRemoveReadGeneric(blackhole: Blackhole) = {
-    val map = new HashMap[Object, Int](initialSize)
     var i = 0
     while (i < size) { map.put(keys(i), i); i += 1 }
     i = 0
@@ -195,26 +110,6 @@ class MapBenchmark {
   }
 }
 
-//@State(Scope.Thread)
-//class MapRemoveOffheapBenchmark {
-//
-//  import Benchmark._
-//
-//  var map: OffheapHashMap_Object_Int = _
-//
-//  @Setup(Level.Invocation)
-//  def setup = {
-//    map = new OffheapHashMap_Object_Int
-//    0 until size foreach (i => map.put(keys(i), i * i))
-//  }
-//
-//  @Benchmark
-//  def benchmark = {
-//    var i = 0
-//    while (i < size / 10) { map.remove(keys(i * 10)); i += 1 }
-//  }
-//}
-
 @State(Scope.Thread)
 class MapRemoveSpecializedBenchmark {
 
@@ -225,26 +120,6 @@ class MapRemoveSpecializedBenchmark {
   @Setup(Level.Invocation)
   def setup = {
     map = new HashMap_Object_Int[Key]
-    0 until size foreach (i => map.put(keys(i), i * i))
-  }
-
-  @Benchmark
-  def benchmark = {
-    var i = 0
-    while (i < size / 10) { map.remove(keys(i * 10)); i += 1 }
-  }
-}
-
-@State(Scope.Thread)
-class MapRemoveGenericBenchmark {
-
-  import Benchmark._
-
-  var map: HashMap[Object, Int] = _
-
-  @Setup(Level.Invocation)
-  def setup = {
-    map = new HashMap[Object, Int]
     0 until size foreach (i => map.put(keys(i), i * i))
   }
 

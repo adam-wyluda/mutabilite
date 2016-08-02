@@ -29,24 +29,6 @@ lazy val tests = project
     )
   )
 
-lazy val naive = project
-  .in(file("naive"))
-  .dependsOn(api, tests % "test")
-  .settings(
-    defaults ++ Seq(
-      moduleName := "naive"
-    )
-  )
-
-lazy val generic = project
-  .in(file("generic"))
-  .dependsOn(api, tests % "test")
-  .settings(
-    defaults ++ Seq(
-      moduleName := "generic"
-    )
-  )
-
 lazy val specializedCore = project
   .in(file("specialized-core"))
   .dependsOn(api, tests % "test")
@@ -77,21 +59,9 @@ lazy val specializedOps = project
     )
 )
 
-lazy val offheap = project
-  .in(file("offheap"))
-  .dependsOn(api, specializedOps, tests % "test")
-  .settings(
-    defaults ++ Seq(
-      moduleName := "offheap",
-      libraryDependencies ++= Seq(
-        "sh.den" % "scala-offheap_2.11" % "0.2-SNAPSHOT"
-      )
-    )
-  )
-
 lazy val benchmark = project
   .in(file("benchmark"))
-  .dependsOn(generic, specializedOps, offheap)
+  .dependsOn(specializedOps)
   .enablePlugins(JmhPlugin)
   .settings(
     defaults ++ Seq(

@@ -26,7 +26,7 @@ types = ['Boolean', 'Char', 'Byte', 'Short',
     K_Array = 'AnyRef'
     K_Set = 'Set_Object[K]'
     K_HashSet = 'HashSet_Object[K]'
-    Cast_to_K = '.asInstanceOf[' + K_Arg + ']'
+    Cast_to_K = '.asInstanceOf[K]'
     Cast_from_K = '.asInstanceOf[AnyRef]'
   else:
     K_Arg = K
@@ -44,7 +44,7 @@ types = ['Boolean', 'Char', 'Byte', 'Short',
     V_Array = 'AnyRef'
     V_Seq = 'Seq_Object[V]'
     V_BufferSeq = 'BufferSeq_Object[V]'
-    Cast_to_V = '.asInstanceOf[' + V_Arg + ']'
+    Cast_to_V = '.asInstanceOf[V]'
     Cast_from_V = '.asInstanceOf[AnyRef]'
   else:
     V_Arg = V
