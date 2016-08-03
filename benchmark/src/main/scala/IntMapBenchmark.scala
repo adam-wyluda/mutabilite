@@ -16,7 +16,7 @@ class IntMapBenchmark {
     val map = new HashMap_Int_Int(initialSize)
     var i = 0
     while (i < size) {
-      map.put(i, i * i)
+      map.put(i + 1, i * i)
       i += 1
     }
     map
@@ -26,7 +26,7 @@ class IntMapBenchmark {
     val map = debox.Map.empty[Int, Int]
     var i = 0
     while (i < size) {
-      map.update(i, i * i)
+      map.update(i + 1, i * i)
       i += 1
     }
     map
@@ -36,7 +36,7 @@ class IntMapBenchmark {
     val map = new StdlibMap[Int, Int](initialSize)
     var i = 0
     while (i < size) {
-      map.put(i, i * i)
+      map.put(i + 1, i * i)
       i += 1
     }
     map
@@ -47,7 +47,7 @@ class IntMapBenchmark {
 
   @Setup(Level.Invocation)
   def setup = {
-    randKey = random.nextInt(size)
+    randKey = random.nextInt(size) + 1
     nonExistingKey = randKey + size
   }
 

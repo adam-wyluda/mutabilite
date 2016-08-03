@@ -16,7 +16,7 @@ class IntSetBenchmark {
     val set = new HashSet_Int(initialSize)
     var i = 0
     while (i < size) {
-      set.add(i)
+      set.add(i + 1)
       i += 1
     }
     set
@@ -26,7 +26,7 @@ class IntSetBenchmark {
     val set = debox.Set.empty[Int]
     var i = 0
     while (i < size) {
-      set.add(i)
+      set.add(i + 1)
       i += 1
     }
     set
@@ -36,7 +36,7 @@ class IntSetBenchmark {
     val set = StdlibSet[Int]()
     var i = 0
     while (i < size) {
-      set.add(i)
+      set.add(i + 1)
       i += 1
     }
     set
