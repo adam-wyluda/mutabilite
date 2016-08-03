@@ -50,6 +50,10 @@ lazy val benchmark = project
   .enablePlugins(JmhPlugin)
   .settings(
     defaults ++ Seq(
-      moduleName := "benchmark"
+      moduleName := "benchmark",
+      resolvers += Resolver.sonatypeRepo("releases"),
+      libraryDependencies ++= Seq(
+        "org.spire-math" %% "debox" % "0.7.3"
+      )
     )
   )

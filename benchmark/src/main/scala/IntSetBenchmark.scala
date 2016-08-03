@@ -22,6 +22,16 @@ class IntSetBenchmark {
     set
   }
 
+  val deboxSet: debox.Set[Int] = {
+    val set = debox.Set.empty[Int]
+    var i = 0
+    while (i < size) {
+      set.add(i)
+      i += 1
+    }
+    set
+  }
+
   val stdSet: StdlibSet[Int] = {
     val set = StdlibSet[Int]()
     var i = 0
@@ -45,10 +55,16 @@ class IntSetBenchmark {
   def containsExistingSpecialized = specSet(randKey)
 
   @Benchmark
+  def containsExistingDebox = deboxSet(randKey)
+
+  @Benchmark
   def containsExistingStdlib = stdSet(randKey)
 
   @Benchmark
   def containsNonExistingSpecialized = specSet(nonExistingKey)
+
+  @Benchmark
+  def containsNonExistingDebox = deboxSet(nonExistingKey)
 
   @Benchmark
   def containsNonExistingStdlib = stdSet(nonExistingKey)
@@ -56,6 +72,16 @@ class IntSetBenchmark {
   @Benchmark
   def addSpecialized = {
     val s = new HashSet_Int(initialSize = 16)
+    var i = 0
+    while (i < size) {
+      s.add(i)
+      i += 1
+    }
+  }
+
+  @Benchmark
+  def addDebox = {
+    val s = debox.Set.ofSize[Int](16)
     var i = 0
     while (i < size) {
       s.add(i)
@@ -82,11 +108,18 @@ class IntSetBenchmark {
     specSet foreach (blackhole.consume(_))
 
   @Benchmark
+  def foreachDebox(blackhole: Blackhole) =
+    deboxSet foreach (blackhole.consume(_))
+
+  @Benchmark
   def foreachStdlib(blackhole: Blackhole) =
     stdSet foreach (blackhole.consume(_))
 
   @Benchmark
   def mapSpecialized = specSet map (_ + 1)
+
+  @Benchmark
+  def mapDebox = deboxSet map (_ + 1)
 
   @Benchmark
   def mapStdlib = stdSet map (_ + 1)
@@ -134,6 +167,30 @@ class IntSetRemoveSpecializedBenchmark {
   @Setup(Level.Invocation)
   def setup = {
     set = new HashSet_Int(initialSize)
+    var i = 0
+    while (i < size) {
+      set.add(i)
+      i += 1
+    }
+  }
+
+  @Benchmark
+  def benchmark = {
+    var i = 0
+    while (i < size / 10) { set.remove(i * 10); i += 1 }
+  }
+}
+
+@State(Scope.Thread)
+class IntSetRemoveDeboxBenchmark {
+
+  import Benchmark._
+
+  var set: debox.Set[Int] = _
+
+  @Setup(Level.Invocation)
+  def setup = {
+    set = debox.Set.ofSize[Int](initialSize)
     var i = 0
     while (i < size) {
       set.add(i)

@@ -22,6 +22,16 @@ class IntMapBenchmark {
     map
   }
 
+  val deboxMap: debox.Map[Int, Int] = {
+    val map = debox.Map.empty[Int, Int]
+    var i = 0
+    while (i < size) {
+      map.update(i, i * i)
+      i += 1
+    }
+    map
+  }
+
   val stdMap: StdlibMap[Int, Int] = {
     val map = new StdlibMap[Int, Int](initialSize)
     var i = 0
@@ -45,16 +55,25 @@ class IntMapBenchmark {
   def getRandomSpecialized = specMap.get(randKey)
 
   @Benchmark
+  def getRandomDebox = deboxMap.get(randKey)
+
+  @Benchmark
   def getRandomStdlib = stdMap.get(randKey)
 
   @Benchmark
   def getDirectSpecialized = specMap(randKey)
 
   @Benchmark
+  def getDirectDebox = deboxMap(randKey)
+
+  @Benchmark
   def getDirectStdlib = stdMap(randKey)
 
   @Benchmark
-  def getNonExistingSpecialized = specMap(nonExistingKey)
+  def getNonExistingSpecialized = specMap.get(nonExistingKey)
+
+  @Benchmark
+  def getNonExistingDebox = deboxMap.get(nonExistingKey)
 
   @Benchmark
   def getNonExistingStdlib = stdMap.get(nonExistingKey)
@@ -65,6 +84,16 @@ class IntMapBenchmark {
     var i = 0
     while (i < size) {
       m.put(i, i)
+      i += 1
+    }
+  }
+
+  @Benchmark
+  def putAllDebox = {
+    val m = debox.Map.ofSize[Int, Int](16)
+    var i = 0
+    while (i < size) {
+      m.update(i, i)
       i += 1
     }
   }
@@ -88,6 +117,10 @@ class IntMapBenchmark {
     specMap foreach ((k, v) => blackhole.consume(k))
 
   @Benchmark
+  def foreachDebox(blackhole: Blackhole) =
+    deboxMap foreach ((k, v) => blackhole.consume(v))
+
+  @Benchmark
   def foreachStdlib(blackhole: Blackhole) =
     stdMap foreach (blackhole.consume(_))
 
@@ -103,6 +136,17 @@ class IntMapBenchmark {
   }
 
   @Benchmark
+  def putRemoveReadDebox(blackhole: Blackhole) = {
+    val map = debox.Map.empty[Int, Int]
+    var i = 0
+    while (i < size) { map.update(i, i); i += 1 }
+    i = 0
+    while (i < size / 10) { map.remove(i * 10); i += 1 }
+    i = 0
+    while (i < size) { blackhole.consume(map(i)); i += 1 }
+  }
+
+  @Benchmark
   def putRemoveReadStdlib(blackhole: Blackhole) = {
     val map = new StdlibMap[Int, Int](initialSize = 16)
     var i = 0
@@ -110,11 +154,14 @@ class IntMapBenchmark {
     i = 0
     while (i < size / 10) { map.remove(i * 10); i += 1 }
     i = 0
-    while (i < size) { blackhole.consume(map.get(i)); i += 1 }
+    while (i < size) { blackhole.consume(map(i)); i += 1 }
   }
 
   @Benchmark
   def mapSpecialized = specMap map ((k, v) => k + 1)
+
+  @Benchmark
+  def mapDebox = deboxMap mapToArray ((k, v) => k + 1)
 
   @Benchmark
   def mapStdlib = stdMap map { case (k, v) => k + 1 }
@@ -163,6 +210,26 @@ class IntMapRemoveSpecializedBenchmark {
   def setup = {
     map = new HashMap_Int_Int
     0 until size foreach (i => map.put(i, i * i))
+  }
+
+  @Benchmark
+  def benchmark = {
+    var i = 0
+    while (i < size / 10) { map.remove(i * 10); i += 1 }
+  }
+}
+
+@State(Scope.Thread)
+class IntMapRemoveDeboxBenchmark {
+
+  import Benchmark._
+
+  var map: debox.Map[Int, Int] = _
+
+  @Setup(Level.Invocation)
+  def setup = {
+    map = debox.Map.empty[Int, Int]
+    0 until size foreach (i => map.update(i, i * i))
   }
 
   @Benchmark
