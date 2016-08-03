@@ -80,7 +80,7 @@ class IntMapBenchmark {
 
   @Benchmark
   def putAllSpecialized = {
-    val m = new HashMap_Int_Int(initialSize = 16)
+    val m = new HashMap_Int_Int(initialSize = initialSize)
     var i = 0
     while (i < size) {
       m.put(i, i)
@@ -90,7 +90,7 @@ class IntMapBenchmark {
 
   @Benchmark
   def putAllDebox = {
-    val m = debox.Map.ofSize[Int, Int](16)
+    val m = debox.Map.ofSize[Int, Int](initialSize)
     var i = 0
     while (i < size) {
       m.update(i, i)
@@ -100,7 +100,7 @@ class IntMapBenchmark {
 
   @Benchmark
   def putAllStdlib = {
-    val m = new StdlibMap[Int, Int](initialSize = 16)
+    val m = new StdlibMap[Int, Int](initialSize = initialSize)
     var i = 0
     while (i < size) {
       m.put(i, i)
@@ -126,35 +126,35 @@ class IntMapBenchmark {
 
   @Benchmark
   def putRemoveReadSpecialized(blackhole: Blackhole) = {
-    val map = new HashMap_Int_Int(initialSize = 16)
+    val map = new HashMap_Int_Int(initialSize = initialSize)
     var i = 0
     while (i < size) { map.put(i, i); i += 1 }
     i = 0
     while (i < size / 10) { map.remove(i * 10); i += 1 }
     i = 0
-    while (i < size) { blackhole.consume(map(i)); i += 1 }
+    while (i < size) { blackhole.consume(map.get(i)); i += 1 }
   }
 
   @Benchmark
   def putRemoveReadDebox(blackhole: Blackhole) = {
-    val map = debox.Map.empty[Int, Int]
+    val map = debox.Map.ofSize[Int, Int](initialSize)
     var i = 0
     while (i < size) { map.update(i, i); i += 1 }
     i = 0
     while (i < size / 10) { map.remove(i * 10); i += 1 }
     i = 0
-    while (i < size) { blackhole.consume(map(i)); i += 1 }
+    while (i < size) { blackhole.consume(map.get(i)); i += 1 }
   }
 
   @Benchmark
   def putRemoveReadStdlib(blackhole: Blackhole) = {
-    val map = new StdlibMap[Int, Int](initialSize = 16)
+    val map = new StdlibMap[Int, Int](initialSize = initialSize)
     var i = 0
     while (i < size) { map.put(i, i); i += 1 }
     i = 0
     while (i < size / 10) { map.remove(i * 10); i += 1 }
     i = 0
-    while (i < size) { blackhole.consume(map(i)); i += 1 }
+    while (i < size) { blackhole.consume(map.get(i)); i += 1 }
   }
 
   @Benchmark
