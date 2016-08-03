@@ -21,6 +21,16 @@ class SetBenchmark {
     set
   }
 
+  val deboxSet: debox.Set[Key] = {
+    val set = debox.Set.ofSize[Key](initialSize)
+    var i = 0
+    while (i < size) {
+      set.add(keys(i))
+      i += 1
+    }
+    set
+  }
+
   val stdSet: StdlibSet[Key] = {
     val set = StdlibSet[Key]()
     var i = 0
@@ -44,10 +54,16 @@ class SetBenchmark {
   def containsExistingSpecialized = specSet(randKey)
 
   @Benchmark
+  def containsExistingDebox = deboxSet(randKey)
+
+  @Benchmark
   def containsExistingStdlib = stdSet(randKey)
 
   @Benchmark
   def containsNonExistingSpecialized = specSet(nonExistingKey)
+
+  @Benchmark
+  def containsNonExistingDebox = deboxSet(nonExistingKey)
 
   @Benchmark
   def containsNonExistingStdlib = stdSet(nonExistingKey)
@@ -63,8 +79,18 @@ class SetBenchmark {
   }
 
   @Benchmark
+  def addDebox = {
+    val s = debox.Set.ofSize[Key](initialSize)
+    var i = 0
+    while (i < size) {
+      s.add(keys(i))
+      i += 1
+    }
+  }
+
+  @Benchmark
   def addStdlib = {
-    val s = StdlibSet[Key]()
+    val s = new StdlibSet[Key]() { override val initialSize = Benchmark.initialSize }
     var i = 0
     while (i < size) {
       s.add(keys(i))
@@ -75,6 +101,10 @@ class SetBenchmark {
   @Benchmark
   def foreachSpecialized(blackhole: Blackhole) =
     specSet foreach (blackhole.consume(_))
+
+  @Benchmark
+  def foreachDebox(blackhole: Blackhole) =
+    deboxSet foreach (blackhole.consume(_))
 
   @Benchmark
   def foreachStdlib(blackhole: Blackhole) =
@@ -91,6 +121,30 @@ class SetRemoveSpecializedBenchmark {
   @Setup(Level.Invocation)
   def setup = {
     set = new HashSet_Object[Key](initialSize)
+    var i = 0
+    while (i < size) {
+      set.add(keys(i))
+      i += 1
+    }
+  }
+
+  @Benchmark
+  def benchmark = {
+    var i = 0
+    while (i < size / 10) { set.remove(keys(i * 10)); i += 1 }
+  }
+}
+
+@State(Scope.Thread)
+class SetRemoveDeboxBenchmark {
+
+  import Benchmark._
+
+  var set: debox.Set[Key] = _
+
+  @Setup(Level.Invocation)
+  def setup = {
+    set = debox.Set.ofSize[Key](initialSize)
     var i = 0
     while (i < size) {
       set.add(keys(i))
