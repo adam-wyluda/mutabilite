@@ -1,22 +1,20 @@
 package test
 
-import offheap.collection._
+import offheap.collection.{BufferSeq_Int, _}
 import org.scalatest.{BeforeAndAfter, FunSuite}
+import HashEq.Implicits._
 
-trait SeqTest { this: FunSuite with BeforeAndAfter =>
-
-  def provideSeq_Int: Seq[Int]
-
-  var seq: Seq[Int] = _
+class SeqTest extends FunSuite with BeforeAndAfter {
+  var seq: Seq_Int = _
 
   before {
-    seq = provideSeq_Int
+    seq = new BufferSeq_Int
     1 to 10 foreach (seq.append(_))
   }
 
   test("isEmpty") {
     assert(seq.notEmpty)
-    assert(provideSeq_Int.empty)
+    assert(new BufferSeq_Int().empty)
   }
 
   test("size") {
@@ -36,7 +34,7 @@ trait SeqTest { this: FunSuite with BeforeAndAfter =>
   }
 
   test("append") {
-    val seq = provideSeq_Int
+    val seq = new BufferSeq_Int
 
     assert(seq.empty)
     1 to 3 foreach (seq.append(_))
@@ -63,7 +61,7 @@ trait SeqTest { this: FunSuite with BeforeAndAfter =>
   }
 
   test("remove at capacity") {
-    val newSeq = provideSeq_Int
+    val newSeq = new BufferSeq_Int
     1 to newSeq.capacity foreach (newSeq.append(_))
 
     assert(newSeq.size == newSeq.capacity)
@@ -86,5 +84,24 @@ trait SeqTest { this: FunSuite with BeforeAndAfter =>
     for (i <- 2 until 10) {
       assert(seq(i) == i)
     }
+  }
+
+  test("compact") {
+    val seq = new BufferSeq_Int
+    1 to 50 foreach (seq.append(_))
+    assert(seq.capacity == 64)
+
+    1 to 25 foreach (_ => seq.remove(0))
+    assert(seq.capacity == 64)
+    seq.compact
+    assert(seq.capacity == 32)
+
+    1 to 15 foreach (_ => seq.remove(0))
+    assert(seq.capacity == 32)
+    seq.compact
+    assert(seq.capacity == 16)
+
+    assert(seq.size == 10)
+    0 until 10 foreach (i => assert(seq(i) == i + 41))
   }
 }

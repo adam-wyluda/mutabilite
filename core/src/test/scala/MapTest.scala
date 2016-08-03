@@ -2,18 +2,15 @@ package test
 
 import offheap.collection._
 import org.scalatest.{BeforeAndAfter, FunSuite}
+import scala.collection.{ mutable => stdlib }
 
-import scala.{collection => stdlib}
+import HashEq.Implicits._
 
-trait MapTest { this: FunSuite with BeforeAndAfter =>
-
-  def provideMap_Int_Object: Map[Int, Object]
-  def provideMap_Object_Int: Map[Object, Int]
-
-  var map: Map[Int, Object] = _
+class MapTest extends FunSuite with BeforeAndAfter {
+  var map: Map_Int_Object[String] = _
 
   before {
-    map = provideMap_Int_Object
+    map = new HashMap_Int_Object[String]
     map.put(1, "one")
     map.put(2, "too")
     map.put(3, "tree")
@@ -29,7 +26,7 @@ trait MapTest { this: FunSuite with BeforeAndAfter =>
 
   test("isEmpty") {
     assert(map.notEmpty)
-    assert(provideMap_Int_Object.empty)
+    assert(new HashMap_Int_Object[String].empty)
   }
 
   test("size") {
@@ -40,9 +37,9 @@ trait MapTest { this: FunSuite with BeforeAndAfter =>
     var keys = stdlib.Set[Int]()
     map foreach {
       case (k, v) => {
-          assert(v == expected(k))
-          keys += k
-        }
+        assert(v == expected(k))
+        keys += k
+      }
     }
     assert(keys.size == 3)
     1 to 3 foreach (i => assert(keys(i)))
@@ -67,7 +64,7 @@ trait MapTest { this: FunSuite with BeforeAndAfter =>
   }
 
   test("put and apply") {
-    val map = provideMap_Object_Int
+    val map = new HashMap_Object_Int[String]
     1 to 100 foreach { i =>
       map.put(i toString, i)
     }
@@ -91,7 +88,7 @@ trait MapTest { this: FunSuite with BeforeAndAfter =>
   }
 
   test("put and remove") {
-    val map = provideMap_Object_Int
+    val map = new HashMap_Object_Int[String]
     1 to 100 foreach { i =>
       map.put(i toString, i)
     }
@@ -132,5 +129,24 @@ trait MapTest { this: FunSuite with BeforeAndAfter =>
   test("contains") {
     1 to 3 foreach (i => assert(map.contains(i)))
     4 to 6 foreach (i => assert(!map.contains(i)))
+  }
+
+  test("compact") {
+    val map = new HashMap_Int_Int
+    1 to 50 foreach (i => map.put(i, i * i))
+    assert(map.capacity == 64)
+
+    1 to 25 foreach (map.remove(_))
+    assert(map.capacity == 64)
+    map.compact
+    assert(map.capacity == 32)
+
+    25 to 40 foreach (map.remove(_))
+    assert(map.capacity == 32)
+    map.compact
+    assert(map.capacity == 16)
+
+    assert(map.size == 10)
+    41 to 50 foreach (i => assert(map(i) == i * i))
   }
 }

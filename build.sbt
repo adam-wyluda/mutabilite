@@ -8,6 +8,11 @@ lazy val defaults = Defaults.coreDefaultSettings ++ Seq(
   addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full)
 )
 
+lazy val testDependencies = Seq(
+  "org.scalatest" % "scalatest_2.11" % "2.2.4",
+  "org.scalacheck" %% "scalacheck" % "1.12.2"
+)
+
 lazy val api = project
   .in(file("api"))
   .settings(
@@ -16,25 +21,13 @@ lazy val api = project
     )
   )
 
-lazy val tests = project
-  .in(file("tests"))
+lazy val core = project
+  .in(file("core"))
   .dependsOn(api)
   .settings(
     defaults ++ Seq(
-      moduleName := "tests",
-      libraryDependencies ++= Seq(
-        "org.scalatest" % "scalatest_2.11" % "2.2.4",
-        "org.scalacheck" %% "scalacheck" % "1.12.2"
-      )
-    )
-  )
-
-lazy val core = project
-  .in(file("core"))
-  .dependsOn(api, tests % "test")
-  .settings(
-    defaults ++ Seq(
-      moduleName := "core"
+      moduleName := "core",
+      libraryDependencies ++= testDependencies
     )
   )
 
@@ -52,10 +45,11 @@ lazy val macros = project
 
 lazy val ops = project
   .in(file("ops"))
-  .dependsOn(api, macros, tests % "test")
+  .dependsOn(api, macros)
   .settings(
     defaults ++ Seq(
-      moduleName := "ops"
+      moduleName := "ops",
+      libraryDependencies ++= testDependencies
     )
 )
 

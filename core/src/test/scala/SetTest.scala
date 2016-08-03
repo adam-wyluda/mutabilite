@@ -3,21 +3,20 @@ package test
 import offheap.collection._
 import org.scalatest.{BeforeAndAfter, FunSuite}
 
-trait SetTest[S <: Set[Int]] { this: FunSuite with BeforeAndAfter =>
+import HashEq.Implicits._
 
-  def provideSet_Int: S
-
-  var set: S = _
+class SetTest extends FunSuite with BeforeAndAfter {
+  var set: Set_Int = _
 
   before {
-    set = provideSet_Int
+    set = new HashSet_Int
     1 to 7 foreach (set.add(_))
     5 to 10 foreach (set.add(_))
   }
 
   test("isEmpty") {
     assert(set.notEmpty)
-    assert(provideSet_Int.empty)
+    assert(new HashSet_Int().empty)
   }
 
   test("size") {
@@ -57,12 +56,9 @@ trait SetTest[S <: Set[Int]] { this: FunSuite with BeforeAndAfter =>
     1 to 10 by 2 foreach (i => assert(!set(i)))
     2 to 10 by 2 foreach (i => assert(set(i)))
   }
-}
-
-trait GenericSetTest extends SetTest[GenericSet[Int]] { this: FunSuite with BeforeAndAfter =>
 
   test("intersect") {
-    val other = provideSet_Int
+    val other = new HashSet_Int
     5 to 15 foreach (other.add(_))
 
     val intersect = set intersect other
@@ -73,7 +69,7 @@ trait GenericSetTest extends SetTest[GenericSet[Int]] { this: FunSuite with Befo
   }
 
   test("union") {
-    val other = provideSet_Int
+    val other = new HashSet_Int
     5 to 15 foreach (other.add(_))
 
     val union = set union other
@@ -82,7 +78,7 @@ trait GenericSetTest extends SetTest[GenericSet[Int]] { this: FunSuite with Befo
   }
 
   test("diff") {
-    val other = provideSet_Int
+    val other = new HashSet_Int
     5 to 15 foreach (set.add(_))
     5 to 10 foreach (other.add(_))
 
@@ -91,5 +87,24 @@ trait GenericSetTest extends SetTest[GenericSet[Int]] { this: FunSuite with Befo
     1 to 4 foreach (i => assert(diff(i)))
     5 to 10 foreach (i => assert(!diff(i)))
     11 to 15 foreach (i => assert(diff(i)))
+  }
+
+  test("compact") {
+    val set = new HashSet_Int
+    1 to 50 foreach (set.add(_))
+    assert(set.capacity == 64)
+
+    1 to 25 foreach (set.remove(_))
+    assert(set.capacity == 64)
+    set.compact
+    assert(set.capacity == 32)
+
+    25 to 40 foreach (set.remove(_))
+    assert(set.capacity == 32)
+    set.compact
+    assert(set.capacity == 16)
+
+    assert(set.size == 10)
+    41 to 50 foreach (i => assert(set(i)))
   }
 }

@@ -3,13 +3,11 @@ package test
 import offheap.collection._
 import org.scalatest.{BeforeAndAfter, FunSuite}
 
-trait OptTest { this: FunSuite with BeforeAndAfter =>
+import HashEq.Implicits._
 
-  def provideOpt_Int(value: Int): Opt[Int]
-  def provideNone: Opt[Int]
-
-  val opt = provideOpt_Int(25)
-  val none = provideNone
+class OptTest extends FunSuite with BeforeAndAfter {
+  val opt = new Some_Int(25)
+  val none = None_Int
 
   test("isEmpty") {
     assert(opt.notEmpty)
