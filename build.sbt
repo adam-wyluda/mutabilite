@@ -29,39 +29,39 @@ lazy val tests = project
     )
   )
 
-lazy val specializedCore = project
-  .in(file("specialized-core"))
+lazy val core = project
+  .in(file("core"))
   .dependsOn(api, tests % "test")
   .settings(
     defaults ++ Seq(
-      moduleName := "specialized-core"
+      moduleName := "core"
     )
   )
 
-lazy val specializedMacros = project
-  .in(file("specialized-macros"))
-  .dependsOn(specializedCore)
+lazy val macros = project
+  .in(file("macros"))
+  .dependsOn(core)
   .settings(
     defaults ++ Seq(
-      moduleName := "specialized-macros",
+      moduleName := "macros",
       libraryDependencies ++= Seq(
         "org.scala-lang" % "scala-reflect" % "2.11.8"
       )
     )
   )
 
-lazy val specializedOps = project
-  .in(file("specialized-ops"))
-  .dependsOn(api, specializedMacros, tests % "test")
+lazy val ops = project
+  .in(file("ops"))
+  .dependsOn(api, macros, tests % "test")
   .settings(
     defaults ++ Seq(
-      moduleName := "specialized-ops"
+      moduleName := "ops"
     )
 )
 
 lazy val benchmark = project
   .in(file("benchmark"))
-  .dependsOn(specializedOps)
+  .dependsOn(ops)
   .enablePlugins(JmhPlugin)
   .settings(
     defaults ++ Seq(
