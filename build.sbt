@@ -13,17 +13,8 @@ lazy val testDependencies = Seq(
   "org.scalacheck" %% "scalacheck" % "1.12.2"
 )
 
-lazy val api = project
-  .in(file("api"))
-  .settings(
-    defaults ++ Seq(
-      moduleName := "api"
-    )
-  )
-
 lazy val core = project
   .in(file("core"))
-  .dependsOn(api)
   .settings(
     defaults ++ Seq(
       moduleName := "core",
@@ -45,7 +36,7 @@ lazy val macros = project
 
 lazy val ops = project
   .in(file("ops"))
-  .dependsOn(api, macros)
+  .dependsOn(macros)
   .settings(
     defaults ++ Seq(
       moduleName := "ops",
