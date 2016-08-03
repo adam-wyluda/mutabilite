@@ -2,7 +2,6 @@ package test
 
 import offheap.collection.{BufferSeq_Int, _}
 import org.scalatest.{BeforeAndAfter, FunSuite}
-import HashEq.Implicits._
 
 class SeqTest extends FunSuite with BeforeAndAfter {
   var seq: Seq_Int = _

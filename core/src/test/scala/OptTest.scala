@@ -3,8 +3,6 @@ package test
 import offheap.collection._
 import org.scalatest.{BeforeAndAfter, FunSuite}
 
-import HashEq.Implicits._
-
 class OptTest extends FunSuite with BeforeAndAfter {
   val opt = new Some_Int(25)
   val none = None_Int

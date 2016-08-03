@@ -4,8 +4,6 @@ import offheap.collection._
 import offheap.collection.ops._
 import org.scalatest.{BeforeAndAfter, FunSuite}
 
-import HashEq.Implicits._
-
 class MapOpsTest extends FunSuite {
   test("map (int, string) to float") {
     val map = new HashMap_Int_Object[String]

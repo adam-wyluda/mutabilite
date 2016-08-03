@@ -2,7 +2,6 @@ package benchmark
 
 import org.openjdk.jmh.annotations._
 import offheap.collection._
-import HashEq.Implicits._
 import org.openjdk.jmh.infra.Blackhole
 
 import scala.collection.mutable.{OpenHashMap => StdlibMap}

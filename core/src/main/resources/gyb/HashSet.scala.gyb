@@ -1,7 +1,5 @@
 package offheap.collection
 
-import HashEq._
-
 %{
 types = ['Boolean', 'Char', 'Byte', 'Short',
 'Int', 'Long', 'Float', 'Double', 'Object']

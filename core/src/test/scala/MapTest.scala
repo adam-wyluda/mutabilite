@@ -4,8 +4,6 @@ import offheap.collection._
 import org.scalatest.{BeforeAndAfter, FunSuite}
 import scala.collection.{ mutable => stdlib }
 
-import HashEq.Implicits._
-
 class MapTest extends FunSuite with BeforeAndAfter {
   var map: Map_Int_Object[String] = _
 

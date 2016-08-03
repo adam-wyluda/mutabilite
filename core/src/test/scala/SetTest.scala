@@ -3,8 +3,6 @@ package test
 import offheap.collection._
 import org.scalatest.{BeforeAndAfter, FunSuite}
 
-import HashEq.Implicits._
-
 class SetTest extends FunSuite with BeforeAndAfter {
   var set: Set_Int = _
 

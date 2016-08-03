@@ -1,7 +1,5 @@
 package offheap.collection
 
-import HashEq._
-
 %{
 from itertools import product
 

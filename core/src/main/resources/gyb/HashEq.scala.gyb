@@ -5,66 +5,22 @@ types = ['Boolean', 'Char', 'Byte', 'Short',
 'Int', 'Long', 'Float', 'Double']
 }%
 
-object HashEq {
+% for T in types:
 
-  % for T in types:
+trait Eq_${T} extends Eq[${T}] {
+  def eqv(a: ${T}, b: ${T}): Boolean = a == b
+}
 
-  trait Eq_${T} extends Eq[${T}] {
-    def eqv(a: ${T}, b: ${T}): Boolean = a == b
-  }
+trait Hash_${T} extends Eq_${T} with Hash[${T}] {
+  def hash(value: ${T}): Int
+}
 
-  trait Hash_${T} extends Eq_${T} with Hash[${T}] {
-    def hash(value: ${T}): Int
-  }
+% end
 
-  % end
+trait Eq_Object extends Eq[Any] {
+  def eqv(a: Any, b: Any): Boolean = a == b
+}
 
-  trait Eq_Object extends Eq[Any] {
-    def eqv(a: Any, b: Any): Boolean = a == b
-  }
-
-  trait Hash_Object extends Eq_Object with Hash[Any] {
-    def hash(value: Any): Int
-  }
-
-  object Implicits {
-    implicit object BooleanHash extends Hash_Boolean {
-      def hash(value: Boolean): Int = if (value) 1231 else 1237
-    }
-
-    implicit object CharHash extends Hash_Char {
-      def hash(value: Char): Int = value
-    }
-
-    implicit object ByteHash extends Hash_Byte {
-      def hash(value: Byte): Int = value
-    }
-
-    implicit object ShortHash extends Hash_Short {
-      def hash(value: Short): Int = value
-    }
-
-    implicit object IntHash extends Hash_Int {
-      def hash(value: Int): Int = value
-    }
-
-    implicit object LongHash extends Hash_Long {
-      def hash(value: Long): Int = (value ^ (value >>> 32)).asInstanceOf[Int]
-    }
-
-    implicit object FloatHash extends Hash_Float {
-      def hash(value: Float): Int = java.lang.Float.floatToIntBits(value)
-    }
-
-    implicit object DoubleHash extends Hash_Double {
-      def hash(value: Double): Int = {
-        val bits = java.lang.Double.doubleToLongBits(value)
-        (bits ^ (bits >>> 32)).asInstanceOf[Int]
-      }
-    }
-
-    implicit object ObjectHash extends Hash_Object {
-      def hash(value: Any): Int = value.hashCode()
-    }
-  }
+trait Hash_Object extends Eq_Object with Hash[Any] {
+  def hash(value: Any): Int
 }

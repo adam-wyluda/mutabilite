@@ -4,8 +4,6 @@ import offheap.collection._
 import offheap.collection.ops._
 import org.scalatest.{BeforeAndAfter, FunSuite}
 
-import HashEq.Implicits._
-
 class SetOpsTest extends FunSuite {
   test("map int to string") {
     val set: Set_Int = new HashSet_Int
