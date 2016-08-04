@@ -90,10 +90,10 @@ class SetTest extends FunSuite with BeforeAndAfter {
   test("compact") {
     val set = new HashSet_Int
     1 to 50 foreach (set.add(_))
-    assert(set.capacity == 64)
+    assert(set.capacity == 128)
 
     1 to 25 foreach (set.remove(_))
-    assert(set.capacity == 64)
+    assert(set.capacity == 128)
     set.compact
     assert(set.capacity == 32)
 

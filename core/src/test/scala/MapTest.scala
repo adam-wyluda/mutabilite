@@ -132,10 +132,10 @@ class MapTest extends FunSuite with BeforeAndAfter {
   test("compact") {
     val map = new HashMap_Int_Int
     1 to 50 foreach (i => map.put(i, i * i))
-    assert(map.capacity == 64)
+    assert(map.capacity == 128)
 
     1 to 25 foreach (map.remove(_))
-    assert(map.capacity == 64)
+    assert(map.capacity == 128)
     map.compact
     assert(map.capacity == 32)
 

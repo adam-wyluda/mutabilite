@@ -70,7 +70,7 @@ class SetBenchmark {
 
   @Benchmark
   def addSpecialized = {
-    val s = new HashSet_Object[Key](initialSize)
+    val s = new HashSet_Object[Key]
     var i = 0
     while (i < size) {
       s.add(keys(i))
@@ -80,7 +80,7 @@ class SetBenchmark {
 
   @Benchmark
   def addDebox = {
-    val s = debox.Set.ofSize[Key](initialSize)
+    val s = debox.Set.empty[Key]
     var i = 0
     while (i < size) {
       s.add(keys(i))
@@ -90,7 +90,7 @@ class SetBenchmark {
 
   @Benchmark
   def addStdlib = {
-    val s = new StdlibSet[Key]() { override val initialSize = Benchmark.initialSize }
+    val s = new StdlibSet[Key]()
     var i = 0
     while (i < size) {
       s.add(keys(i))

@@ -71,7 +71,7 @@ class IntSetBenchmark {
 
   @Benchmark
   def addSpecialized = {
-    val s = new HashSet_Int(initialSize = initialSize)
+    val s = new HashSet_Int
     var i = 0
     while (i < size) {
       s.add(i)
@@ -81,7 +81,7 @@ class IntSetBenchmark {
 
   @Benchmark
   def addDebox = {
-    val s = debox.Set.ofSize[Int](initialSize)
+    val s = debox.Set.empty[Int]
     var i = 0
     while (i < size) {
       s.add(i)
@@ -91,7 +91,7 @@ class IntSetBenchmark {
 
   @Benchmark
   def addStdlib = {
-    val s = new StdlibSet[Int] { override val initialSize = Benchmark.initialSize }
+    val s = new StdlibSet[Int]
     var i = 0
     while (i < size) {
       s.add(i)

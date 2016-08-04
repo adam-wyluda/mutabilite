@@ -80,7 +80,7 @@ class IntMapBenchmark {
 
   @Benchmark
   def putAllSpecialized = {
-    val m = new HashMap_Int_Int(initialSize = initialSize)
+    val m = new HashMap_Int_Int
     var i = 0
     while (i < size) {
       m.put(i, i)
@@ -90,7 +90,7 @@ class IntMapBenchmark {
 
   @Benchmark
   def putAllDebox = {
-    val m = debox.Map.ofSize[Int, Int](initialSize)
+    val m = debox.Map.empty[Int, Int]
     var i = 0
     while (i < size) {
       m.update(i, i)
@@ -100,7 +100,7 @@ class IntMapBenchmark {
 
   @Benchmark
   def putAllStdlib = {
-    val m = new StdlibMap[Int, Int](initialSize = initialSize)
+    val m = new StdlibMap[Int, Int]
     var i = 0
     while (i < size) {
       m.put(i, i)
@@ -126,7 +126,7 @@ class IntMapBenchmark {
 
   @Benchmark
   def putRemoveReadSpecialized(blackhole: Blackhole) = {
-    val map = new HashMap_Int_Int(initialSize = initialSize)
+    val map = new HashMap_Int_Int
     var i = 0
     while (i < size) { map.put(i, i); i += 1 }
     i = 0
@@ -137,7 +137,7 @@ class IntMapBenchmark {
 
   @Benchmark
   def putRemoveReadDebox(blackhole: Blackhole) = {
-    val map = debox.Map.ofSize[Int, Int](initialSize)
+    val map = debox.Map.empty[Int, Int]
     var i = 0
     while (i < size) { map.update(i, i); i += 1 }
     i = 0
@@ -148,7 +148,7 @@ class IntMapBenchmark {
 
   @Benchmark
   def putRemoveReadStdlib(blackhole: Blackhole) = {
-    val map = new StdlibMap[Int, Int](initialSize = initialSize)
+    val map = new StdlibMap[Int, Int]
     var i = 0
     while (i < size) { map.put(i, i); i += 1 }
     i = 0

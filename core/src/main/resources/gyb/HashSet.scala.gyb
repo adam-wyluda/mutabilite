@@ -187,7 +187,10 @@ class HashSet_${T}${T_Param}(initialSize: Int = 8)(implicit hashK: Hash_${T}) ex
   @inline
   private[this] def shouldGrow = _size > capacity * 9 / 10
 
-  private[this] def growIfNecessary: Unit = if (shouldGrow) growToNewCapacity(capacity * 2)
+  private[this] def growIfNecessary: Unit =
+    if (shouldGrow) {
+      growToNewCapacity (capacity * (if (capacity < 10000) 4 else 2))
+    }
 
   private[this] def growToNewCapacity(newCapacity: Int) = {
     val oldCapacity = capacity
