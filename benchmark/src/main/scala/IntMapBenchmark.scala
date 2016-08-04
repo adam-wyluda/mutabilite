@@ -80,7 +80,7 @@ class IntMapBenchmark {
 
   @Benchmark
   def putAllSpecialized = {
-    val m = new HashMap_Int_Int
+    val m = new HashMap_Int_Int(initialSize = initialSize)
     var i = 0
     while (i < size) {
       m.put(keys(i), i)
@@ -90,7 +90,7 @@ class IntMapBenchmark {
 
   @Benchmark
   def putAllDebox = {
-    val m = debox.Map.empty[Int, Int]
+    val m = debox.Map.ofSize[Int, Int](initialSize)
     var i = 0
     while (i < size) {
       m.update(keys(i), i)
@@ -100,7 +100,7 @@ class IntMapBenchmark {
 
   @Benchmark
   def putAllStdlib = {
-    val m = new StdlibMap[Int, Int]
+    val m = new StdlibMap[Int, Int](initialSize = initialSize)
     var i = 0
     while (i < size) {
       m.put(keys(i), i)
@@ -126,7 +126,7 @@ class IntMapBenchmark {
 
   @Benchmark
   def putRemoveReadSpecialized(blackhole: Blackhole) = {
-    val map = new HashMap_Int_Int
+    val map = new HashMap_Int_Int(initialSize = initialSize)
     var i = 0
     while (i < size) { map.put(keys(i), i); i += 1 }
     i = 0
@@ -137,7 +137,7 @@ class IntMapBenchmark {
 
   @Benchmark
   def putRemoveReadDebox(blackhole: Blackhole) = {
-    val map = debox.Map.empty[Int, Int]
+    val map = debox.Map.ofSize[Int, Int](initialSize)
     var i = 0
     while (i < size) { map.update(keys(i), i); i += 1 }
     i = 0
@@ -148,7 +148,7 @@ class IntMapBenchmark {
 
   @Benchmark
   def putRemoveReadStdlib(blackhole: Blackhole) = {
-    val map = new StdlibMap[Int, Int]
+    val map = new StdlibMap[Int, Int](initialSize = initialSize)
     var i = 0
     while (i < size) { map.put(keys(i), i); i += 1 }
     i = 0
@@ -208,7 +208,7 @@ class IntMapRemoveSpecializedBenchmark {
 
   @Setup(Level.Invocation)
   def setup = {
-    map = new HashMap_Int_Int
+    map = new HashMap_Int_Int(initialSize = initialSize)
     0 until size foreach (i => map.put(keys(i), i))
   }
 
@@ -228,7 +228,7 @@ class IntMapRemoveDeboxBenchmark {
 
   @Setup(Level.Invocation)
   def setup = {
-    map = debox.Map.empty[Int, Int]
+    map = debox.Map.ofSize[Int, Int](initialSize)
     0 until size foreach (i => map.update(keys(i), i))
   }
 
@@ -248,7 +248,7 @@ class IntMapRemoveStdlibBenchmark {
 
   @Setup(Level.Invocation)
   def setup = {
-    map = StdlibMap[Int, Int]()
+    map = new StdlibMap[Int, Int](initialSize = initialSize)
     0 until size foreach (i => map.put(keys(i), i))
   }
 
