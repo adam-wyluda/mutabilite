@@ -10,23 +10,23 @@ import scala.collection.mutable.{Buffer => StdlibBuffer, OpenHashMap => StdlibMa
 @State(Scope.Thread)
 class IntMapBenchmark {
 
-  import Benchmark._
+  import IntBenchmark._
 
   val specMap: HashMap_Int_Int = {
     val map = new HashMap_Int_Int(initialSize)
     var i = 0
     while (i < size) {
-      map.put(i + 1, i * i)
+      map.put(keys(i), i * i)
       i += 1
     }
     map
   }
 
   val deboxMap: debox.Map[Int, Int] = {
-    val map = debox.Map.empty[Int, Int]
+    val map = debox.Map.ofSize[Int, Int](initialSize)
     var i = 0
     while (i < size) {
-      map.update(i + 1, i * i)
+      map.update(keys(i), i * i)
       i += 1
     }
     map
@@ -36,7 +36,7 @@ class IntMapBenchmark {
     val map = new StdlibMap[Int, Int](initialSize)
     var i = 0
     while (i < size) {
-      map.put(i + 1, i * i)
+      map.put(keys(i), i * i)
       i += 1
     }
     map
@@ -47,8 +47,8 @@ class IntMapBenchmark {
 
   @Setup(Level.Invocation)
   def setup = {
-    randKey = random.nextInt(size) + 1
-    nonExistingKey = randKey + size
+    randKey = keys(random.nextInt(size))
+    nonExistingKey = random.nextInt
   }
 
   @Benchmark
@@ -83,7 +83,7 @@ class IntMapBenchmark {
     val m = new HashMap_Int_Int
     var i = 0
     while (i < size) {
-      m.put(i, i)
+      m.put(keys(i), i)
       i += 1
     }
   }
@@ -93,7 +93,7 @@ class IntMapBenchmark {
     val m = debox.Map.empty[Int, Int]
     var i = 0
     while (i < size) {
-      m.update(i, i)
+      m.update(keys(i), i)
       i += 1
     }
   }
@@ -103,7 +103,7 @@ class IntMapBenchmark {
     val m = new StdlibMap[Int, Int]
     var i = 0
     while (i < size) {
-      m.put(i, i)
+      m.put(keys(i), i)
       i += 1
     }
   }
@@ -128,9 +128,9 @@ class IntMapBenchmark {
   def putRemoveReadSpecialized(blackhole: Blackhole) = {
     val map = new HashMap_Int_Int
     var i = 0
-    while (i < size) { map.put(i, i); i += 1 }
+    while (i < size) { map.put(keys(i), i); i += 1 }
     i = 0
-    while (i < size / 10) { map.remove(i * 10); i += 1 }
+    while (i < size / 10) { map.remove(keys(i * 10)); i += 1 }
     i = 0
     while (i < size) { blackhole.consume(map.get(i)); i += 1 }
   }
@@ -139,9 +139,9 @@ class IntMapBenchmark {
   def putRemoveReadDebox(blackhole: Blackhole) = {
     val map = debox.Map.empty[Int, Int]
     var i = 0
-    while (i < size) { map.update(i, i); i += 1 }
+    while (i < size) { map.update(keys(i), i); i += 1 }
     i = 0
-    while (i < size / 10) { map.remove(i * 10); i += 1 }
+    while (i < size / 10) { map.remove(keys(i * 10)); i += 1 }
     i = 0
     while (i < size) { blackhole.consume(map.get(i)); i += 1 }
   }
@@ -150,21 +150,21 @@ class IntMapBenchmark {
   def putRemoveReadStdlib(blackhole: Blackhole) = {
     val map = new StdlibMap[Int, Int]
     var i = 0
-    while (i < size) { map.put(i, i); i += 1 }
+    while (i < size) { map.put(keys(i), i); i += 1 }
     i = 0
-    while (i < size / 10) { map.remove(i * 10); i += 1 }
+    while (i < size / 10) { map.remove(keys(i * 10)); i += 1 }
     i = 0
     while (i < size) { blackhole.consume(map.get(i)); i += 1 }
   }
 
   @Benchmark
-  def mapSpecialized = specMap map ((k, v) => k + 1)
+  def mapSpecialized = specMap map ((k, v) => keys(k % size))
 
   @Benchmark
-  def mapDebox = deboxMap mapToArray ((k, v) => k + 1)
+  def mapDebox = deboxMap mapToArray ((k, v) => keys(k % size))
 
   @Benchmark
-  def mapStdlib = stdMap map { case (k, v) => k + 1 }
+  def mapStdlib = stdMap map { case (k, v) => keys(k % size) }
 
   @Benchmark
   def flatMapFold =
@@ -202,59 +202,59 @@ class IntMapBenchmark {
 @State(Scope.Thread)
 class IntMapRemoveSpecializedBenchmark {
 
-  import Benchmark._
+  import IntBenchmark._
 
   var map: HashMap_Int_Int = _
 
   @Setup(Level.Invocation)
   def setup = {
     map = new HashMap_Int_Int
-    0 until size foreach (i => map.put(i, i * i))
+    0 until size foreach (i => map.put(keys(i), i))
   }
 
   @Benchmark
   def benchmark = {
     var i = 0
-    while (i < size / 10) { map.remove(i * 10); i += 1 }
+    while (i < size / 10) { map.remove(i); i += 1 }
   }
 }
 
 @State(Scope.Thread)
 class IntMapRemoveDeboxBenchmark {
 
-  import Benchmark._
+  import IntBenchmark._
 
   var map: debox.Map[Int, Int] = _
 
   @Setup(Level.Invocation)
   def setup = {
     map = debox.Map.empty[Int, Int]
-    0 until size foreach (i => map.update(i, i * i))
+    0 until size foreach (i => map.update(keys(i), i))
   }
 
   @Benchmark
   def benchmark = {
     var i = 0
-    while (i < size / 10) { map.remove(i * 10); i += 1 }
+    while (i < size / 10) { map.remove(i); i += 1 }
   }
 }
 
 @State(Scope.Thread)
 class IntMapRemoveStdlibBenchmark {
 
-  import Benchmark._
+  import IntBenchmark._
 
   var map: StdlibMap[Int, Int] = _
 
   @Setup(Level.Invocation)
   def setup = {
     map = StdlibMap[Int, Int]()
-    0 until size foreach (i => map.put(i, i * i))
+    0 until size foreach (i => map.put(keys(i), i))
   }
 
   @Benchmark
   def benchmark = {
     var i = 0
-    while (i < size / 10) { map.remove(i * 10); i += 1 }
+    while (i < size / 10) { map.remove(i); i += 1 }
   }
 }

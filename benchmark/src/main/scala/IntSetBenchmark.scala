@@ -10,33 +10,33 @@ import scala.collection.mutable.{HashSet => StdlibSet}
 @State(Scope.Thread)
 class IntSetBenchmark {
 
-  import Benchmark._
+  import IntBenchmark._
 
   val specSet: HashSet_Int = {
     val set = new HashSet_Int(initialSize)
     var i = 0
     while (i < size) {
-      set.add(i + 1)
+      set.add(keys(i))
       i += 1
     }
     set
   }
 
   val deboxSet: debox.Set[Int] = {
-    val set = debox.Set.empty[Int]
+    val set = debox.Set.ofSize[Int](initialSize)
     var i = 0
     while (i < size) {
-      set.add(i + 1)
+      set.add(keys(i))
       i += 1
     }
     set
   }
 
   val stdSet: StdlibSet[Int] = {
-    val set = StdlibSet[Int]()
+    val set = new StdlibSet[Int] { override val initialSize = IntBenchmark.initialSize }
     var i = 0
     while (i < size) {
-      set.add(i + 1)
+      set.add(keys(i))
       i += 1
     }
     set
@@ -47,8 +47,8 @@ class IntSetBenchmark {
 
   @Setup(Level.Invocation)
   def setup = {
-    randKey = random.nextInt(size)
-    nonExistingKey = randKey + size
+    randKey = keys(random.nextInt(size))
+    nonExistingKey = random.nextInt
   }
 
   @Benchmark
@@ -74,7 +74,7 @@ class IntSetBenchmark {
     val s = new HashSet_Int
     var i = 0
     while (i < size) {
-      s.add(i)
+      s.add(keys(i))
       i += 1
     }
   }
@@ -84,7 +84,7 @@ class IntSetBenchmark {
     val s = debox.Set.empty[Int]
     var i = 0
     while (i < size) {
-      s.add(i)
+      s.add(keys(i))
       i += 1
     }
   }
@@ -94,7 +94,7 @@ class IntSetBenchmark {
     val s = new StdlibSet[Int]
     var i = 0
     while (i < size) {
-      s.add(i)
+      s.add(keys(i))
       i += 1
     }
   }
@@ -116,13 +116,13 @@ class IntSetBenchmark {
     stdSet foreach (blackhole.consume(_))
 
   @Benchmark
-  def mapSpecialized = specSet map (_ + 1)
+  def mapSpecialized = specSet map (i => keys(i % size))
 
   @Benchmark
-  def mapDebox = deboxSet map (_ + 1)
+  def mapDebox = deboxSet map (i => keys(i % size))
 
   @Benchmark
-  def mapStdlib = stdSet map (_ + 1)
+  def mapStdlib = stdSet map (i => keys(i % size))
 
   @Benchmark
   def flatMapFold =
@@ -160,7 +160,7 @@ class IntSetBenchmark {
 @State(Scope.Thread)
 class IntSetRemoveSpecializedBenchmark {
 
-  import Benchmark._
+  import IntBenchmark._
 
   var set: HashSet_Int = _
 
@@ -169,7 +169,7 @@ class IntSetRemoveSpecializedBenchmark {
     set = new HashSet_Int(initialSize)
     var i = 0
     while (i < size) {
-      set.add(i)
+      set.add(keys(i))
       i += 1
     }
   }
@@ -177,14 +177,14 @@ class IntSetRemoveSpecializedBenchmark {
   @Benchmark
   def benchmark = {
     var i = 0
-    while (i < size / 10) { set.remove(i * 10); i += 1 }
+    while (i < size / 10) { set.remove(keys(i)); i += 1 }
   }
 }
 
 @State(Scope.Thread)
 class IntSetRemoveDeboxBenchmark {
 
-  import Benchmark._
+  import IntBenchmark._
 
   var set: debox.Set[Int] = _
 
@@ -193,7 +193,7 @@ class IntSetRemoveDeboxBenchmark {
     set = debox.Set.ofSize[Int](initialSize)
     var i = 0
     while (i < size) {
-      set.add(i)
+      set.add(keys(i))
       i += 1
     }
   }
@@ -201,14 +201,14 @@ class IntSetRemoveDeboxBenchmark {
   @Benchmark
   def benchmark = {
     var i = 0
-    while (i < size / 10) { set.remove(i * 10); i += 1 }
+    while (i < size / 10) { set.remove(keys(i)); i += 1 }
   }
 }
 
 @State(Scope.Thread)
 class IntSetRemoveStdlibBenchmark {
 
-  import Benchmark._
+  import IntBenchmark._
 
   var set: StdlibSet[Int] = _
 
@@ -217,7 +217,7 @@ class IntSetRemoveStdlibBenchmark {
     set = StdlibSet[Int]()
     var i = 0
     while (i < size) {
-      set.add(i)
+      set.add(keys(i))
       i += 1
     }
   }
@@ -225,6 +225,6 @@ class IntSetRemoveStdlibBenchmark {
   @Benchmark
   def benchmark = {
     var i = 0
-    while (i < size / 10) { set.remove(i * 10); i += 1 }
+    while (i < size / 10) { set.remove(keys(i)); i += 1 }
   }
 }
