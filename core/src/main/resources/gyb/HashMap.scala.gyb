@@ -80,6 +80,7 @@ class HashMap_${K}_${V}${Param}(initialSize: Int = 8)
   private[this] var _size = 0
   var capacity = initialSize
   private[this] var mask = capacity - 1
+  private[this] var threshold = (capacity * 0.9).toInt
 
   def apply(key: ${K_Arg}): ${V_Arg} = {
     val index = indexOf(key)
@@ -109,7 +110,7 @@ class HashMap_${K}_${V}${Param}(initialSize: Int = 8)
       if (!isInit(nextHash)) {
         val nextDis = (capacity + pos - nextHash) & mask
         if (nextDis >= dis) {
-          if (hash == nextHash && hashK.eqv(_keys(pos), key)) {
+          if (hashK.eqv(_keys(pos), key)) {
             result = pos
             false
           } else {
@@ -130,8 +131,7 @@ class HashMap_${K}_${V}${Param}(initialSize: Int = 8)
   def put(key: ${K_Arg}, value: ${V_Arg}): Unit = {
     var _key = key${Cast_from_K}
     var _value = value${Cast_from_V}
-    var originalHash = hashCode(key)
-    var hash = originalHash
+    var hash = hashCode(key)
     var pos = hash
     var dis = 0
     while ({
@@ -143,7 +143,7 @@ class HashMap_${K}_${V}${Param}(initialSize: Int = 8)
         _size += 1
         growIfNecessary
         false
-      } else if (nextHash == originalHash && hashK.eqv(_keys(pos), key)) {
+      } else if (hashK.eqv(_keys(pos), key)) {
         _values(pos) = value${Cast_from_V}
         false
       } else {
@@ -220,11 +220,8 @@ class HashMap_${K}_${V}${Param}(initialSize: Int = 8)
 
   def contains(key: ${K_Arg}): Boolean = indexOf(key) != -1
 
-  @inline
-  private[this] def shouldGrow = _size > capacity * 9 / 10
-
   private[this] def growIfNecessary: Unit =
-    if (shouldGrow) {
+    if (_size > threshold) {
       growToNewCapacity (capacity * (if (capacity < 10000) 4 else 2))
     }
 
@@ -234,6 +231,7 @@ class HashMap_${K}_${V}${Param}(initialSize: Int = 8)
     val oldKeys = _keys
     val oldValues = _values
     capacity = newCapacity
+    threshold = (capacity * 0.9).toInt
     mask = capacity - 1
     hashes = new Array[Int](capacity)
     _keys = new Array[${K_Array}](capacity)

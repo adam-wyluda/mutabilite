@@ -42,6 +42,7 @@ class HashSet_${T}${T_Param}(initialSize: Int = 8)(implicit hashK: Hash_${T}) ex
   private[this] var _size = 0
   var capacity = initialSize
   private[this] var mask = capacity - 1
+  private[this] var threshold = (capacity * 0.9).toInt
 
   def apply(key: ${T_Arg}): Boolean = indexOf(key) != -1
 
@@ -55,7 +56,7 @@ class HashSet_${T}${T_Param}(initialSize: Int = 8)(implicit hashK: Hash_${T}) ex
       if (!isInit(nextHash)) {
         val nextDis = (capacity + pos - nextHash) & mask
         if (nextDis >= dis) {
-          if (hash == nextHash && hashK.eqv(_keys(pos), key)) {
+          if (hashK.eqv(_keys(pos), key)) {
             result = pos
             false
           } else {
@@ -89,7 +90,7 @@ class HashSet_${T}${T_Param}(initialSize: Int = 8)(implicit hashK: Hash_${T}) ex
         growIfNecessary
         result = true
         false
-      } else if (nextHash == originalHash && hashK.eqv(_keys(pos), key)) {
+      } else if (hashK.eqv(_keys(pos), key)) {
         result = false
         false
       } else {
@@ -184,11 +185,8 @@ class HashSet_${T}${T_Param}(initialSize: Int = 8)(implicit hashK: Hash_${T}) ex
     result
   }
 
-  @inline
-  private[this] def shouldGrow = _size > capacity * 9 / 10
-
   private[this] def growIfNecessary: Unit =
-    if (shouldGrow) {
+    if (_size > threshold) {
       growToNewCapacity (capacity * (if (capacity < 10000) 4 else 2))
     }
 
@@ -197,6 +195,7 @@ class HashSet_${T}${T_Param}(initialSize: Int = 8)(implicit hashK: Hash_${T}) ex
     val oldHashes = hashes
     val oldKeys = _keys
     capacity = newCapacity
+    threshold = (capacity * 0.9).toInt
     mask = capacity - 1
     hashes = new Array[Int](capacity)
     _keys = new Array[${T_Array}](capacity)
@@ -220,7 +219,7 @@ class HashSet_${T}${T_Param}(initialSize: Int = 8)(implicit hashK: Hash_${T}) ex
 
   def compact: Unit = {
     var newCapacity = 1
-    while (newCapacity < size) newCapacity *= 2
+    while (newCapacity * 2 < threshold) newCapacity *= 2
     if (newCapacity != capacity) growToNewCapacity(newCapacity)
   }
 

@@ -34,7 +34,7 @@ object Benchmark {
 
   val initialSize = {
     var _size = 1
-    while (_size < size) _size *= 2
-    _size
+    while (_size * 2 < size * 0.65) _size *= 2
+    _size * 2
   }
 }
