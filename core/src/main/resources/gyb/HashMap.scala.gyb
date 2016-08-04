@@ -36,9 +36,6 @@ types = ['Boolean', 'Char', 'Byte', 'Short',
 
   if V == 'Object':
     V_Arg = 'V'
-    V_Opt = 'Opt[V]'
-    V_None = 'none'
-    V_Some = 'Some'
     V_Array = 'AnyRef'
     V_Seq = 'Seq_Object[V]'
     V_BufferSeq = 'BufferSeq_Object[V]'
@@ -46,9 +43,6 @@ types = ['Boolean', 'Char', 'Byte', 'Short',
     Cast_from_V = '.asInstanceOf[AnyRef]'
   else:
     V_Arg = V
-    V_Opt = 'Opt_' + V
-    V_None = 'None_' + V
-    V_Some = 'Some_' + V
     V_Array = V
     V_Seq = 'Seq_' + V
     V_BufferSeq = 'BufferSeq_' + V
@@ -58,9 +52,9 @@ types = ['Boolean', 'Char', 'Byte', 'Short',
 
 trait Map_${K}_${V}${Param} extends Map[${K_Arg}, ${V_Arg}] {
   def apply(key: ${K_Arg}): ${V_Arg}
-  def get(key: ${K_Arg}): ${V_Opt}
-  def put(key: ${K_Arg}, value: ${V_Arg}): ${V_Opt}
-  def remove(key: ${K_Arg}): ${V_Opt}
+  def get(key: ${K_Arg}): Option[${V_Arg}]
+  def put(key: ${K_Arg}, value: ${V_Arg}): Unit
+  def remove(key: ${K_Arg}): Unit
   def keys: ${K_Set}
   def values: ${V_Seq}
   def contains(key: ${K_Arg}): Boolean
@@ -87,10 +81,6 @@ class HashMap_${K}_${V}${Param}(initialSize: Int = 8)
   var capacity = initialSize
   private[this] var mask = capacity - 1
 
-  % if V == 'Object':
-  private[this] val none = new None[V]
-  % end
-
   def apply(key: ${K_Arg}): ${V_Arg} = {
     val index = indexOf(key)
     if (index == -1) {
@@ -100,12 +90,12 @@ class HashMap_${K}_${V}${Param}(initialSize: Int = 8)
     }
   }
 
-  def get(key: ${K_Arg}): ${V_Opt} = {
+  def get(key: ${K_Arg}): Option[${V_Arg}] = {
     val index = indexOf(key)
     if (index == -1) {
-      ${V_None}
+      None
     } else {
-      new ${V_Some}(_values(index)${Cast_to_V})
+      Some((_values(index)${Cast_to_V}))
     }
   }
 
@@ -137,14 +127,13 @@ class HashMap_${K}_${V}${Param}(initialSize: Int = 8)
     result
   }
 
-  def put(key: ${K_Arg}, value: ${V_Arg}): ${V_Opt} = {
+  def put(key: ${K_Arg}, value: ${V_Arg}): Unit = {
     var _key = key${Cast_from_K}
     var _value = value${Cast_from_V}
     var originalHash = hashCode(key)
     var hash = originalHash
     var pos = hash
     var dis = 0
-    var previous: ${V_Opt} = ${V_None}
     while ({
       val nextHash = hashes(pos)
       if (isInit(nextHash)) {
@@ -155,7 +144,6 @@ class HashMap_${K}_${V}${Param}(initialSize: Int = 8)
         growIfNecessary
         false
       } else if (nextHash == originalHash && hashK.eqv(_keys(pos), key)) {
-        previous = new ${V_Some}(_values(pos)${Cast_to_V})
         _values(pos) = value${Cast_from_V}
         false
       } else {
@@ -176,13 +164,11 @@ class HashMap_${K}_${V}${Param}(initialSize: Int = 8)
         true
       }
     }) ()
-    previous
   }
 
-  def remove(key: ${K_Arg}): ${V_Opt} = {
+  def remove(key: ${K_Arg}): Unit = {
     var index = indexOf(key)
     if (index != -1) {
-      val previous = new ${V_Some}(_values(index)${Cast_to_V})
       while ({
         val nextIndex = (index + 1) & mask
         val nextHash = hashes(nextIndex)
@@ -209,9 +195,6 @@ class HashMap_${K}_${V}${Param}(initialSize: Int = 8)
       _values(index) = null
       % end
       _size -= 1
-      previous
-    } else {
-      ${V_None}
     }
   }
 
