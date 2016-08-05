@@ -215,7 +215,7 @@ class IntMapRemoveSpecializedBenchmark {
   @Benchmark
   def benchmark = {
     var i = 0
-    while (i < size / 10) { map.remove(i); i += 1 }
+    while (i < size / 10) { map.remove(keys(i)); i += 1 }
   }
 }
 
@@ -235,7 +235,7 @@ class IntMapRemoveDeboxBenchmark {
   @Benchmark
   def benchmark = {
     var i = 0
-    while (i < size / 10) { map.remove(i); i += 1 }
+    while (i < size / 10) { map.remove(keys(i)); i += 1 }
   }
 }
 
@@ -255,6 +255,6 @@ class IntMapRemoveStdlibBenchmark {
   @Benchmark
   def benchmark = {
     var i = 0
-    while (i < size / 10) { map.remove(i); i += 1 }
+    while (i < size / 10) { map.remove(keys(i)); i += 1 }
   }
 }

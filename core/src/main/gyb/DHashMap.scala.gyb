@@ -1,0 +1,266 @@
+package offheap.collection
+
+// Uses hashing scheme from Debox library: https://github.com/non/debox
+
+%{
+from itertools import product
+
+types = ['Boolean', 'Char', 'Byte', 'Short',
+'Int', 'Long', 'Float', 'Double', 'Object']
+}%
+
+% for (K, V) in product(types, types):
+
+%{
+  if (K == 'Object' and V == 'Object'):
+    Param = '[K, V]'
+  elif K == 'Object':
+    Param = '[K]'
+  elif V == 'Object':
+    Param = '[V]'
+  else:
+    Param = ''
+
+  if K == 'Object':
+    K_Arg = 'K'
+    K_Array = 'AnyRef'
+    K_Set = 'Set_Object[K]'
+    K_HashSet = 'HashSet_Object[K]'
+    Cast_to_K = '.asInstanceOf[K]'
+    Cast_from_K = '.asInstanceOf[AnyRef]'
+  else:
+    K_Arg = K
+    K_Array = K
+    K_Set = 'Set_' + K
+    K_HashSet = 'HashSet_' + K
+    Cast_to_K = ''
+    Cast_from_K = ''
+
+  if V == 'Object':
+    V_Arg = 'V'
+    V_Array = 'AnyRef'
+    V_Seq = 'Seq_Object[V]'
+    V_BufferSeq = 'BufferSeq_Object[V]'
+    Cast_to_V = '.asInstanceOf[V]'
+    Cast_from_V = '.asInstanceOf[AnyRef]'
+  else:
+    V_Arg = V
+    V_Array = V
+    V_Seq = 'Seq_' + V
+    V_BufferSeq = 'BufferSeq_' + V
+    Cast_to_V = ''
+    Cast_from_V = ''
+}%
+
+trait Map_${K}_${V}${Param} extends Map[${K_Arg}, ${V_Arg}] {
+  def apply(key: ${K_Arg}): ${V_Arg}
+  def get(key: ${K_Arg}): Option[${V_Arg}]
+  def put(key: ${K_Arg}, value: ${V_Arg}): Unit
+  def remove(key: ${K_Arg}): Unit
+  def keys: ${K_Set}
+  def values: ${V_Seq}
+  def contains(key: ${K_Arg}): Boolean
+
+  def hashAt(index: Int): Byte
+  def keyAt(index: Int): ${K_Arg}
+  def valueAt(index: Int): ${V_Arg}
+  def updateValue(index: Int, value: ${V_Arg}): Unit
+  def isInit(hash: Byte): Boolean
+}
+
+class HashMap_${K}_${V}${Param}(initialSize: Int = 8)
+  % if K == V:
+    (implicit hashK: Hash_${K})
+  % else:
+    (implicit hashK: Hash_${K}, hashV: Hash_${V})
+  % end
+    extends Map_${K}_${V}${Param} {
+
+  private[this] var buckets: Array[Byte] = new Array[Byte](initialSize)
+  private[this] var _keys: Array[${K_Array}] = new Array[${K_Array}](initialSize)
+  private[this] var _values: Array[${V_Array}] = new Array[${V_Array}](initialSize)
+  private[this] var _size = 0
+  private[this] var used = 0
+
+  var capacity = initialSize
+  private[this] var mask = capacity - 1
+  var limit = (capacity * 0.65).toInt
+
+  def apply(key: ${K_Arg}): ${V_Arg} = {
+    var i = hashK.hash(key) & 0x7fffffff
+    var perturbation = i
+    while (true) {
+      val j = i & mask
+      val status = buckets(j)
+      if (status == 0) throw new NoSuchElementException(s"key not found: $key")
+      else if (status == 3 && _keys(j) == key) return _values(j)${Cast_to_V}
+      else {
+        i = (i << 2) + i + perturbation + 1
+        perturbation = perturbation >> 5
+      }
+    }
+    throw new NoSuchElementException(s"key not found: $key")
+  }
+
+  def get(key: ${K_Arg}): Option[${V_Arg}] = {
+    var i = hashK.hash(key) & 0x7fffffff
+    var perturbation = i
+    while (true) {
+      val j = i & mask
+      val status = buckets(j)
+      if (status == 0) return None
+      else if (status == 3 && _keys(j) == key) return Some(_values(j)${Cast_to_V})
+      else {
+        i = (i << 2) + i + perturbation + 1
+        perturbation = perturbation >> 5
+      }
+    }
+    None
+  }
+
+  def put(key: ${K_Arg}, value: ${V_Arg}): Unit = {
+    var i = hashK.hash(key) & 0x7fffffff
+    var perturbation = i
+    var freeBlock = -1
+    while (true) {
+      val j = i & mask
+      val status = buckets(j)
+      if (status == 0) {
+        val writeTo = if (freeBlock == -1) j else freeBlock
+        _keys(writeTo) = key${Cast_from_K}
+        _values(writeTo) = value${Cast_from_V}
+        buckets(writeTo) = 3
+        _size += 1
+        used += 1
+        growIfNecessary
+        return
+      } else if (status == 2) {
+        i = (i << 2) + i + perturbation + 1
+        perturbation = perturbation >> 5
+        freeBlock = j
+      } else if (_keys(j) == key) {
+        _values(j) = value${Cast_from_V}
+        return
+      } else {
+        i = (i << 2) + i + perturbation + 1
+        perturbation = perturbation >> 5
+      }
+    }
+  }
+
+  def remove(key: ${K_Arg}): Unit = {
+    var i = hashK.hash(key) & 0x7fffffff
+    var perturbation = i
+    while (true) {
+      val j = i & mask
+      val status = buckets(j)
+      if (status == 3 && _keys(j) == key) {
+        buckets(j) = 2
+        _size -= 1
+        return
+      } else if (status == 0) {
+        return
+      } else {
+        i = (i << 2) + i + perturbation + 1
+        perturbation = perturbation >> 5
+      }
+    }
+  }
+
+  def keys: ${K_Set} = {
+    val result = new ${K_HashSet}(initialSize = capacity)
+    var i = 0
+    while (i < capacity) {
+      if (buckets(i) == 3) result.add(_keys(i)${Cast_to_K})
+      i += 1
+    }
+    result
+  }
+
+  def values: ${V_Seq} = {
+    val result = new ${V_BufferSeq}(initialSize = capacity)
+    var i = 0
+    while (i < capacity) {
+      if (buckets(i) == 3) result.append(_values(i)${Cast_to_V})
+      i += 1
+    }
+    result
+  }
+
+  def contains(key: ${K_Arg}): Boolean = {
+    var i = hashK.hash(key) & 0x7fffffff
+    var perturbation = i
+    while (true) {
+      val j = i & mask
+      val status = buckets(j)
+      if (status == 0) return false
+      else if (status == 3 && _keys(j) == key) return true
+      else {
+        i = (i << 2) + i + perturbation + 1
+        perturbation = perturbation >> 5
+      }
+    }
+    false
+  }
+
+  private[this] def growIfNecessary: Unit =
+    if (used > limit) {
+      growTable(capacity * (if (capacity < 10000) 4 else 2))
+    }
+
+  private[this] def growTable(targetCapacity: Int): Unit = {
+    val oldCapacity = capacity
+    val oldBuckets = buckets
+    val oldKeys = _keys
+    val oldValues = _values
+    capacity = targetCapacity
+    mask = capacity - 1
+    limit = (capacity * 0.65).toInt
+    buckets = new Array[Byte](capacity)
+    _keys = new Array[${K_Array}](capacity)
+    _values = new Array[${V_Array}](capacity)
+    _size = 0
+    used = 0
+    var i = 0
+    while (i < oldCapacity) {
+      val bucket = oldBuckets(i)
+      if (bucket == 3) {
+        val key = oldKeys(i)${Cast_to_K}
+        val value = oldValues(i)${Cast_to_V}
+        put(key, value)
+      }
+      i += 1
+    }
+  }
+
+  def compact: Unit = {
+    var newCapacity = 1
+    while (newCapacity < _size / 0.65) newCapacity *= 2
+    if (newCapacity != capacity) growTable(newCapacity)
+  }
+
+  def hashAt(index: Int): Byte = buckets(index)
+  def keyAt(index: Int): ${K_Arg} = _keys(index)${Cast_to_K}
+  def valueAt(index: Int): ${V_Arg} = _values(index)${Cast_to_V}
+  def updateValue(index: Int, value: ${V_Arg}): Unit = _values(index) = value${Cast_from_V}
+  def isInit(bucket: Byte) = bucket == 0
+  private[this] def isDel(hash: Int) = hash == 1
+
+  def empty = _size == 0
+  def size: Int = _size
+
+  def foreach(f: (${K_Arg}, ${V_Arg}) => Unit): Unit = {
+    var i = 0
+    while (i < capacity) {
+      val status = buckets(i)
+      if (status == 3) {
+        val key = _keys(i)${Cast_to_K}
+        val value = _values(i)${Cast_to_V}
+        f(key, value)
+      }
+      i += 1
+    }
+  }
+}
+
+% end

@@ -4,7 +4,8 @@ import scala.util.Random
 
 object Benchmark {
 
-  val size = 100000
+  //  With load factor of 0.65, this should not trigger growth
+  val size = 80000
 
   val random = Random
 
@@ -34,7 +35,7 @@ object Benchmark {
 
   val initialSize = {
     var _size = 1
-    while (_size * 2 < size * 0.65) _size *= 2
+    while (_size * 2 < size) _size *= 2
     _size * 2
   }
 }

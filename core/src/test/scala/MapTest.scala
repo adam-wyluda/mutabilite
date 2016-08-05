@@ -126,10 +126,10 @@ class MapTest extends FunSuite with BeforeAndAfter {
     1 to 25 foreach (map.remove(_))
     assert(map.capacity == 128)
     map.compact
-    assert(map.capacity == 32)
+    assert(map.capacity == 64)
 
     25 to 40 foreach (map.remove(_))
-    assert(map.capacity == 32)
+    assert(map.capacity == 64)
     map.compact
     assert(map.capacity == 16)
 
