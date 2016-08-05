@@ -116,13 +116,13 @@ class IntSetBenchmark {
     stdSet foreach (blackhole.consume(_))
 
   @Benchmark
-  def mapSpecialized = specSet map (i => keys(i % size))
+  def mapSpecialized = specSet map (_ + 1)
 
   @Benchmark
-  def mapDebox = deboxSet map (i => keys(i % size))
+  def mapDebox = deboxSet map (_ + 1)
 
   @Benchmark
-  def mapStdlib = stdSet map (i => keys(i % size))
+  def mapStdlib = stdSet map (_ + 1)
 
   @Benchmark
   def flatMapFold =

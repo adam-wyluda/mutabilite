@@ -158,13 +158,13 @@ class IntMapBenchmark {
   }
 
   @Benchmark
-  def mapSpecialized = specMap map ((k, v) => keys(k % size))
+  def mapSpecialized = specMap map ((k, v) => k)
 
   @Benchmark
-  def mapDebox = deboxMap mapToArray ((k, v) => keys(k % size))
+  def mapDebox = deboxMap mapToArray ((k, v) => k)
 
   @Benchmark
-  def mapStdlib = stdMap map { case (k, v) => keys(k % size) }
+  def mapStdlib = stdMap map { case (k, v) => k }
 
   @Benchmark
   def flatMapFold =
