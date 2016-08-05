@@ -1,0 +1,260 @@
+package offheap.collection
+
+// Port of stdlib OpenHashMap:
+// https://github.com/scala/scala/blob/v2.11.7/src/library/scala/collection/mutable/OpenHashMap.scala
+
+%{
+from itertools import product
+
+types = ['Boolean', 'Char', 'Byte', 'Short',
+'Int', 'Long', 'Float', 'Double', 'Object']
+}%
+
+% for (K, V) in product(types, types):
+
+%{
+  if (K == 'Object' and V == 'Object'):
+    Param = '[K, V]'
+  elif K == 'Object':
+    Param = '[K]'
+  elif V == 'Object':
+    Param = '[V]'
+  else:
+    Param = ''
+
+  if K == 'Object':
+    K_Arg = 'K'
+    K_Array = 'AnyRef'
+    K_Set = 'Set_Object[K]'
+    K_HashSet = 'HashSet_Object[K]'
+    Cast_to_K = '.asInstanceOf[K]'
+    Cast_from_K = '.asInstanceOf[AnyRef]'
+  else:
+    K_Arg = K
+    K_Array = K
+    K_Set = 'Set_' + K
+    K_HashSet = 'HashSet_' + K
+    Cast_to_K = ''
+    Cast_from_K = ''
+
+  if V == 'Object':
+    V_Arg = 'V'
+    V_Array = 'AnyRef'
+    V_Seq = 'Seq_Object[V]'
+    V_BufferSeq = 'BufferSeq_Object[V]'
+    Cast_to_V = '.asInstanceOf[V]'
+    Cast_from_V = '.asInstanceOf[AnyRef]'
+  else:
+    V_Arg = V
+    V_Array = V
+    V_Seq = 'Seq_' + V
+    V_BufferSeq = 'BufferSeq_' + V
+    Cast_to_V = ''
+    Cast_from_V = ''
+}%
+
+trait Map_${K}_${V}${Param} extends Map[${K_Arg}, ${V_Arg}] {
+  def apply(key: ${K_Arg}): ${V_Arg}
+  def get(key: ${K_Arg}): Option[${V_Arg}]
+  def put(key: ${K_Arg}, value: ${V_Arg}): Unit
+  def remove(key: ${K_Arg}): Unit
+  def keys: ${K_Set}
+  def values: ${V_Seq}
+  def contains(key: ${K_Arg}): Boolean
+
+  def hashAt(index: Int): Int
+  def keyAt(index: Int): ${K_Arg}
+  def valueAt(index: Int): ${V_Arg}
+  def updateValue(index: Int, value: ${V_Arg}): Unit
+  def isInit(hash: Int): Boolean
+}
+
+class HashMap_${K}_${V}${Param}(initialSize: Int = 8)
+  % if K == V:
+    (implicit hashK: Hash_${K})
+  % else:
+    (implicit hashK: Hash_${K}, hashV: Hash_${V})
+  % end
+    extends Map_${K}_${V}${Param} {
+
+  private[this] var hashes: Array[Int] = new Array[Int](initialSize)
+  private[this] var _keys: Array[${K_Array}] = new Array[${K_Array}](initialSize)
+  private[this] var _values: Array[${V_Array}] = new Array[${V_Array}](initialSize)
+  private[this] var _size = 0
+  private[this] var deleted = 0
+
+  var capacity = initialSize
+  private[this] var mask = capacity - 1
+
+  def apply(key: ${K_Arg}): ${V_Arg} = {
+    val hash = hashCode(key)
+    var j = hash
+    var index = hash & mask
+    var perturb = index
+    while (!isInit(hashes(index))) {
+      if (hashes(index) == hash && _keys(index) == key) {
+        return _values(index)${Cast_to_V}
+      }
+      j = 5 * j + 1 + perturb
+      perturb >>= 5
+      index = j & mask
+    }
+    throw new NoSuchElementException(s"key not found: $key")
+  }
+
+  def get(key: ${K_Arg}): Option[${V_Arg}] = {
+    val hash = hashCode(key)
+    var j = hash
+    var index = hash & mask
+    var perturb = index
+    while (!isInit(hashes(index))) {
+      if (hashes(index) == hash && _keys(index) == key) {
+        return Some(_values(index)${Cast_to_V})
+      }
+      j = 5 * j + 1 + perturb
+      perturb >>= 5
+      index = j & mask
+    }
+    None
+  }
+
+  private[this] def indexOf(key: ${K_Arg}): Int = {
+    val hash = hashCode(key)
+    indexOf(key, hash)
+  }
+
+  private[this] def indexOf(key: ${K_Arg}, hash: Int): Int = {
+    val hash = hashCode(key)
+    var j = hash
+    var index = hash & mask
+    var perturb = index
+    while (!isInit(hashes(index)) && !(hashes(index) == hash && _keys(index) == key)) {
+      j = 5 * j + 1 + perturb
+      perturb >>= 5
+      index = j & mask
+    }
+    index
+  }
+
+  def put(key: ${K_Arg}, value: ${V_Arg}): Unit = {
+    growIfNecessary
+    val hash = hashCode(key)
+    val index = indexOf(key, hash)
+    val hashAtIndex = hashes(index)
+    if (isInit(hashAtIndex)) {
+      hashes(index) = hash
+      _keys(index) = key${Cast_from_K}
+      _values(index) = value${Cast_from_V}
+      _size += 1
+    } else {
+      if (isDel(hashAtIndex)) {
+        _size += 1
+      }
+      hashes(index) = hash
+      _values(index) = value${Cast_from_V}
+    }
+  }
+
+  def remove(key: ${K_Arg}): Unit = {
+    val index = indexOf(key)
+    val hashAtIndex = hashes(index)
+    if (!isInit(hashAtIndex) && !isDel(hashAtIndex)) {
+      hashes(index) = 1
+      _size -= 1
+      deleted += 1
+    }
+  }
+
+  def keys: ${K_Set} = {
+    val result = new ${K_HashSet}(initialSize = capacity)
+    var i = 0
+    while (i < capacity) {
+      if (!isInit(hashes(i))) result.add(_keys(i)${Cast_to_K})
+      i += 1
+    }
+    result
+  }
+
+  def values: ${V_Seq} = {
+    val result = new ${V_BufferSeq}(initialSize = capacity)
+    var i = 0
+    while (i < capacity) {
+      if (!isInit(hashes(i))) result.append(_values(i)${Cast_to_V})
+      i += 1
+    }
+    result
+  }
+
+  def contains(key: ${K_Arg}): Boolean = {
+    val index = indexOf(key)
+    val hashAtIndex = hashes(index)
+    (hashAtIndex != 0 && hashAtIndex != 1)
+  }
+
+  private[this] def growIfNecessary: Unit =
+    if (2 * (_size + deleted) > mask) {
+      growTable(capacity * (if (capacity < 10000) 4 else 2))
+    }
+
+  private[this] def growTable(targetCapacity: Int): Unit = {
+    val oldCapacity = capacity
+    val oldHashes = hashes
+    val oldKeys = _keys
+    val oldValues = _values
+    capacity = targetCapacity
+    mask = capacity - 1
+    hashes = new Array[Int](capacity)
+    _keys = new Array[${K_Array}](capacity)
+    _values = new Array[${V_Array}](capacity)
+    _size = 0
+    var i = 0
+    while (i < oldCapacity) {
+      val hash = oldHashes(i)
+      if (!isInit(hash)) {
+        val key = oldKeys(i)${Cast_to_K}
+        val value = oldValues(i)${Cast_to_V}
+        put(key, value)
+      }
+      i += 1
+    }
+    deleted = 0
+  }
+
+  private[this] def hashCode(key: ${K_Arg}) = {
+    var h = hashK.hash(key)
+    h ^= ((h >>> 20) ^ (h >>> 12))
+    h ^= (h >>> 7) ^ (h >>> 4)
+    if (h == 0 || h == 1) 2 else h
+  }
+
+  def compact: Unit = {
+    var newCapacity = 1
+    while (2 * _size < mask * 0.65) newCapacity *= 2
+    if (newCapacity != capacity) growTable(newCapacity)
+  }
+
+  def hashAt(index: Int): Int = hashes(index)
+  def keyAt(index: Int): ${K_Arg} = _keys(index)${Cast_to_K}
+  def valueAt(index: Int): ${V_Arg} = _values(index)${Cast_to_V}
+  def updateValue(index: Int, value: ${V_Arg}): Unit = _values(index) = value${Cast_from_V}
+  def isInit(hash: Int) = hash == 0
+  private[this] def isDel(hash: Int) = hash == 1
+
+  def empty = _size == 0
+  def size: Int = _size
+
+  def foreach(f: (${K_Arg}, ${V_Arg}) => Unit): Unit = {
+    var i = 0
+    while (i < capacity) {
+      val hash = hashes(i)
+      if (!isInit(hash)) {
+        val key = _keys(i)${Cast_to_K}
+        val value = _values(i)${Cast_to_V}
+        f(key, value)
+      }
+      i += 1
+    }
+  }
+}
+
+% end

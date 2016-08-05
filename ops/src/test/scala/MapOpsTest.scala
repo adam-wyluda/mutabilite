@@ -142,7 +142,7 @@ class MapOpsTest extends FunSuite {
     val sum = map.reduceValues { (acc: String, v: String) =>
       acc + v
     }
-    assert(sum == "12345")
+    "12345" foreach (c => assert(sum.contains(c)))
   }
 
   test("transformValues") {

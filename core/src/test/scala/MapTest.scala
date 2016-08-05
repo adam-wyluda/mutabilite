@@ -110,7 +110,7 @@ class MapTest extends FunSuite with BeforeAndAfter {
     val values = map.values
 
     assert(values.size == 3)
-    0 until values.size foreach (i => assert(values(i) == expected(i + 1)))
+    1 to values.size foreach (i => assert(values.index(expected(i)) != -1))
   }
 
   test("contains") {
