@@ -13,8 +13,8 @@ class SetTest extends FunSuite with BeforeAndAfter {
   }
 
   test("isEmpty") {
-    assert(set.notEmpty)
-    assert(new HashSet_Int().empty)
+    assert(set.nonEmpty)
+    assert(new HashSet_Int().isEmpty)
   }
 
   test("size") {

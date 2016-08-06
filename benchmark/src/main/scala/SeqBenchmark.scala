@@ -269,7 +269,7 @@ class SeqRemoveSpecializedBenchmark {
 
   @Benchmark
   def benchmark = {
-    while (seq.notEmpty) seq.remove(0)
+    while (seq.nonEmpty) seq.remove(0)
   }
 }
 

@@ -227,7 +227,7 @@ class HashSet_${T}${T_Param}(initialSize: Int = 8)(implicit hashK: Hash_${T}) ex
   def keyAt(index: Int): ${T_Arg} = _keys(index)${Cast_to_T}
   def isInit(hash: Int) = hash == 0
 
-  def empty = _size == 0
+  def isEmpty = _size == 0
   def size: Int = _size
 
   def foreach(f: ${T_Arg} => Unit): Unit = {

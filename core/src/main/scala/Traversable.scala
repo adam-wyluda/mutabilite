@@ -1,11 +1,12 @@
 package offheap.collection
 
+/**
+  * Base trait for all collections.
+  */
 sealed trait Traversable extends Any {
   def size: Int
-  def capacity: Int
-  def empty: Boolean
-  def notEmpty: Boolean = !empty
-  def compact: Unit
+  def isEmpty: Boolean
+  def nonEmpty: Boolean = !isEmpty
 }
 
 trait Traversable1[A] extends Any with Traversable {

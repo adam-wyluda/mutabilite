@@ -240,7 +240,7 @@ class HashMap_${K}_${V}${Param}(initialSize: Int = 8)
   def isInit(hash: Int) = hash == 0
   private[this] def isDel(hash: Int) = hash == 1
 
-  def empty = _size == 0
+  def isEmpty = _size == 0
   def size: Int = _size
 
   def foreach(f: (${K_Arg}, ${V_Arg}) => Unit): Unit = {

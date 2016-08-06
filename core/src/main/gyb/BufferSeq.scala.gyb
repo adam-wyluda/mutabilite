@@ -107,7 +107,7 @@ class BufferSeq_${T}${T_Param}(initialSize: Int = 16)(implicit eq: Eq_${T}) exte
   }
   private def growTo(size: Int) = while (shouldGrow(size)) grow
 
-  def empty = size == 0
+  def isEmpty = size == 0
   def capacity = array.size
 
   def foreach(f: ${T_Arg} => Unit): Unit = {

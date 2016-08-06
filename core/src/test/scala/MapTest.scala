@@ -23,8 +23,8 @@ class MapTest extends FunSuite with BeforeAndAfter {
   }
 
   test("isEmpty") {
-    assert(map.notEmpty)
-    assert(new HashMap_Int_Object[String].empty)
+    assert(map.nonEmpty)
+    assert(new HashMap_Int_Object[String].isEmpty)
   }
 
   test("size") {

@@ -184,7 +184,7 @@ class KHashMap_${K}_${V}${Param}(initialSize: Int = 8)
   def updateValue(index: Int, value: ${V_Arg}): Unit = _values(index) = value${Cast_from_V}
   def isInit(hash: Int) = hash == 0
 
-  def empty = _size == 0
+  def isEmpty = _size == 0
   def size: Int = _size
 
   def foreach(f: (${K_Arg}, ${V_Arg}) => Unit): Unit = {

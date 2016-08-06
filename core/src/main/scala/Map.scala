@@ -8,4 +8,6 @@ trait Map[K, V] extends Traversable2[K, V] {
   def keys: Set[K]
   def values: Seq[V]
   def contains(key: K): Boolean
+  def compact: Unit
+  def capacity: Int
 }
