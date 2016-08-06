@@ -12,7 +12,7 @@ object IntBenchmark {
     val keys = new Array[Int](size)
     var i = 0
     while (i < size) {
-      keys(i) = random.nextInt
+      keys(i) = random.nextInt(1000000)
       i += 1
     }
     keys
