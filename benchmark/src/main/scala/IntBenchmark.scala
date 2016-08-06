@@ -8,15 +8,7 @@ object IntBenchmark {
 
   val random = Random
 
-  val keys: Array[Int] = {
-    val keys = new Array[Int](size)
-    var i = 0
-    while (i < size) {
-      keys(i) = random.nextInt(1000000)
-      i += 1
-    }
-    keys
-  }
+  val keys: Array[Int] = Array.fill[Int](size)(random.nextInt(1000000))
 
   val initialSize = {
     var _size = 1

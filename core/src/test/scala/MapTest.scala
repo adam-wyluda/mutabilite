@@ -118,6 +118,31 @@ class MapTest extends FunSuite with BeforeAndAfter {
     }
   }
 
+  test("put and remove 3") {
+    val map = new HashMap_Int_Int
+    val rand = scala.util.Random
+
+    val n = 50000
+    val vals = Array.fill[Int](n * 2)(rand.nextInt)
+    val keyRange = -n until n
+    keyRange foreach (i => map.put(i, vals(i + n)))
+    assert(map.size == vals.size)
+    keyRange foreach { i =>
+      assert(map.contains(i))
+      assert(map(i) == vals(i + n))
+    }
+    keyRange by 2 foreach { i =>
+      map.remove(i)
+      assert(!map.contains(i))
+      assert(map.get(i).isEmpty)
+    }
+    assert(map.size == vals.size / 2)
+    keyRange drop 1 by 2 foreach { i =>
+      assert(map.contains(i))
+      assert(map(i) == vals(i + n))
+    }
+  }
+
   test("keys") {
     val keys = map.keys
 
