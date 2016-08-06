@@ -61,9 +61,7 @@ trait Definitions {
 
   def map_object_v[K: WeakTypeTag, V: WeakTypeTag]: Type =
     wt[V] match {
-      case BooleanTpe => wt[Map_Object_Boolean[K]]
       case CharTpe => wt[Map_Object_Char[K]]
-      case ByteTpe => wt[Map_Object_Byte[K]]
       case ShortTpe => wt[Map_Object_Short[K]]
       case IntTpe => wt[Map_Object_Int[K]]
       case LongTpe => wt[Map_Object_Long[K]]
@@ -73,14 +71,8 @@ trait Definitions {
 
   def map_k_object[K: WeakTypeTag, V: WeakTypeTag]: Type =
     wt[K] match {
-      case BooleanTpe => wt[Map_Boolean_Object[V]]
-      case CharTpe => wt[Map_Char_Object[V]]
-      case ByteTpe => wt[Map_Byte_Object[V]]
-      case ShortTpe => wt[Map_Short_Object[V]]
       case IntTpe => wt[Map_Int_Object[V]]
       case LongTpe => wt[Map_Long_Object[V]]
-      case FloatTpe => wt[Map_Float_Object[V]]
-      case DoubleTpe => wt[Map_Double_Object[V]]
     }
 
   def hashMapType[K: WeakTypeTag, V: WeakTypeTag]: Type =
@@ -92,9 +84,7 @@ trait Definitions {
 
   def hashMap_object_v[K: WeakTypeTag, V: WeakTypeTag]: Type =
     wt[V] match {
-      case BooleanTpe => wt[HashMap_Object_Boolean[K]]
       case CharTpe => wt[HashMap_Object_Char[K]]
-      case ByteTpe => wt[HashMap_Object_Byte[K]]
       case ShortTpe => wt[HashMap_Object_Short[K]]
       case IntTpe => wt[HashMap_Object_Int[K]]
       case LongTpe => wt[HashMap_Object_Long[K]]
@@ -104,14 +94,8 @@ trait Definitions {
 
   def hashMap_k_object[K: WeakTypeTag, V: WeakTypeTag]: Type =
     wt[K] match {
-      case BooleanTpe => wt[HashMap_Boolean_Object[V]]
-      case CharTpe => wt[HashMap_Char_Object[V]]
-      case ByteTpe => wt[HashMap_Byte_Object[V]]
-      case ShortTpe => wt[HashMap_Short_Object[V]]
       case IntTpe => wt[HashMap_Int_Object[V]]
       case LongTpe => wt[HashMap_Long_Object[V]]
-      case FloatTpe => wt[HashMap_Float_Object[V]]
-      case DoubleTpe => wt[HashMap_Double_Object[V]]
     }
 
   def typeName[B: WeakTypeTag]: String =

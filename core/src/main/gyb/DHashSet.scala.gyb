@@ -1,8 +1,7 @@
 package offheap.collection
 
 %{
-types = ['Boolean', 'Char', 'Byte', 'Short',
-'Int', 'Long', 'Float', 'Double', 'Object']
+types = ['Char', 'Short', 'Int', 'Long', 'Float', 'Double', 'Object']
 }%
 
 % for T in types:

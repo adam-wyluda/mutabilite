@@ -120,8 +120,8 @@ class MapOpsTest extends FunSuite {
     }
     assert(sum == 3 + 5 * 6 / 2 + 5)
 
-    assert(new HashMap_Short_Boolean().fold(7) { (acc, k, v) =>
-      acc + k + (if (v) 1 else 0)
+    assert(new HashMap_Int_Short().fold(7) { (acc, k, v) =>
+      acc + k + v
     } == 7)
   }
 

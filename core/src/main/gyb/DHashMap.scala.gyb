@@ -5,11 +5,11 @@ package offheap.collection
 %{
 from itertools import product
 
-types = ['Boolean', 'Char', 'Byte', 'Short',
-'Int', 'Long', 'Float', 'Double', 'Object']
+keys = ['Int', 'Long', 'Object']
+values = ['Char', 'Short', 'Int', 'Long', 'Float', 'Double', 'Object']
 }%
 
-% for (K, V) in product(types, types):
+% for (K, V) in product(keys, values):
 
 %{
   if (K == 'Object' and V == 'Object'):
