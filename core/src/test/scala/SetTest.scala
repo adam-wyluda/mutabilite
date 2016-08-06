@@ -101,7 +101,7 @@ class SetTest extends FunSuite with BeforeAndAfter {
     25 to 40 foreach (set.remove(_))
     assert(set.capacity == 64)
     set.compact
-    assert(set.capacity == 32)
+    assert(set.capacity == 16)
 
     assert(set.size == 10)
     41 to 50 foreach (i => assert(set(i)))

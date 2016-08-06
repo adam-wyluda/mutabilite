@@ -1,0 +1,206 @@
+package offheap.collection
+
+%{
+types = ['Boolean', 'Char', 'Byte', 'Short',
+'Int', 'Long', 'Float', 'Double', 'Object']
+}%
+
+% for T in types:
+
+%{
+  if T == 'Object':
+    T_Arg = 'A'
+    T_Param = '[A]'
+    T_Array = 'AnyRef'
+    Cast_to_T = '.asInstanceOf[A]'
+    Cast_from_T = '.asInstanceOf[AnyRef]'
+  else:
+    T_Arg = T
+    T_Param = ''
+    T_Array = T
+    Cast_to_T = ''
+    Cast_from_T = ''
+}%
+
+trait Set_${T}${T_Param} extends Any with Set[${T_Arg}] {
+  def apply(elem: ${T_Arg}): Boolean
+  def add(elem: ${T_Arg}): Boolean
+  def remove(elem: ${T_Arg}): Boolean
+  def intersect(that: Set_${T}${T_Param}): Set_${T}${T_Param}
+  def union(that: Set_${T}${T_Param}): Set_${T}${T_Param}
+  def diff(that: Set_${T}${T_Param}): Set_${T}${T_Param}
+
+  def hashAt(index: Int): Byte
+  def keyAt(index: Int): ${T_Arg}
+  def isInit(hash: Byte): Boolean
+}
+
+class HashSet_${T}${T_Param}(initialSize: Int = 8)(implicit hashK: Hash_${T}) extends Set_${T}${T_Param} {
+
+  private[this] var buckets: Array[Byte] = new Array[Byte](initialSize)
+  private[this] var _keys: Array[${T_Array}] = new Array[${T_Array}](initialSize)
+  private[this] var _size = 0
+  private[this] var used = 0
+
+  var capacity = initialSize
+  private[this] var mask = capacity - 1
+  var limit = (capacity * 0.65).toInt
+
+  def apply(key: ${T_Arg}): Boolean = {
+    var i = hashK.hash(key) & 0x7fffffff
+    var perturbation = i
+    while (true) {
+      var j = i & mask
+      var status = buckets(j)
+      if (status == 0) return false
+      else if (status == 3 && _keys(j) == key) return true
+      else {
+        i = (i << 2) + i + perturbation + 1
+        perturbation = perturbation >> 5
+      }
+    }
+    return false
+  }
+
+  def add(key: ${T_Arg}): Boolean = {
+    var i = hashK.hash(key) & 0x7fffffff
+    var perturbation = i
+    while (true) {
+      val j = i & mask
+      val status = buckets(j)
+      if (status == 3) {
+        if (_keys(j) == key) return false
+        else {
+          i = (i << 2) + i + perturbation + 1
+          perturbation = perturbation >> 5
+        }
+      } else if (status == 2 && apply(key)) return false
+      else {
+        _keys(j) = key${Cast_from_T}
+        buckets(j) = 3
+        _size += 1
+        if (status == 0) {
+          used += 1
+          growIfNecessary
+        }
+        return true
+      }
+    }
+    return false
+  }
+
+  def remove(key: ${T_Arg}): Boolean = {
+    var i = hashK.hash(key) & 0x7fffffff
+    var perturbation = i
+    while (true) {
+      val j = i & mask
+      val status = buckets(j)
+      if (status == 3 && _keys(j) == key) {
+        buckets(j) = 2
+        _size -= 1
+        return true
+      } else if (status == 0) return false
+      else {
+        i = (i << 2) + i + perturbation + 1
+        perturbation = perturbation >> 5
+      }
+    }
+    return false
+  }
+
+  def intersect(that: Set_${T}${T_Param}): HashSet_${T}${T_Param} = {
+    val result = new HashSet_${T}${T_Param}
+    var i = 0
+    while (i < capacity) {
+      val status = buckets(i)
+      if (status == 3) {
+        val key = _keys(i)${Cast_to_T}
+        if (that(key)) result.add(key)
+      }
+      i += 1
+    }
+    result
+  }
+
+  def union(that: Set_${T}${T_Param}): HashSet_${T}${T_Param} = {
+    val result = new HashSet_${T}${T_Param}(initialSize = capacity)
+    var i = 0
+    while (i < capacity) {
+      val status = buckets(i)
+      if (status == 3) result.add(_keys(i)${Cast_to_T})
+      i += 1
+    }
+    i = 0
+    while (i < that.capacity) {
+      val status = that.hashAt(i)
+      if (status == 3) result.add(that.keyAt(i))
+      i += 1
+    }
+    result
+  }
+
+  def diff(that: Set_${T}${T_Param}): HashSet_${T}${T_Param} = {
+    val result = new HashSet_${T}${T_Param}
+    var i = 0
+    while (i < capacity) {
+      val status = buckets(i)
+      if (status == 3) {
+        val key = _keys(i)${Cast_to_T}
+        if (!that(key)) result.add(key)
+      }
+      i += 1
+    }
+    result
+  }
+
+  private[this] def growIfNecessary: Unit =
+    if (used > limit) {
+      growTable(capacity * (if (capacity < 10000) 4 else 2))
+    }
+
+  private[this] def growTable(targetCapacity: Int): Unit = {
+    val oldCapacity = capacity
+    val oldBuckets = buckets
+    val oldKeys = _keys
+    capacity = targetCapacity
+    mask = capacity - 1
+    limit = (capacity * 0.65).toInt
+    buckets = new Array[Byte](capacity)
+    _keys = new Array[${T_Array}](capacity)
+    _size = 0
+    used = 0
+    var i = 0
+    while (i < oldCapacity) {
+      val bucket = oldBuckets(i)
+      if (bucket == 3) add(oldKeys(i)${Cast_to_T})
+      i += 1
+    }
+  }
+
+  def compact: Unit = {
+    var newCapacity = 1
+    while (newCapacity < _size / 0.65) newCapacity *= 2
+    if (newCapacity != capacity) growTable(newCapacity)
+  }
+
+  def hashAt(index: Int): Byte = buckets(index)
+  def keyAt(index: Int): ${T_Arg} = _keys(index)${Cast_to_T}
+  def isInit(bucket: Byte) = bucket == 0
+
+  def empty = _size == 0
+  def size: Int = _size
+
+  def foreach(f: ${T_Arg} => Unit): Unit = {
+    var i = 0
+    while (i < capacity) {
+      val status = buckets(i)
+      if (status == 3) {
+        val key = _keys(i)${Cast_to_T}
+        f(key)
+      }
+      i += 1
+    }
+  }
+}
+
+% end
