@@ -13,7 +13,7 @@ class IntSetBenchmark {
   import IntBenchmark._
 
   val specSet: HashSet_Int = {
-    val set = new HashSet_Int(initialSize)
+    val set = new HashSet_Int(initialSize = initialSize)
     var i = 0
     while (i < size) {
       set.add(keys(i))
@@ -23,7 +23,7 @@ class IntSetBenchmark {
   }
 
   val deboxSet: debox.Set[Int] = {
-    val set = debox.Set.ofSize[Int](initialSize)
+    val set = debox.Set.ofSize[Int](size)
     var i = 0
     while (i < size) {
       set.add(keys(i))
@@ -81,7 +81,7 @@ class IntSetBenchmark {
 
   @Benchmark
   def addDebox = {
-    val s = debox.Set.ofSize[Int](initialSize)
+    val s = debox.Set.ofSize[Int](size)
     var i = 0
     while (i < size) {
       s.add(keys(i))
@@ -190,7 +190,7 @@ class IntSetRemoveDeboxBenchmark {
 
   @Setup(Level.Invocation)
   def setup = {
-    set = debox.Set.ofSize[Int](initialSize)
+    set = debox.Set.ofSize[Int](size)
     var i = 0
     while (i < size) {
       set.add(keys(i))

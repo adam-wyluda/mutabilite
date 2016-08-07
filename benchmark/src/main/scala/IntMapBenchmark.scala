@@ -23,7 +23,7 @@ class IntMapBenchmark {
   }
 
   val deboxMap: debox.Map[Int, Int] = {
-    val map = debox.Map.ofSize[Int, Int](initialSize)
+    val map = debox.Map.ofSize[Int, Int](size)
     var i = 0
     while (i < size) {
       map.update(keys(i), i * i)
@@ -90,7 +90,7 @@ class IntMapBenchmark {
 
   @Benchmark
   def putAllDebox = {
-    val m = debox.Map.ofSize[Int, Int](initialSize)
+    val m = debox.Map.ofSize[Int, Int](size)
     var i = 0
     while (i < size) {
       m.update(keys(i), i)
@@ -228,7 +228,7 @@ class IntMapRemoveDeboxBenchmark {
 
   @Setup(Level.Invocation)
   def setup = {
-    map = debox.Map.ofSize[Int, Int](initialSize)
+    map = debox.Map.ofSize[Int, Int](size)
     0 until size foreach (i => map.update(keys(i), i))
   }
 
