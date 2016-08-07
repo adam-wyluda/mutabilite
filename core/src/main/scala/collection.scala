@@ -1,5 +1,8 @@
 package offheap
 
+/**
+  * Library implicits.
+  */
 package object collection {
 
   implicit object BooleanHash extends Hash_Boolean {
