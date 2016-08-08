@@ -16,18 +16,17 @@ class SeqOpsMacros(val c: whitebox.Context) extends Common {
 
   def map[B: WeakTypeTag](f: Tree) =
     stabilizedSeq { seq =>
-      val builderTpe = bufferType[B]
-      val builder = freshVal("builder",
-                             builderTpe,
-                             q"new $builderTpe(initialSize = $seq.capacity)")
+      val arrTpe = weakTypeOf[Array[B]]
+      val resultTpe = bufferType[B]
+      val arr = freshVal("array", arrTpe, q"new $arrTpe($seq.size)")
       val body = iterateSeq(
           seq,
-          idx => q"${builder.symbol}.append(${app(f, q"$seq($idx)")})"
+          idx => q"${arr.symbol}($idx) = ${app(f, q"$seq($idx)")}"
       )
       q"""
-        $builder
+        $arr
         ..$body
-        ${builder.symbol}
+        new $resultTpe(${arr.symbol}, $seq.size)
       """
     }
 
