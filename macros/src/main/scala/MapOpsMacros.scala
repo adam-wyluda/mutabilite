@@ -16,22 +16,24 @@ class MapOpsMacros(val c: whitebox.Context) extends Common {
 
   def map[B: WeakTypeTag](f: Tree) =
     stabilizedMap { map =>
-      val builderTpe = bufferType[B]
-      val builder = freshVal("builder",
-                             builderTpe,
-                             q"new $builderTpe(initialSize = $map.capacity)")
+      val arrTpe =
+        if (weakTypeOf[B] <:< AnyRefTpe) weakTypeOf[Array[AnyRef]]
+        else weakTypeOf[Array[B]]
+      val resultTpe = bufferType[B]
+      val arr = freshVal("array", arrTpe, q"new $arrTpe($map.size)")
+      val idx2 = freshVar("j", IntTpe, q"0")
       val body = iterateHash(
           map,
           idx => q"""
-              ${builder.symbol}.append(
-                ${app(f, q"$map.keyAt($idx)", q"$map.valueAt($idx)")}
-              )
+              ${arr.symbol}(${idx2.symbol}) = ${app(f, q"$map.keyAt($idx)", q"$map.valueAt($idx)")}
+              ${idx2.symbol} += 1
             """
       )
       q"""
-        $builder
+        $arr
+        $idx2
         ..$body
-        ${builder.symbol}
+        new $resultTpe(${arr.symbol}, $map.size)
       """
     }
 

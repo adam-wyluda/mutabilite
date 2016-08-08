@@ -44,9 +44,9 @@ class SetOpsMacros(val c: whitebox.Context) extends Common {
             q"${result.symbol}",
             idx2 => q"${builder.symbol}.add(${result.symbol}.keyAt($idx2))")
         q"""
-            $result
-            ..$inner
-          """
+          $result
+          ..$inner
+        """
       })
       q"""
         $builder

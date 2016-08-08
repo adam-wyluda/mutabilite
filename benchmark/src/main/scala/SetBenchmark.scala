@@ -22,7 +22,7 @@ class SetBenchmark {
   }
 
   val deboxSet: debox.Set[Key] = {
-    val set = debox.Set.ofSize[Key](initialSize)
+    val set = debox.Set.ofSize[Key](size)
     var i = 0
     while (i < size) {
       set.add(keys(i))
@@ -32,7 +32,7 @@ class SetBenchmark {
   }
 
   val stdSet: StdlibSet[Key] = {
-    val set = StdlibSet[Key]()
+    val set = new StdlibSet[Key] { override val initialSize = Benchmark.initialSize }
     var i = 0
     while (i < size) {
       set.add(keys(i))
@@ -80,7 +80,7 @@ class SetBenchmark {
 
   @Benchmark
   def addDebox = {
-    val s = debox.Set.ofSize[Key](initialSize)
+    val s = debox.Set.ofSize[Key](size)
     var i = 0
     while (i < size) {
       s.add(keys(i))
@@ -144,7 +144,7 @@ class SetRemoveDeboxBenchmark {
 
   @Setup(Level.Invocation)
   def setup = {
-    set = debox.Set.ofSize[Key](initialSize)
+    set = debox.Set.ofSize[Key](size)
     var i = 0
     while (i < size) {
       set.add(keys(i))

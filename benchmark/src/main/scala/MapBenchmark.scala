@@ -89,7 +89,7 @@ class MapBenchmark {
 
   @Benchmark
   def putAllDebox = {
-    val m = debox.Map.ofSize[Key, Int](initialSize)
+    val m = debox.Map.ofSize[Key, Int](size)
     var i = 0
     while (i < size) {
       m.update(keys(i), i)
@@ -132,7 +132,7 @@ class MapBenchmark {
 
   @Benchmark
   def putRemoveReadDebox(blackhole: Blackhole) = {
-    val map = debox.Map.ofSize[Key, Int](initialSize)
+    val map = debox.Map.ofSize[Key, Int](size)
     var i = 0
     while (i < size) { map.update(keys(i), i); i += 1 }
     i = 0
@@ -182,7 +182,7 @@ class MapRemoveDeboxBenchmark {
 
   @Setup(Level.Invocation)
   def setup = {
-    map = debox.Map.ofSize[Key, Int](initialSize)
+    map = debox.Map.ofSize[Key, Int](size)
     0 until size foreach (i => map.update(keys(i), i * i))
   }
 

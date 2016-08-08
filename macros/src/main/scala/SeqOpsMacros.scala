@@ -16,7 +16,9 @@ class SeqOpsMacros(val c: whitebox.Context) extends Common {
 
   def map[B: WeakTypeTag](f: Tree) =
     stabilizedSeq { seq =>
-      val arrTpe = weakTypeOf[Array[B]]
+      val arrTpe =
+        if (weakTypeOf[B] <:< AnyRefTpe) weakTypeOf[Array[AnyRef]]
+        else weakTypeOf[Array[B]]
       val resultTpe = bufferType[B]
       val arr = freshVal("array", arrTpe, q"new $arrTpe($seq.size)")
       val body = iterateSeq(
