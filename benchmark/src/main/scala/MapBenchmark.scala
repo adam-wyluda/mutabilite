@@ -22,7 +22,7 @@ class MapBenchmark {
   }
 
   val deboxMap: debox.Map[Key, Int] = {
-    val map = debox.Map.ofSize[Key, Int](initialSize)
+    val map = debox.Map.ofSize[Key, Int](size)
     var i = 0
     while (i < size) {
       map.update(keys(i), i * i)
