@@ -22,7 +22,7 @@ types = ['Boolean', 'Char', 'Byte', 'Short',
     Cast_from_T = ''
 }%
 
-trait Seq_${T}${T_Param} extends Any with Seq[${T_Arg}] {
+trait Seq_${T}${T_Param} extends Seq[${T_Arg}] {
   def apply(index: Int): ${T_Arg}
   def append(elem: ${T_Arg}): Unit
   def update(index: Int, value: ${T_Arg}): Unit

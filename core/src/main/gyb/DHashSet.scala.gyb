@@ -21,7 +21,7 @@ types = ['Char', 'Short', 'Int', 'Long', 'Float', 'Double', 'Object']
     Cast_from_T = ''
 }%
 
-trait Set_${T}${T_Param} extends Any with Set[${T_Arg}] {
+trait Set_${T}${T_Param} extends Set[${T_Arg}] {
   def apply(elem: ${T_Arg}): Boolean
   def add(elem: ${T_Arg}): Boolean
   def remove(elem: ${T_Arg}): Boolean
