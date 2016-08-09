@@ -1,6 +1,7 @@
 package test
 
 import offheap.collection._
+import offheap.collection.implicits._
 import org.scalatest.{BeforeAndAfter, FunSuite}
 import scala.collection.{ mutable => stdlib }
 

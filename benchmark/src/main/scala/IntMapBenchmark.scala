@@ -2,6 +2,7 @@ package benchmark
 
 import org.openjdk.jmh.annotations._
 import offheap.collection._
+import offheap.collection.implicits._
 import offheap.collection.ops._
 import org.openjdk.jmh.infra.Blackhole
 

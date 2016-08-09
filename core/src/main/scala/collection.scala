@@ -1,9 +1,10 @@
 package offheap
+package collection
 
 /**
   * Library implicits.
   */
-package object collection {
+package object implicits {
 
   implicit object BooleanHash extends Hash_Boolean {
     def hash(value: Boolean): Int = if (value) 1231 else 1237
