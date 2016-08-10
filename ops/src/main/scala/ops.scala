@@ -1,5 +1,7 @@
 package offheap.collection
 
+import offheap.collection.generic._
+
 import scala.language.experimental.{macros => CanMacro}
 
 /**

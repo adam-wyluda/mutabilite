@@ -1,5 +1,7 @@
 package offheap.collection
 
+import generic._
+
 %{
 types = ['Boolean', 'Char', 'Byte', 'Short',
 'Int', 'Long', 'Float', 'Double']

@@ -1,7 +1,6 @@
 package test
 
 import offheap.collection._
-import offheap.collection.implicits._
 import offheap.collection.ops._
 import org.scalatest.{BeforeAndAfter, FunSuite}
 

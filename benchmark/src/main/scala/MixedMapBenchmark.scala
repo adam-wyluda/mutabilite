@@ -1,7 +1,6 @@
 package benchmark
 
 import offheap.collection._
-import offheap.collection.implicits._
 import offheap.collection.ops._
 import org.openjdk.jmh.annotations._
 import org.openjdk.jmh.infra.Blackhole
@@ -138,7 +137,7 @@ class MixedMapBenchmark {
 
   @Benchmark
   def putRemoveReadDebox(blackhole: Blackhole) = {
-    val map = debox.Map.ofSize[Int, String](initialSize)
+    val map = debox.Map.ofSize[Int, String](size)
     var i = 0
     while (i < size) { map.update(keys(i), "x"); i += 1 }
     i = 0

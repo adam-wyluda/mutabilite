@@ -1,12 +1,13 @@
 package offheap.collection
+package generic
 
 /**
   * Base trait for all collections.
   *
   * Provides basic information about collection size.
   *
-  * To aid specialization, the foreach method definition is moved to [[offheap.collection.Traversable1]] and
-  * [[offheap.collection.Traversable2]].
+  * To aid specialization, the foreach method definition is moved to [[offheap.collection.generic.Traversable1]] and
+  * [[offheap.collection.generic.Traversable2]].
   */
 sealed trait Traversable {
 

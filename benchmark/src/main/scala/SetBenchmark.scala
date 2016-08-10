@@ -2,7 +2,6 @@ package benchmark
 
 import org.openjdk.jmh.annotations._
 import offheap.collection._
-import offheap.collection.implicits._
 import org.openjdk.jmh.infra.Blackhole
 
 import scala.collection.mutable.{HashSet => StdlibSet}

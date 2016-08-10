@@ -1,4 +1,5 @@
 package offheap.collection
+package generic
 
 /**
   * Mutable collection of distinct values.

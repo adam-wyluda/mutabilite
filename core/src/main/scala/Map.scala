@@ -1,4 +1,5 @@
 package offheap.collection
+package generic
 
 /**
   * Mutable map of keys to values.

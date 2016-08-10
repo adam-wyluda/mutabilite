@@ -1,7 +1,6 @@
 package test
 
-import offheap.collection.{BufferSeq_Int, _}
-import offheap.collection.implicits._
+import offheap.collection._
 import org.scalatest.{BeforeAndAfter, FunSuite}
 
 class SeqTest extends FunSuite with BeforeAndAfter {

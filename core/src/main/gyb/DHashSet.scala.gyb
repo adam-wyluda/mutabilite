@@ -1,5 +1,9 @@
 package offheap.collection
 
+import generic._
+
+// Uses hashing scheme from Debox library: https://github.com/non/debox
+
 %{
 types = ['Char', 'Short', 'Int', 'Long', 'Float', 'Double', 'Object']
 }%

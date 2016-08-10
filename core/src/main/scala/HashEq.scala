@@ -1,4 +1,5 @@
 package offheap.collection
+package generic
 
 /**
   * Typeclass implementing element equality.
