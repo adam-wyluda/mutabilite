@@ -2,7 +2,8 @@ package test
 
 import offheap.collection._
 import org.scalatest.{BeforeAndAfter, FunSuite}
-import scala.collection.{ mutable => stdlib }
+
+import scala.collection.{mutable => stdlib}
 
 class MapTest extends FunSuite with BeforeAndAfter {
   var map: Map_Int_Object[String] = _

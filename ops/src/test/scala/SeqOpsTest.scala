@@ -1,8 +1,7 @@
 package test
 
 import offheap.collection._
-import offheap.collection.ops._
-import org.scalatest.{BeforeAndAfter, FunSuite}
+import org.scalatest.FunSuite
 
 class SeqOpsTest extends FunSuite {
   test("map int to string") {

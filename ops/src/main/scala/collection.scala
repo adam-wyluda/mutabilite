@@ -1,35 +1,73 @@
-package offheap.collection
+package offheap
 
-import offheap.collection.generic._
-
+import offheap.collection.generic.{Map, Seq, Set}
 import scala.language.experimental.{macros => CanMacro}
 
 /**
-  * Implicit operations on collections.
+  * Library implicits.
   */
-package object ops {
+package object collection {
+
+  implicit object BooleanHash extends Hash_Boolean {
+    def hash(value: Boolean): Int = if (value) 1231 else 1237
+  }
+
+  implicit object CharHash extends Hash_Char {
+    def hash(value: Char): Int = value
+  }
+
+  implicit object ByteHash extends Hash_Byte {
+    def hash(value: Byte): Int = value
+  }
+
+  implicit object ShortHash extends Hash_Short {
+    def hash(value: Short): Int = value
+  }
+
+  implicit object IntHash extends Hash_Int {
+    def hash(value: Int): Int = value
+  }
+
+  implicit object LongHash extends Hash_Long {
+    def hash(value: Long): Int = (value ^ (value >>> 32)).asInstanceOf[Int]
+  }
+
+  implicit object FloatHash extends Hash_Float {
+    def hash(value: Float): Int = java.lang.Float.floatToIntBits(value)
+  }
+
+  implicit object DoubleHash extends Hash_Double {
+    def hash(value: Double): Int = {
+      val bits = java.lang.Double.doubleToLongBits(value)
+      (bits ^ (bits >>> 32)).asInstanceOf[Int]
+    }
+  }
+
+  implicit object ObjectHash extends Hash_Object {
+    def hash(value: Any): Int = value.hashCode()
+  }
 
   implicit class SeqOps[A](val seq: Seq[A]) extends AnyVal {
 
     /**
       * Build new sequence by transforming each value using given function.
-      * 
+      *
       * @param f transforming function
       * @tparam B transforming function target type
       * @return mapped sequence
       */
     def map[B](f: A => B): Seq[B] = macro offheap.collection.macros.SeqOpsMacros
-      .map[B]
+    .map[B]
 
     /**
       * Build new sequence by applying given function to each value and appending all elements from resulting sequences.
-      * 
+      *
       * @param f function that returns sequence of B
       * @tparam B resulting sequence target type
       * @return sequence that contains all elements provided by f
       */
     def flatMap[B](f: A => Seq[B]): Seq[B] = macro offheap.collection.macros.SeqOpsMacros
-      .flatMap[B]
+    .flatMap[B]
 
     /**
       * Filter sequence with given predicate.
@@ -38,7 +76,7 @@ package object ops {
       * @return filtered sequence
       */
     def filter(f: A => Boolean): Seq[A] = macro offheap.collection.macros.SeqOpsMacros
-      .filter[A]
+    .filter[A]
 
     /**
       * Foreach implementation that inlines given closure.
@@ -56,7 +94,7 @@ package object ops {
       * @return resulting value
       */
     def foldLeft[B](z: B)(op: (B, A) => B): B = macro offheap.collection.macros.SeqOpsMacros
-      .foldLeft[B]
+    .foldLeft[B]
 
     /**
       * Apply given operator going from right to left starting with given element.
@@ -67,7 +105,7 @@ package object ops {
       * @return resulting value
       */
     def foldRight[B](z: B)(op: (A, B) => B): B = macro offheap.collection.macros.SeqOpsMacros
-      .foldRight[B]
+    .foldRight[B]
 
     /**
       * Apply given operator going from left to right starting with first element.
@@ -76,7 +114,7 @@ package object ops {
       * @return resulting value
       */
     def reduceLeft(op: (A, A) => A): A = macro offheap.collection.macros.SeqOpsMacros
-      .reduceLeft[A]
+    .reduceLeft[A]
 
     /**
       * Apply given operator going from left to right starting with last element.
@@ -85,7 +123,7 @@ package object ops {
       * @return resulting value
       */
     def reduceRight(op: (A, A) => A): A = macro offheap.collection.macros.SeqOpsMacros
-      .reduceRight[A]
+    .reduceRight[A]
 
     /**
       * Map sequence in place.
@@ -126,7 +164,7 @@ package object ops {
       * @return map with keys from this sequence and values from the other
       */
     def zipToMap[B](values: Seq[B]): Map[A, B] = macro offheap.collection.macros.SeqOpsMacros
-      .zipToMap[A, B]
+    .zipToMap[A, B]
   }
 
   implicit class SetOps[A](val set: Set[A]) extends AnyVal {
@@ -139,7 +177,7 @@ package object ops {
       * @return mapped set
       */
     def map[B](f: A => B): Set[B] = macro offheap.collection.macros.SetOpsMacros
-      .map[B]
+    .map[B]
 
     /**
       * Build new set by applying given function to each value and appending all elements from resulting sets.
@@ -149,7 +187,7 @@ package object ops {
       * @return set that contains all elements provided by f
       */
     def flatMap[B](f: A => Set[B]): Set[B] = macro offheap.collection.macros.SetOpsMacros
-      .flatMap[B]
+    .flatMap[B]
 
     /**
       * Filter set with given predicate.
@@ -158,7 +196,7 @@ package object ops {
       * @return filtered set
       */
     def filter(f: A => Boolean): Set[A] = macro offheap.collection.macros.SetOpsMacros
-      .filter[A]
+    .filter[A]
 
     /**
       * Foreach implementation that inlines given closure.
@@ -176,7 +214,7 @@ package object ops {
       * @return resulting value
       */
     def fold[B](z: B)(op: (B, A) => B): B = macro offheap.collection.macros.SetOpsMacros
-      .fold[B]
+    .fold[B]
 
     /**
       * Apply given operator to every element in the set.
@@ -185,7 +223,7 @@ package object ops {
       * @return resulting value
       */
     def reduce(op: (A, A) => A): A = macro offheap.collection.macros.SetOpsMacros
-      .reduce[A]
+    .reduce[A]
 
     /**
       * Test given predicate for all values.
@@ -214,7 +252,7 @@ package object ops {
       * @return mapped sequence
       */
     def map[B](f: (K, V) => B): Seq[B] = macro offheap.collection.macros.MapOpsMacros
-      .map[B]
+    .map[B]
 
     /**
       * Build new map by transforming each key with given function.
@@ -224,7 +262,7 @@ package object ops {
       * @return map with transformed keys and original values
       */
     def mapKeys[B](f: K => B): Map[B, V] = macro offheap.collection.macros.MapOpsMacros
-      .mapKeys[V, B]
+    .mapKeys[V, B]
 
     /**
       * Build new map by transforming each value with given function
@@ -234,7 +272,7 @@ package object ops {
       * @return map with transformed values and original keys
       */
     def mapValues[B](f: V => B): Map[K, B] = macro offheap.collection.macros.MapOpsMacros
-      .mapValues[K, B]
+    .mapValues[K, B]
 
     /**
       * Build new sequence by applying given function to each pair of key and value and appending all elements
@@ -245,7 +283,7 @@ package object ops {
       * @return sequence that contains all elements provided by f
       */
     def flatMap[B](f: (K, V) => Seq[B]): Seq[B] = macro offheap.collection.macros.MapOpsMacros
-      .flatMap[B]
+    .flatMap[B]
 
     /**
       * Filter map with given predicate.
@@ -254,7 +292,7 @@ package object ops {
       * @return filtered map
       */
     def filter(f: (K, V) => Boolean): Map[K, V] = macro offheap.collection.macros.MapOpsMacros
-      .filter[K, V]
+    .filter[K, V]
 
     /**
       * Foreach implementation that inlines given closure.
@@ -272,7 +310,7 @@ package object ops {
       * @return resulting value
       */
     def fold[B](z: B)(op: (B, K, V) => B): B = macro offheap.collection.macros.MapOpsMacros
-      .fold[B]
+    .fold[B]
 
     /**
       * Apply given operator to every key in the map.
@@ -281,7 +319,7 @@ package object ops {
       * @return resulting value
       */
     def reduceKeys(op: (K, K) => K): K = macro offheap.collection.macros.MapOpsMacros
-      .reduceKeys[K]
+    .reduceKeys[K]
 
     /**
       * Apply given operator to every value in the map.
@@ -290,7 +328,7 @@ package object ops {
       * @return resulting value
       */
     def reduceValues(op: (V, V) => V): V = macro offheap.collection.macros.MapOpsMacros
-      .reduceValues[V]
+    .reduceValues[V]
 
     /**
       * Map values in place.
