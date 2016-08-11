@@ -1,10 +1,13 @@
 package benchmark
 
+import java.util.function.Consumer
+
 import org.openjdk.jmh.annotations._
 import offheap.collection._
 import org.openjdk.jmh.infra.Blackhole
 
 import scala.collection.mutable.{HashSet => StdlibSet}
+import java.util.{HashSet => JavaSet}
 
 @State(Scope.Thread)
 class IntSetBenchmark {
@@ -41,6 +44,16 @@ class IntSetBenchmark {
     set
   }
 
+  val javaSet: JavaSet[Int] = {
+    val set = new JavaSet[Int](initialSize)
+    var i = 0
+    while (i < size) {
+      set.add(keys(i))
+      i += 1
+    }
+    set
+  }
+
   var randKey: Int = _
   var nonExistingKey: Int = _
 
@@ -60,6 +73,9 @@ class IntSetBenchmark {
   def containsExistingStdlib = stdSet(randKey)
 
   @Benchmark
+  def containsExistingJavalib = javaSet.contains(randKey)
+
+  @Benchmark
   def containsNonExistingSpecialized = specSet(nonExistingKey)
 
   @Benchmark
@@ -67,6 +83,9 @@ class IntSetBenchmark {
 
   @Benchmark
   def containsNonExistingStdlib = stdSet(nonExistingKey)
+
+  @Benchmark
+  def containsNonExistingJavalib = javaSet.contains(nonExistingKey)
 
   @Benchmark
   def addSpecialized = {
@@ -99,6 +118,16 @@ class IntSetBenchmark {
   }
 
   @Benchmark
+  def addJavalib = {
+    val s = new JavaSet[Int](initialSize)
+    var i = 0
+    while (i < size) {
+      s.add(keys(i))
+      i += 1
+    }
+  }
+
+  @Benchmark
   def foreachMacro(blackhole: Blackhole) =
     specSet foreachMacro (blackhole.consume(_))
 
@@ -115,6 +144,12 @@ class IntSetBenchmark {
     stdSet foreach (blackhole.consume(_))
 
   @Benchmark
+  def foreachJavalib(blackhole: Blackhole) =
+    javaSet.forEach(new Consumer[Int] {
+      def accept(t: Int): Unit = blackhole.consume(t)
+    })
+
+  @Benchmark
   def mapSpecialized = specSet map (_ + 1)
 
   @Benchmark
@@ -122,38 +157,6 @@ class IntSetBenchmark {
 
   @Benchmark
   def mapStdlib = stdSet map (_ + 1)
-
-  @Benchmark
-  def flatMapFold =
-    specSet.fold (new HashSet_Int) { (r, i) =>
-      var j = 0
-      while (j < 5) { r.add(i + j); j += 1 }
-      r
-    }
-
-  @Benchmark
-  def flatMapSpecialized =
-    specSet flatMap { i =>
-      val r = new HashSet_Int
-      var j = 0
-      while (j < 5) { r.add(i + j); j += 1 }
-      r
-    }
-
-  @Benchmark
-  def flatMapStdlib =
-    stdSet flatMap { i =>
-      val r = StdlibSet[Int]()
-      var j = 0
-      while (j < 5) { r.add(i + j); j += 1 }
-      r
-    }
-
-  @Benchmark
-  def filterSpecialized = specSet filter (_ % 2 == 0)
-
-  @Benchmark
-  def filterStdlib = stdSet filter (_ % 2 == 0)
 }
 
 @State(Scope.Thread)
@@ -176,7 +179,7 @@ class IntSetRemoveSpecializedBenchmark {
   @Benchmark
   def benchmark = {
     var i = 0
-    while (i < size / 10) { set.remove(keys(i)); i += 1 }
+    while (i < size / 10) { set.remove(keys(i * 10)); i += 1 }
   }
 }
 
@@ -200,7 +203,7 @@ class IntSetRemoveDeboxBenchmark {
   @Benchmark
   def benchmark = {
     var i = 0
-    while (i < size / 10) { set.remove(keys(i)); i += 1 }
+    while (i < size / 10) { set.remove(keys(i * 10)); i += 1 }
   }
 }
 
@@ -224,6 +227,30 @@ class IntSetRemoveStdlibBenchmark {
   @Benchmark
   def benchmark = {
     var i = 0
-    while (i < size / 10) { set.remove(keys(i)); i += 1 }
+    while (i < size / 10) { set.remove(keys(i * 10)); i += 1 }
+  }
+}
+
+@State(Scope.Thread)
+class IntSetRemoveJavalibBenchmark {
+
+  import IntBenchmark._
+
+  var set: JavaSet[Int] = _
+
+  @Setup(Level.Invocation)
+  def setup = {
+    set = new JavaSet[Int](initialSize)
+    var i = 0
+    while (i < size) {
+      set.add(keys(i))
+      i += 1
+    }
+  }
+
+  @Benchmark
+  def benchmark = {
+    var i = 0
+    while (i < size / 10) { set.remove(keys(i * 10)); i += 1 }
   }
 }

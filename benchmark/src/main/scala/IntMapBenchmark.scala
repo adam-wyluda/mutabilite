@@ -1,10 +1,13 @@
 package benchmark
 
+import java.util.function.BiConsumer
+
 import org.openjdk.jmh.annotations._
 import offheap.collection._
 import org.openjdk.jmh.infra.Blackhole
 
 import scala.collection.mutable.{Buffer => StdlibBuffer, OpenHashMap => StdlibMap}
+import java.util.{HashMap => JavaMap}
 
 @State(Scope.Thread)
 class IntMapBenchmark {
@@ -41,6 +44,16 @@ class IntMapBenchmark {
     map
   }
 
+  val javaMap: JavaMap[Int, Int] = {
+    val map = new JavaMap[Int, Int](initialSize)
+    var i = 0
+    while (i < size) {
+      map.put(keys(i), i * i)
+      i += 1
+    }
+    map
+  }
+
   var randKey: Int = _
   var nonExistingKey: Int = _
 
@@ -49,15 +62,6 @@ class IntMapBenchmark {
     randKey = keys(random.nextInt(size))
     nonExistingKey = random.nextInt
   }
-
-  @Benchmark
-  def getRandomSpecialized = specMap.get(randKey)
-
-  @Benchmark
-  def getRandomDebox = deboxMap.get(randKey)
-
-  @Benchmark
-  def getRandomStdlib = stdMap.get(randKey)
 
   @Benchmark
   def getDirectSpecialized = specMap(randKey)
@@ -69,6 +73,9 @@ class IntMapBenchmark {
   def getDirectStdlib = stdMap(randKey)
 
   @Benchmark
+  def getDirectJavalib = javaMap.get(randKey)
+
+  @Benchmark
   def getNonExistingSpecialized = specMap.get(nonExistingKey)
 
   @Benchmark
@@ -76,6 +83,9 @@ class IntMapBenchmark {
 
   @Benchmark
   def getNonExistingStdlib = stdMap.get(nonExistingKey)
+
+  @Benchmark
+  def getNonExistingJavalib = javaMap.get(nonExistingKey)
 
   @Benchmark
   def putAllSpecialized = {
@@ -108,6 +118,16 @@ class IntMapBenchmark {
   }
 
   @Benchmark
+  def putAllJavalib = {
+    val m = new JavaMap[Int, Int](initialSize)
+    var i = 0
+    while (i < size) {
+      m.put(keys(i), i)
+      i += 1
+    }
+  }
+
+  @Benchmark
   def foreachMacro(blackhole: Blackhole) =
     specMap foreachMacro ((k, v) => blackhole.consume(k))
 
@@ -117,11 +137,17 @@ class IntMapBenchmark {
 
   @Benchmark
   def foreachDebox(blackhole: Blackhole) =
-    deboxMap foreach ((k, v) => blackhole.consume(v))
+    deboxMap foreach ((k, v) => blackhole.consume(k))
 
   @Benchmark
   def foreachStdlib(blackhole: Blackhole) =
     stdMap foreach (blackhole.consume(_))
+
+  @Benchmark
+  def foreachJavalib(blackhole: Blackhole) =
+    javaMap forEach (new BiConsumer[Int, Int] {
+      def accept(t: Int, x: Int): Unit = blackhole.consume(t)
+    })
 
   @Benchmark
   def putRemoveReadSpecialized(blackhole: Blackhole) = {
@@ -157,6 +183,17 @@ class IntMapBenchmark {
   }
 
   @Benchmark
+  def putRemoveReadJavalib(blackhole: Blackhole) = {
+    val map = new JavaMap[Int, Int](initialSize)
+    var i = 0
+    while (i < size) { map.put(keys(i), i); i += 1 }
+    i = 0
+    while (i < size / 10) { map.remove(keys(i * 10)); i += 1 }
+    i = 0
+    while (i < size) { blackhole.consume(map.get(i)); i += 1 }
+  }
+
+  @Benchmark
   def mapSpecialized = specMap map ((k, v) => k)
 
   @Benchmark
@@ -164,38 +201,6 @@ class IntMapBenchmark {
 
   @Benchmark
   def mapStdlib = stdMap map { case (k, v) => k }
-
-  @Benchmark
-  def flatMapFold =
-    specMap.fold (new BufferSeq_Int) { (r, k, v) =>
-      var j = 0
-      while (j < 5) { r.append(k + j); j += 1 }
-      r
-    }
-
-  @Benchmark
-  def flatMapSpecialized =
-    specMap flatMap { (k, v) =>
-      val r = new BufferSeq_Int
-      var j = 0
-      while (j < 5) { r.append(k + j); j += 1 }
-      r
-    }
-
-  @Benchmark
-  def flatMapStdlib =
-    stdMap flatMap { case (k, v) =>
-      val r = StdlibBuffer[Int]()
-      var j = 0
-      while (j < 5) { r.append(k + j); j += 1 }
-      r
-    }
-
-  @Benchmark
-  def filterSpecialized = specMap filter ((k, v) => k % 2 == 0)
-
-  @Benchmark
-  def filterStdlib = stdMap filter { case (k, v) => k % 2 == 0 }
 }
 
 @State(Scope.Thread)
@@ -214,7 +219,7 @@ class IntMapRemoveSpecializedBenchmark {
   @Benchmark
   def benchmark = {
     var i = 0
-    while (i < size / 10) { map.remove(keys(i)); i += 1 }
+    while (i < size / 10) { map.remove(keys(i * 10)); i += 1 }
   }
 }
 
@@ -234,7 +239,7 @@ class IntMapRemoveDeboxBenchmark {
   @Benchmark
   def benchmark = {
     var i = 0
-    while (i < size / 10) { map.remove(keys(i)); i += 1 }
+    while (i < size / 10) { map.remove(keys(i * 10)); i += 1 }
   }
 }
 
@@ -254,6 +259,26 @@ class IntMapRemoveStdlibBenchmark {
   @Benchmark
   def benchmark = {
     var i = 0
-    while (i < size / 10) { map.remove(keys(i)); i += 1 }
+    while (i < size / 10) { map.remove(keys(i * 10)); i += 1 }
+  }
+}
+
+@State(Scope.Thread)
+class IntMapRemoveJavalibBenchmark {
+
+  import IntBenchmark._
+
+  var map: JavaMap[Int, Int] = _
+
+  @Setup(Level.Invocation)
+  def setup = {
+    map = new JavaMap[Int, Int](initialSize)
+    0 until size foreach (i => map.put(keys(i), i))
+  }
+
+  @Benchmark
+  def benchmark = {
+    var i = 0
+    while (i < size / 10) { map.remove(keys(i * 10)); i += 1 }
   }
 }

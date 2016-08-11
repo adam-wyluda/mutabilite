@@ -1,10 +1,13 @@
 package benchmark
 
+import java.util.function.{BiConsumer, Consumer}
+
 import offheap.collection._
 import org.openjdk.jmh.annotations._
 import org.openjdk.jmh.infra.Blackhole
 
 import scala.collection.mutable.{Buffer => StdlibBuffer, OpenHashMap => StdlibMap}
+import java.util.{HashMap => JavaMap}
 
 @State(Scope.Thread)
 class MixedMapBenchmark {
@@ -31,11 +34,21 @@ class MixedMapBenchmark {
     map
   }
 
-  val stdMap: StdlibMap[Int, Int] = {
-    val map = new StdlibMap[Int, Int](initialSize)
+  val stdMap: StdlibMap[Int, String] = {
+    val map = new StdlibMap[Int, String](initialSize)
     var i = 0
     while (i < size) {
-      map.put(keys(i), i * i)
+      map.put(keys(i), i toString)
+      i += 1
+    }
+    map
+  }
+
+  val javaMap: JavaMap[Int, String] = {
+    val map = new JavaMap[Int, String](initialSize)
+    var i = 0
+    while (i < size) {
+      map.put(keys(i), i toString)
       i += 1
     }
     map
@@ -51,15 +64,6 @@ class MixedMapBenchmark {
   }
 
   @Benchmark
-  def getRandomSpecialized = specMap.get(randKey)
-
-  @Benchmark
-  def getRandomDebox = deboxMap.get(randKey)
-
-  @Benchmark
-  def getRandomStdlib = stdMap.get(randKey)
-
-  @Benchmark
   def getDirectSpecialized = specMap(randKey)
 
   @Benchmark
@@ -69,6 +73,9 @@ class MixedMapBenchmark {
   def getDirectStdlib = stdMap(randKey)
 
   @Benchmark
+  def getDirectJavalib = javaMap.get(randKey)
+
+  @Benchmark
   def getNonExistingSpecialized = specMap.get(nonExistingKey)
 
   @Benchmark
@@ -76,6 +83,9 @@ class MixedMapBenchmark {
 
   @Benchmark
   def getNonExistingStdlib = stdMap.get(nonExistingKey)
+
+  @Benchmark
+  def getNonExistingJavalib = javaMap.get(nonExistingKey)
 
   @Benchmark
   def putAllSpecialized = {
@@ -108,6 +118,16 @@ class MixedMapBenchmark {
   }
 
   @Benchmark
+  def putAllJavalib = {
+    val m = new JavaMap[Int, String](initialSize)
+    var i = 0
+    while (i < size) {
+      m.put(keys(i), "x")
+      i += 1
+    }
+  }
+
+  @Benchmark
   def foreachMacro(blackhole: Blackhole) =
     specMap foreachMacro ((k, v) => blackhole.consume(k))
 
@@ -122,6 +142,12 @@ class MixedMapBenchmark {
   @Benchmark
   def foreachStdlib(blackhole: Blackhole) =
     stdMap foreach (blackhole.consume(_))
+
+  @Benchmark
+  def foreachJavalib(blackhole: Blackhole) =
+    javaMap forEach (new BiConsumer[Int, String] {
+          def accept(t: Int, x: String): Unit = blackhole.consume(t)
+        })
 
   @Benchmark
   def putRemoveReadSpecialized(blackhole: Blackhole) = {
@@ -148,6 +174,17 @@ class MixedMapBenchmark {
   @Benchmark
   def putRemoveReadStdlib(blackhole: Blackhole) = {
     val map = new StdlibMap[Int, String](initialSize = initialSize)
+    var i = 0
+    while (i < size) { map.put(keys(i), "x"); i += 1 }
+    i = 0
+    while (i < size / 10) { map.remove(keys(i * 10)); i += 1 }
+    i = 0
+    while (i < size) { blackhole.consume(map.get(i)); i += 1 }
+  }
+
+  @Benchmark
+  def putRemoveReadJavalib(blackhole: Blackhole) = {
+    val map = new JavaMap[Int, String](initialSize)
     var i = 0
     while (i < size) { map.put(keys(i), "x"); i += 1 }
     i = 0
@@ -216,6 +253,26 @@ class MixedMapRemoveStdlibBenchmark {
   @Setup(Level.Invocation)
   def setup = {
     map = new StdlibMap[Int, String](initialSize = initialSize)
+    0 until size foreach (i => map.put(keys(i), i toString))
+  }
+
+  @Benchmark
+  def benchmark = {
+    var i = 0
+    while (i < size / 10) { map.remove(keys(i)); i += 1 }
+  }
+}
+
+@State(Scope.Thread)
+class MixedMapRemoveJavalibBenchmark {
+
+  import IntBenchmark._
+
+  var map: JavaMap[Int, String] = _
+
+  @Setup(Level.Invocation)
+  def setup = {
+    map = new JavaMap[Int, String](initialSize)
     0 until size foreach (i => map.put(keys(i), i toString))
   }
 

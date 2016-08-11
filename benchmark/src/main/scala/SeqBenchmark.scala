@@ -1,11 +1,14 @@
 package benchmark
 
+import java.util.function.Consumer
+
 import org.openjdk.jmh.annotations._
 import offheap.collection._
 import org.openjdk.jmh.infra.Blackhole
 
 import scala.util.Random
 import scala.collection.mutable.{ArrayBuffer => StdlibSeq}
+import java.util.{ArrayList => JavaSeq}
 
 @State(Scope.Thread)
 class SeqBenchmark {
@@ -27,6 +30,12 @@ class SeqBenchmark {
   val stdSeq: StdlibSeq[Int] = {
     val seq = StdlibSeq[Int]()
     1 to seqSize foreach (seq.append(_))
+    seq
+  }
+
+  val javaSeq: JavaSeq[Int] = {
+    val seq = new JavaSeq[Int]
+    1 to seqSize foreach (seq.add(_))
     seq
   }
 
@@ -64,6 +73,15 @@ class SeqBenchmark {
     var i = 0
     while (i < seqSize) {
       blackhole.consume(stdSeq(i))
+      i += 1
+    }
+  }
+
+  @Benchmark
+  def readSequentialJavalib(blackhole: Blackhole) = {
+    var i = 0
+    while (i < seqSize) {
+      blackhole.consume(javaSeq.get(i))
       i += 1
     }
   }
@@ -108,6 +126,16 @@ class SeqBenchmark {
   }
 
   @Benchmark
+  def appendJavalib = {
+    val s = new JavaSeq[Int](16)
+    var i = 0
+    while (i < seqSize) {
+      s.add(i)
+      i += 1
+    }
+  }
+
+  @Benchmark
   def updateSequentialSpecialized = {
     val s = specSeq
     var i = 0
@@ -138,6 +166,16 @@ class SeqBenchmark {
   }
 
   @Benchmark
+  def updateSequentialJavalib = {
+    val s = stdSeq
+    var i = 0
+    while (i < seqSize) {
+      s(i) = i * 2
+      i += 1
+    }
+  }
+
+  @Benchmark
   def updateRandomSpecialized = specSeq(randIndex) = randVal
 
   @Benchmark
@@ -147,7 +185,7 @@ class SeqBenchmark {
   def updateRandomStdlib = stdSeq(randIndex) = randVal
 
   @Benchmark
-  def foreachFold = specSeq.foldLeft (0) (_ + _)
+  def updateRandomJavalib = javaSeq.set(randIndex, randVal)
 
   @Benchmark
   def foreachMacro = {
@@ -178,33 +216,12 @@ class SeqBenchmark {
   }
 
   @Benchmark
-  def prependSpecialized = {
-    val s = new BufferSeq_Int(initialSize = 16)
-    var i = 0
-    while (i < seqSize) {
-      s.insert(0, i)
-      i += 1
-    }
-  }
-
-  @Benchmark
-  def prependDebox = {
-    var s = debox.Buffer.ofSize[Int](16)
-    var i = 0
-    while (i < seqSize) {
-      s.insert(0, i)
-      i += 1
-    }
-  }
-
-  @Benchmark
-  def prependStdlib = {
-    val s = new StdlibSeq[Int](initialSize = 16)
-    var i = 0
-    while (i < seqSize) {
-      s.insert(0, i)
-      i += 1
-    }
+  def foreachJavalib = {
+    var sum = 0
+    javaSeq.forEach(new Consumer[Int] {
+      def accept(t: Int): Unit = sum += t
+    })
+    sum
   }
 
   @Benchmark
@@ -215,38 +232,6 @@ class SeqBenchmark {
 
   @Benchmark
   def mapStdlib = stdSeq map (_ + 1)
-
-  @Benchmark
-  def flatMapFold =
-    specSeq.foldLeft(new BufferSeq_Int) { (r, i) =>
-      var j = 0
-      while (j < 5) { r.append(i + j); j += 1 }
-      r
-    }
-
-  @Benchmark
-  def flatMapSpecialized =
-    specSeq flatMap { i =>
-      val r = new BufferSeq_Int
-      var j = 0
-      while (j < 5) { r.append(i + j); j += 1 }
-      r
-    }
-
-  @Benchmark
-  def flatMapStdlib =
-    stdSeq flatMap { i =>
-      val r = StdlibSeq[Int]()
-      var j = 0
-      while (j < 5) { r.append(i + j); j += 1 }
-      r
-    }
-
-  @Benchmark
-  def filterSpecialized = specSeq filter (_ % 2 == 0)
-
-  @Benchmark
-  def filterStdlib = stdSeq filter (_ % 2 == 0)
 }
 
 @State(Scope.Thread)
@@ -314,5 +299,22 @@ class SeqRemoveStdlibBenchmark {
   @Benchmark
   def benchmark = {
     while (seq.nonEmpty) seq.remove(0)
+  }
+}
+
+@State(Scope.Thread)
+class SeqRemoveJavalibBenchmark {
+
+  var seq: JavaSeq[Int] = _
+
+  @Setup(Level.Invocation)
+  def setup = {
+    seq = new JavaSeq[Int]()
+    1 to 10000 foreach (seq.add(_))
+  }
+
+  @Benchmark
+  def benchmark = {
+    while (!seq.isEmpty) seq.remove(0)
   }
 }

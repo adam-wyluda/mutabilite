@@ -1,10 +1,13 @@
 package benchmark
 
+import java.util.function.Consumer
+
 import org.openjdk.jmh.annotations._
 import offheap.collection._
 import org.openjdk.jmh.infra.Blackhole
 
 import scala.collection.mutable.{HashSet => StdlibSet}
+import java.util.{HashSet => JavaSet}
 
 @State(Scope.Thread)
 class SetBenchmark {
@@ -41,6 +44,16 @@ class SetBenchmark {
     set
   }
 
+  val javaSet: JavaSet[Key] = {
+    val set = new JavaSet[Key](initialSize)
+    var i = 0
+    while (i < size) {
+      set.add(keys(i))
+      i += 1
+    }
+    set
+  }
+
   var randKey: Key = _
   var nonExistingKey: Key = _
 
@@ -60,6 +73,9 @@ class SetBenchmark {
   def containsExistingStdlib = stdSet(randKey)
 
   @Benchmark
+  def containsExistingJavalib = javaSet.contains(randKey)
+
+  @Benchmark
   def containsNonExistingSpecialized = specSet(nonExistingKey)
 
   @Benchmark
@@ -67,6 +83,9 @@ class SetBenchmark {
 
   @Benchmark
   def containsNonExistingStdlib = stdSet(nonExistingKey)
+
+  @Benchmark
+  def containsNonExistingJavalib = javaSet.contains(nonExistingKey)
 
   @Benchmark
   def addSpecialized = {
@@ -99,6 +118,16 @@ class SetBenchmark {
   }
 
   @Benchmark
+  def addJavalib = {
+    val s = new JavaSet[Key](initialSize)
+    var i = 0
+    while (i < size) {
+      s.add(keys(i))
+      i += 1
+    }
+  }
+
+  @Benchmark
   def foreachSpecialized(blackhole: Blackhole) =
     specSet foreach (blackhole.consume(_))
 
@@ -109,6 +138,12 @@ class SetBenchmark {
   @Benchmark
   def foreachStdlib(blackhole: Blackhole) =
     stdSet foreach (blackhole.consume(_))
+
+  @Benchmark
+  def foreachJavalib(blackhole: Blackhole) =
+    javaSet.forEach(new Consumer[Key] {
+      def accept(t: Key): Unit = blackhole.consume(t)
+    })
 }
 
 @State(Scope.Thread)
@@ -169,6 +204,30 @@ class SetRemoveStdlibBenchmark {
   @Setup(Level.Invocation)
   def setup = {
     set = new StdlibSet[Key] { override val initialSize = Benchmark.initialSize }
+    var i = 0
+    while (i < size) {
+      set.add(keys(i))
+      i += 1
+    }
+  }
+
+  @Benchmark
+  def benchmark = {
+    var i = 0
+    while (i < size / 10) { set.remove(keys(i * 10)); i += 1 }
+  }
+}
+
+@State(Scope.Thread)
+class SetRemoveJavalibBenchmark {
+
+  import Benchmark._
+
+  var set: JavaSet[Key] = _
+
+  @Setup(Level.Invocation)
+  def setup = {
+    set = new JavaSet[Key](initialSize)
     var i = 0
     while (i < size) {
       set.add(keys(i))

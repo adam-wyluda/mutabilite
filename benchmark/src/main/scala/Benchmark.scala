@@ -5,7 +5,7 @@ import scala.util.Random
 object Benchmark {
 
   //  With load factor of 0.65, this should not trigger growth
-  val size = 80000
+  val size = 75000
 
   val random = Random
 
