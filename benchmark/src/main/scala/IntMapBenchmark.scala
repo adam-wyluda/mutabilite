@@ -162,7 +162,7 @@ class IntMapBenchmark {
 
   @Benchmark
   def putRemoveReadDebox(blackhole: Blackhole) = {
-    val map = debox.Map.ofSize[Int, Int](initialSize)
+    val map = debox.Map.ofSize[Int, Int](size)
     var i = 0
     while (i < size) { map.update(keys(i), i); i += 1 }
     i = 0

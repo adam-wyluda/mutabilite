@@ -96,6 +96,9 @@ class SeqBenchmark {
   def readRandomStdlib = stdSeq(randIndex)
 
   @Benchmark
+  def readRandomJavalib = javaSeq.get(randIndex)
+
+  @Benchmark
   def appendSpecialized = {
     val s = new BufferSeq_Int(initialSize = 16)
     var i = 0
