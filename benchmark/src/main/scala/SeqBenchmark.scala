@@ -191,13 +191,6 @@ class SeqBenchmark {
   def updateRandomJavalib = javaSeq.set(randIndex, randVal)
 
   @Benchmark
-  def foreachMacro = {
-    var sum = 0
-    specSeq foreachMacro (sum += _)
-    sum
-  }
-
-  @Benchmark
   def foreachSpecialized = {
     var sum = 0
     specSeq foreach (sum += _)

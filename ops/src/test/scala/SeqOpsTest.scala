@@ -92,7 +92,7 @@ class SeqOpsTest extends FunSuite {
     1 to 10 foreach (seq.append(_))
 
     var sum = 0
-    seq foreachMacro (sum += _)
+    seq foreach (sum += _)
     assert(sum == 10 * 11 / 2)
   }
 

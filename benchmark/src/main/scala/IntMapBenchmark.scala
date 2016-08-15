@@ -128,10 +128,6 @@ class IntMapBenchmark {
   }
 
   @Benchmark
-  def foreachMacro(blackhole: Blackhole) =
-    specMap foreachMacro ((k, v) => blackhole.consume(k))
-
-  @Benchmark
   def foreachSpecialized(blackhole: Blackhole) =
     specMap foreach ((k, v) => blackhole.consume(k))
 

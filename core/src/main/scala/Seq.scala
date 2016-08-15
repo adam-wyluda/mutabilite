@@ -6,7 +6,7 @@ package generic
   *
   * @tparam A represents element type
   */
-trait Seq[A] extends Traversable1[A] {
+trait Seq[A] extends Traversable {
 
   /**
     * Return value at given index.

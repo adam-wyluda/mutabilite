@@ -249,19 +249,6 @@ class HashMap_${K}_${V}${Param}(initialSize: Int = 8)
 
   def isEmpty = _size == 0
   def size: Int = _size
-
-  def foreach(f: (${K_Arg}, ${V_Arg}) => Unit): Unit = {
-    var i = 0
-    while (i < capacity) {
-      val status = buckets(i)
-      if (status == 3) {
-        val key = _keys(i)${Cast_to_K}
-        val value = _values(i)${Cast_to_V}
-        f(key, value)
-      }
-      i += 1
-    }
-  }
 }
 
 % end

@@ -192,18 +192,6 @@ class HashSet_${T}${T_Param}(initialSize: Int = 8)(implicit hashK: Hash_${T}) ex
 
   def isEmpty = _size == 0
   def size: Int = _size
-
-  def foreach(f: ${T_Arg} => Unit): Unit = {
-    var i = 0
-    while (i < capacity) {
-      val status = buckets(i)
-      if (status == 3) {
-        val key = _keys(i)${Cast_to_T}
-        f(key)
-      }
-      i += 1
-    }
-  }
 }
 
 % end

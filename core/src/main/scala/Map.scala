@@ -7,7 +7,7 @@ package generic
   * @tparam K type of the keys
   * @tparam V type of the values
   */
-trait Map[K, V] extends Traversable2[K, V] {
+trait Map[K, V] extends Traversable {
 
   /**
     * Return value associated with given key.

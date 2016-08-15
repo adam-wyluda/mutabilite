@@ -92,7 +92,7 @@ class SetOpsTest extends FunSuite {
     1 to 10 foreach (set.add(_))
 
     var sum = 0
-    set foreachMacro (sum += _)
+    set foreach (sum += _)
     assert(sum == 10 * 11 / 2)
   }
 

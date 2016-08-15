@@ -128,10 +128,6 @@ class IntSetBenchmark {
   }
 
   @Benchmark
-  def foreachMacro(blackhole: Blackhole) =
-    specSet foreachMacro (blackhole.consume(_))
-
-  @Benchmark
   def foreachSpecialized(blackhole: Blackhole) =
     specSet foreach (blackhole.consume(_))
 

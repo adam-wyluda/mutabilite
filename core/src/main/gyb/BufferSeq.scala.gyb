@@ -31,7 +31,6 @@ trait Seq_${T}${T_Param} extends Seq[${T_Arg}] {
   def remove(n: Int): ${T_Arg}
   def index(elem: ${T_Arg}): Int
   def insert(index: Int, elem: ${T_Arg}): Unit
-  def foreach(f: ${T_Arg} => Unit): Unit
 }
 
 class BufferSeq_${T}${T_Param}(arr: Array[${T_Array}], _size: Int)(implicit eq: Eq_${T}) extends Seq_${T}${T_Param} {
@@ -113,15 +112,6 @@ class BufferSeq_${T}${T_Param}(arr: Array[${T_Array}], _size: Int)(implicit eq: 
 
   def isEmpty = size == 0
   def capacity = array.size
-
-  def foreach(f: ${T_Arg} => Unit): Unit = {
-    var i = 0
-    while (i < size) {
-      f(array(i)${Cast_to_T})
-      i += 1
-    }
-  }
-
 }
 
 % end

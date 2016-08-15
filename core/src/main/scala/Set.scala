@@ -6,7 +6,7 @@ package generic
   *
   * @tparam A represents element type
   */
-trait Set[A] extends Traversable1[A] {
+trait Set[A] extends Traversable {
 
   /**
     * Test if given element is contained within this set.

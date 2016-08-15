@@ -83,7 +83,7 @@ package object collection {
       *
       * @param f function called for every element in the sequence
       */
-    def foreachMacro(f: A => Unit): Unit = macro offheap.collection.macros.SeqOpsMacros.foreach
+    def foreach(f: A => Unit): Unit = macro offheap.collection.macros.SeqOpsMacros.foreach
 
     /**
       * Apply given operator going from left to right starting with given element.
@@ -203,7 +203,7 @@ package object collection {
       *
       * @param f function called for every element in the set
       */
-    def foreachMacro(f: A => Unit): Unit = macro offheap.collection.macros.SetOpsMacros.foreach
+    def foreach(f: A => Unit): Unit = macro offheap.collection.macros.SetOpsMacros.foreach
 
     /**
       * Apply given operator to every element in the set starting with given element.
@@ -299,7 +299,7 @@ package object collection {
       *
       * @param f function called for every element in the map
       */
-    def foreachMacro(f: (K, V) => Unit): Unit = macro offheap.collection.macros.MapOpsMacros.foreach
+    def foreach(f: (K, V) => Unit): Unit = macro offheap.collection.macros.MapOpsMacros.foreach
 
     /**
       * Apply given operator to every pair of key and value in the map starting with given element.
