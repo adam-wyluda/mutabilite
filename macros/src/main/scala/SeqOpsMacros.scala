@@ -1,4 +1,4 @@
-package offheap.collection.macros
+package mutabilite.macros
 
 import scala.reflect.macros.whitebox
 

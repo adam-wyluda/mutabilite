@@ -2,7 +2,7 @@ package benchmark
 
 import java.util.function.{BiConsumer, Consumer}
 
-import offheap.collection._
+import mutabilite._
 import org.openjdk.jmh.annotations._
 import org.openjdk.jmh.infra.Blackhole
 

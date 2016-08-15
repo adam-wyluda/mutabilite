@@ -3,7 +3,7 @@ package benchmark
 import java.util.function.BiConsumer
 
 import org.openjdk.jmh.annotations._
-import offheap.collection._
+import mutabilite._
 import org.openjdk.jmh.infra.Blackhole
 
 import scala.collection.mutable.{Buffer => StdlibBuffer, OpenHashMap => StdlibMap}

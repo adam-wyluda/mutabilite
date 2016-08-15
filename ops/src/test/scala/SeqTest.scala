@@ -1,6 +1,6 @@
 package test
 
-import offheap.collection._
+import mutabilite._
 import org.scalatest.{BeforeAndAfter, FunSuite}
 
 class SeqTest extends FunSuite with BeforeAndAfter {

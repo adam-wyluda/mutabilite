@@ -1,2 +1,2 @@
-# scala-offheap-collections
-Scala Offheap collections prototype
+# mutabilite - lightweight specialized collections that never box
+

@@ -1,4 +1,4 @@
-package offheap.collection
+package mutabilite
 package generic
 
 /**

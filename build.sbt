@@ -1,6 +1,6 @@
 import sbt.Keys._
 
-name := "scala-offheap-collections"
+name := "mutabilite"
 
 lazy val defaults = Defaults.coreDefaultSettings ++ Seq(
   version := "0.1-SNAPSHOT",

@@ -1,10 +1,10 @@
-package offheap.collection
+package mutabilite
 package generic
 
 /**
   * Typeclass implementing element equality.
   *
-  * Import [[offheap.collection]] package object to get default implicit implementations for primitive and reference
+  * Import [[mutabilite]] package object to get default implicit implementations for primitive and reference
   * types.
   *
   * @tparam K type of compared instances
@@ -16,7 +16,7 @@ trait Eq[K] {
 /**
   * Typeclass that provides hash code values for specified type.
   *
-  * Import [[offheap.collection]] package object to get default implicit implementations for primitive and reference
+  * Import [[mutabilite]] package object to get default implicit implementations for primitive and reference
   * types.
   *
   * @tparam K type of hashed instances

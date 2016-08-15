@@ -1,6 +1,6 @@
-package offheap.collection.macros
+package mutabilite.macros
 
-import offheap.collection._
+import mutabilite._
 
 import scala.reflect.macros.whitebox
 
@@ -16,22 +16,22 @@ trait Definitions {
       "java.lang.UnsupportedOperationException")
 
   def SeqClass(elemType: String) =
-    staticClass("offheap.collection.Seq_" + elemType)
+    staticClass("mutabilite.Seq_" + elemType)
 
   def BufferSeqClass(elemType: String) =
-    staticClass("offheap.collection.BufferSeq_" + elemType)
+    staticClass("mutabilite.BufferSeq_" + elemType)
 
   def SetClass(elemType: String) =
-    staticClass("offheap.collection.Set_" + elemType)
+    staticClass("mutabilite.Set_" + elemType)
 
   def HashSetClass(elemType: String) =
-    staticClass("offheap.collection.HashSet_" + elemType)
+    staticClass("mutabilite.HashSet_" + elemType)
 
   def MapClass(keyType: String, valueType: String) =
-    staticClass("offheap.collection.Map_" + keyType + "_" + valueType)
+    staticClass("mutabilite.Map_" + keyType + "_" + valueType)
 
   def HashMapClass(keyType: String, valueType: String) =
-    staticClass("offheap.collection.HashMap_" + keyType + "_" + valueType)
+    staticClass("mutabilite.HashMap_" + keyType + "_" + valueType)
 
   def seqType[T: WeakTypeTag]: Type =
     if (wt[T] <:< AnyRefTpe) {

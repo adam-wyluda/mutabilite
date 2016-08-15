@@ -1,12 +1,10 @@
-package offheap
-
-import offheap.collection.generic.{Map, Seq, Set}
+import mutabilite.generic.{Map, Seq, Set}
 import scala.language.experimental.{macros => CanMacro}
 
 /**
   * Library implicits.
   */
-package object collection {
+package object mutabilite {
 
   implicit object BooleanHash extends Hash_Boolean {
     def hash(value: Boolean): Int = if (value) 1231 else 1237
@@ -56,7 +54,7 @@ package object collection {
       * @tparam B transforming function target type
       * @return mapped sequence
       */
-    def map[B](f: A => B): Seq[B] = macro offheap.collection.macros.SeqOpsMacros
+    def map[B](f: A => B): Seq[B] = macro mutabilite.macros.SeqOpsMacros
       .map[B]
 
     /**
@@ -66,7 +64,7 @@ package object collection {
       * @tparam B resulting sequence target type
       * @return sequence that contains all elements provided by f
       */
-    def flatMap[B](f: A => Seq[B]): Seq[B] = macro offheap.collection.macros.SeqOpsMacros
+    def flatMap[B](f: A => Seq[B]): Seq[B] = macro mutabilite.macros.SeqOpsMacros
       .flatMap[B]
 
     /**
@@ -75,7 +73,7 @@ package object collection {
       * @param f predicate that filters sequence values
       * @return filtered sequence
       */
-    def filter(f: A => Boolean): Seq[A] = macro offheap.collection.macros.SeqOpsMacros
+    def filter(f: A => Boolean): Seq[A] = macro mutabilite.macros.SeqOpsMacros
       .filter[A]
 
     /**
@@ -83,7 +81,7 @@ package object collection {
       *
       * @param f function called for every element in the sequence
       */
-    def foreach(f: A => Unit): Unit = macro offheap.collection.macros.SeqOpsMacros.foreach
+    def foreach(f: A => Unit): Unit = macro mutabilite.macros.SeqOpsMacros.foreach
 
     /**
       * Apply given operator going from left to right starting with given element.
@@ -93,7 +91,7 @@ package object collection {
       * @tparam B type of the starting element and resulting value
       * @return resulting value
       */
-    def foldLeft[B](z: B)(op: (B, A) => B): B = macro offheap.collection.macros.SeqOpsMacros
+    def foldLeft[B](z: B)(op: (B, A) => B): B = macro mutabilite.macros.SeqOpsMacros
       .foldLeft[B]
 
     /**
@@ -104,7 +102,7 @@ package object collection {
       * @tparam B type of the starting element and resulting value
       * @return resulting value
       */
-    def foldRight[B](z: B)(op: (A, B) => B): B = macro offheap.collection.macros.SeqOpsMacros
+    def foldRight[B](z: B)(op: (A, B) => B): B = macro mutabilite.macros.SeqOpsMacros
       .foldRight[B]
 
     /**
@@ -113,7 +111,7 @@ package object collection {
       * @param op applied operator
       * @return resulting value
       */
-    def reduceLeft(op: (A, A) => A): A = macro offheap.collection.macros.SeqOpsMacros
+    def reduceLeft(op: (A, A) => A): A = macro mutabilite.macros.SeqOpsMacros
       .reduceLeft[A]
 
     /**
@@ -122,7 +120,7 @@ package object collection {
       * @param op applied operator
       * @return resulting value
       */
-    def reduceRight(op: (A, A) => A): A = macro offheap.collection.macros.SeqOpsMacros
+    def reduceRight(op: (A, A) => A): A = macro mutabilite.macros.SeqOpsMacros
       .reduceRight[A]
 
     /**
@@ -130,7 +128,7 @@ package object collection {
       *
       * @param f transforming function
       */
-    def transform(f: A => A): Unit = macro offheap.collection.macros.SeqOpsMacros.transform
+    def transform(f: A => A): Unit = macro mutabilite.macros.SeqOpsMacros.transform
 
     /**
       * Test given predicate for all values.
@@ -138,7 +136,7 @@ package object collection {
       * @param p predicate to be tested
       * @return true if given predicate returns true for every element in sequence, false otherwise
       */
-    def forall(p: A => Boolean): Boolean = macro offheap.collection.macros.SeqOpsMacros.forall
+    def forall(p: A => Boolean): Boolean = macro mutabilite.macros.SeqOpsMacros.forall
 
     /**
       * Test if value for which given predicate is true exists.
@@ -146,7 +144,7 @@ package object collection {
       * @param p predicate to be tested
       * @return true if given predicate returns true for any element in sequence, false otherwise
       */
-    def exists(p: A => Boolean): Boolean = macro offheap.collection.macros.SeqOpsMacros.exists
+    def exists(p: A => Boolean): Boolean = macro mutabilite.macros.SeqOpsMacros.exists
 
     /**
       * Test if other sequence has the same elements in the same order.
@@ -154,7 +152,7 @@ package object collection {
       * @param other sequence to compare
       * @return true if the other sequence has the same elements, false otherwise
       */
-    def sameElements(other: Seq[A]): Boolean = macro offheap.collection.macros.SeqOpsMacros.sameElements
+    def sameElements(other: Seq[A]): Boolean = macro mutabilite.macros.SeqOpsMacros.sameElements
 
     /**
       * Construct a map using keys from this sequence associated to values from the other.
@@ -163,7 +161,7 @@ package object collection {
       * @tparam B the type of result map values
       * @return map with keys from this sequence and values from the other
       */
-    def zipToMap[B](values: Seq[B]): Map[A, B] = macro offheap.collection.macros.SeqOpsMacros
+    def zipToMap[B](values: Seq[B]): Map[A, B] = macro mutabilite.macros.SeqOpsMacros
       .zipToMap[A, B]
   }
 
@@ -176,7 +174,7 @@ package object collection {
       * @tparam B transforming function target type
       * @return mapped set
       */
-    def map[B](f: A => B): Set[B] = macro offheap.collection.macros.SetOpsMacros
+    def map[B](f: A => B): Set[B] = macro mutabilite.macros.SetOpsMacros
       .map[B]
 
     /**
@@ -186,7 +184,7 @@ package object collection {
       * @tparam B resulting set target type
       * @return set that contains all elements provided by f
       */
-    def flatMap[B](f: A => Set[B]): Set[B] = macro offheap.collection.macros.SetOpsMacros
+    def flatMap[B](f: A => Set[B]): Set[B] = macro mutabilite.macros.SetOpsMacros
       .flatMap[B]
 
     /**
@@ -195,7 +193,7 @@ package object collection {
       * @param f predicate that filters set values
       * @return filtered set
       */
-    def filter(f: A => Boolean): Set[A] = macro offheap.collection.macros.SetOpsMacros
+    def filter(f: A => Boolean): Set[A] = macro mutabilite.macros.SetOpsMacros
       .filter[A]
 
     /**
@@ -203,7 +201,7 @@ package object collection {
       *
       * @param f function called for every element in the set
       */
-    def foreach(f: A => Unit): Unit = macro offheap.collection.macros.SetOpsMacros.foreach
+    def foreach(f: A => Unit): Unit = macro mutabilite.macros.SetOpsMacros.foreach
 
     /**
       * Apply given operator to every element in the set starting with given element.
@@ -213,7 +211,7 @@ package object collection {
       * @tparam B type of the starting element and resulting value
       * @return resulting value
       */
-    def fold[B](z: B)(op: (B, A) => B): B = macro offheap.collection.macros.SetOpsMacros
+    def fold[B](z: B)(op: (B, A) => B): B = macro mutabilite.macros.SetOpsMacros
       .fold[B]
 
     /**
@@ -222,7 +220,7 @@ package object collection {
       * @param op applied operator
       * @return resulting value
       */
-    def reduce(op: (A, A) => A): A = macro offheap.collection.macros.SetOpsMacros
+    def reduce(op: (A, A) => A): A = macro mutabilite.macros.SetOpsMacros
       .reduce[A]
 
     /**
@@ -231,7 +229,7 @@ package object collection {
       * @param p predicate to be tested
       * @return true if given predicate returns true for every element in set, false otherwise.
       */
-    def forall(p: A => Boolean): Boolean = macro offheap.collection.macros.SetOpsMacros.forall
+    def forall(p: A => Boolean): Boolean = macro mutabilite.macros.SetOpsMacros.forall
 
     /**
       * Test if value for which given predicate is true exists.
@@ -239,7 +237,7 @@ package object collection {
       * @param p predicate to be tested
       * @return true if given predicate returns true for any element in set, false otherwise.
       */
-    def exists(p: A => Boolean): Boolean = macro offheap.collection.macros.SetOpsMacros.exists
+    def exists(p: A => Boolean): Boolean = macro mutabilite.macros.SetOpsMacros.exists
   }
 
   implicit class MapOps[K, V](val map: Map[K, V]) extends AnyVal {
@@ -251,7 +249,7 @@ package object collection {
       * @tparam B transforming function target type
       * @return mapped sequence
       */
-    def map[B](f: (K, V) => B): Seq[B] = macro offheap.collection.macros.MapOpsMacros
+    def map[B](f: (K, V) => B): Seq[B] = macro mutabilite.macros.MapOpsMacros
       .map[B]
 
     /**
@@ -261,7 +259,7 @@ package object collection {
       * @tparam B target key type
       * @return map with transformed keys and original values
       */
-    def mapKeys[B](f: K => B): Map[B, V] = macro offheap.collection.macros.MapOpsMacros
+    def mapKeys[B](f: K => B): Map[B, V] = macro mutabilite.macros.MapOpsMacros
       .mapKeys[V, B]
 
     /**
@@ -271,7 +269,7 @@ package object collection {
       * @tparam B target value type
       * @return map with transformed values and original keys
       */
-    def mapValues[B](f: V => B): Map[K, B] = macro offheap.collection.macros.MapOpsMacros
+    def mapValues[B](f: V => B): Map[K, B] = macro mutabilite.macros.MapOpsMacros
       .mapValues[K, B]
 
     /**
@@ -282,7 +280,7 @@ package object collection {
       * @tparam B resulting sequence target type
       * @return sequence that contains all elements provided by f
       */
-    def flatMap[B](f: (K, V) => Seq[B]): Seq[B] = macro offheap.collection.macros.MapOpsMacros
+    def flatMap[B](f: (K, V) => Seq[B]): Seq[B] = macro mutabilite.macros.MapOpsMacros
       .flatMap[B]
 
     /**
@@ -291,7 +289,7 @@ package object collection {
       * @param f predicate that filters pairs of key and value
       * @return filtered map
       */
-    def filter(f: (K, V) => Boolean): Map[K, V] = macro offheap.collection.macros.MapOpsMacros
+    def filter(f: (K, V) => Boolean): Map[K, V] = macro mutabilite.macros.MapOpsMacros
       .filter[K, V]
 
     /**
@@ -299,7 +297,7 @@ package object collection {
       *
       * @param f function called for every element in the map
       */
-    def foreach(f: (K, V) => Unit): Unit = macro offheap.collection.macros.MapOpsMacros.foreach
+    def foreach(f: (K, V) => Unit): Unit = macro mutabilite.macros.MapOpsMacros.foreach
 
     /**
       * Apply given operator to every pair of key and value in the map starting with given element.
@@ -309,7 +307,7 @@ package object collection {
       * @tparam B type of the starting element and resulting value
       * @return resulting value
       */
-    def fold[B](z: B)(op: (B, K, V) => B): B = macro offheap.collection.macros.MapOpsMacros
+    def fold[B](z: B)(op: (B, K, V) => B): B = macro mutabilite.macros.MapOpsMacros
       .fold[B]
 
     /**
@@ -318,7 +316,7 @@ package object collection {
       * @param op applied operator
       * @return resulting value
       */
-    def reduceKeys(op: (K, K) => K): K = macro offheap.collection.macros.MapOpsMacros
+    def reduceKeys(op: (K, K) => K): K = macro mutabilite.macros.MapOpsMacros
       .reduceKeys[K]
 
     /**
@@ -327,7 +325,7 @@ package object collection {
       * @param op applied operator
       * @return resulting value
       */
-    def reduceValues(op: (V, V) => V): V = macro offheap.collection.macros.MapOpsMacros
+    def reduceValues(op: (V, V) => V): V = macro mutabilite.macros.MapOpsMacros
       .reduceValues[V]
 
     /**
@@ -335,7 +333,7 @@ package object collection {
       *
       * @param f transforming function
       */
-    def transformValues(f: V => V): Unit = macro offheap.collection.macros.MapOpsMacros.transformValues
+    def transformValues(f: V => V): Unit = macro mutabilite.macros.MapOpsMacros.transformValues
 
     /**
       * Test given predicate for all pairs of key and value.
@@ -343,7 +341,7 @@ package object collection {
       * @param p predicate to be tested
       * @return true if given predicate returns true for every pair of key and value in map, false otherwise
       */
-    def forall(p: (K, V) => Boolean): Boolean = macro offheap.collection.macros.MapOpsMacros.forall
+    def forall(p: (K, V) => Boolean): Boolean = macro mutabilite.macros.MapOpsMacros.forall
 
     /**
       * Test if value for which given predicate is true exists.
@@ -351,6 +349,6 @@ package object collection {
       * @param p predicate to be tested
       * @return true if given predicate returns true for any pair of key and value in map, false otherwise
       */
-    def exists(p: (K, V) => Boolean): Boolean = macro offheap.collection.macros.MapOpsMacros.exists
+    def exists(p: (K, V) => Boolean): Boolean = macro mutabilite.macros.MapOpsMacros.exists
   }
 }
