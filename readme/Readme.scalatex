@@ -1,0 +1,143 @@
+@import Main._
+
+@def project = "mutabilite"
+@def version = "0.1.0"
+
+@def benchImg(_src: String) = img(width:="400px", src:=_src)
+@def benchTable(srcs: String*) = {
+  val rows = 
+    for {
+      pair <- srcs.grouped(2)
+      row = for (src <- pair) yield td(benchImg(s"img/$src"))
+    } yield tr(row)
+  table(rows.toSeq)
+}
+
+@sect(project, "lightweight specialized collections that never box")
+  
+  @sect{Overview}
+    
+    @p
+      @b{@project} provides fast mutable collections that are guaranteed to never allocate boxed values. 
+      
+    @p
+      The library is very similar to @lnk("Debox", "https://github.com/non/debox").
+      It provides the same set of collections: Seq(Buffer), Set and Map (using same hashing scheme).
+      
+    @p
+      One of the most significant differences is that @project uses code generation instead of relying on Scala specialization.
+      This means that @project is less convenient to use, but on the other hand it's also free from many
+      @lnk("specialization quirks", "http://axel22.github.io/2013/11/03/specialization-quirks.html"), like
+      all-or-nothing semantics of specialized parameters, which means that you can't have Map[Int, String] without
+      boxing both keys and values.
+      
+    @p
+      On top of that @project implements high-level methods like map or filter using macros that help to reduce
+      amount of generated code necessary to support all possible input and output type combinations.
+      In addition macros will inline given closures giving slight performance benefit to those operations.
+    
+    @sect{Features}
+      @ul
+        @li{No boxing when using primitives mixed with reference types (like in Map[Int, String])}
+        @li{Lightweight - whole library weighs about 500kB (vs. 15MB of debox + spire dependency)}
+        @li{Macros for higher-order functions that inline given closures}
+        @li{Specialized interfaces that guarantee that you don't box}
+
+  @sect{Set up}
+    @p
+      To start using @project, import the following dependency into your SBT project:
+      
+      @hl.scala
+        libraryDependencies += "org" %% "name" % "0.1.0"
+
+  @sect{Usage}
+    
+    @p
+      To get started, import the following package:
+    
+    @p
+      @hl.scala(s"import $project._")
+      
+    @p
+      This will provide you all specialized implementations of collections and typeclasses that are necessary to work with the library.
+      
+    @p
+      Each collection in the library has its own generic interface, which are defined in @(s"$project.generic") package.
+      It's recommended to not use them directly (they are mostly useful for macros), since operations using these interfaces will always box.
+      
+    @p
+      The convention used for naming specialized types is to add primitive type or "object" separated by underscore to denote types for which it is specialized.
+      For example: @hl.scala{Seq_Char, Map_Int_Object[String]}
+    
+    @sect{Example}
+      @hl.scala
+        val seq = new BufferSeq_Int
+        seq.append(1)
+        seq.append(2)
+        seq.append(3)
+
+        val strings = seq map (_ toString)
+        val map = seq zipToMap strings
+        map(2) == "2"
+        
+        val sum = map reduceKeys (_ + _)
+        sum == 6
+
+  @sect{Benchmarks}
+    @p
+      The library has been thoroughly benchmarked using @lnk("JMH", "http://openjdk.java.net/projects/code-tools/jmh/") framework.
+      Each benchmark method focuses on concrete use case - like adding a number of elements to a set or looking up a value in map.
+      
+    @p
+      Comparing to Scala's standard library mutable collections, you can expect @project to be 2-40x faster for most common operations.
+      For detailed benchmark results look into the following gist:
+      @lnk("https://gist.github.com/adamwy/bab182753ea8bfbabe94eeb072e8fdc3")
+      
+    @sect("Seq[Int]")
+      @benchTable(
+        "seq_int_append.png",
+        "seq_int_foreach.png",
+        "seq_int_read_random.png",
+        "seq_int_read_sequential.png",
+        "seq_int_update_random.png",
+        "seq_int_update_sequential.png",
+        "seq_int_map.png",
+        "seq_int_remove.png"
+      )
+      
+    @sect("Set[Int]")
+      @benchTable(
+        "set_int_add.png",
+        "set_int_foreach.png",
+        "set_int_contains_existing.png",
+        "set_int_contains_non_existing.png",
+        "set_int_map.png",
+        "set_int_remove.png"
+      )
+      
+    @sect("Map[Int, Int]")
+      @benchTable(
+        "map_int_int_put_all.png",
+        "map_int_int_foreach.png",
+        "map_int_int_get_direct.png",
+        "map_int_int_get_non_existing.png",
+        "map_int_int_map.png",
+        "map_int_int_remove.png"
+      )
+    
+    @sect("Map[Int, String]")
+      @benchTable(
+        "map_int_string_put_all.png",
+        "map_int_string_foreach.png",
+        "map_int_string_get_direct.png",
+        "map_int_string_get_non_existing.png",
+        "map_int_string_map.png",
+        "map_int_string_remove.png"
+      )
+
+  @sect{Changelog}
+    @sect{0.1.0}
+      @ul
+        @li
+          First release.
+      

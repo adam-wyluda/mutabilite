@@ -57,3 +57,12 @@ lazy val benchmark = project
       )
     )
   )
+
+lazy val readme =
+  scalatex.ScalatexReadme(
+    projectId = "readme",
+    wd = file(""),
+    url = "https://github.com/lihaoyi/scalatex/tree/master",
+    source = "Readme"
+  )
+
