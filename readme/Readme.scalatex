@@ -92,6 +92,12 @@
       Comparing to Scala's standard library mutable collections, you can expect @project to be 2-40x faster for most common operations.
       For detailed benchmark results look into the following gist:
       @lnk("https://gist.github.com/adamwy/bab182753ea8bfbabe94eeb072e8fdc3")
+
+    @p
+      The following charts present the benchmarks results (throughput vs number of elements) for operations on
+      specialized and mixed collections.
+      It compares @project to collections from Debox, Scala and Java standard library.
+      For map benchmarks Scala OpenHashMap is used, since it is is based on similar underlying hash table implementation.
       
     @sect("Seq[Int]")
       @benchTable(
