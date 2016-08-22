@@ -3,6 +3,7 @@ import sbt.Keys._
 name := "mutabilite"
 
 lazy val defaults = Defaults.coreDefaultSettings ++ Seq(
+  organization := "mutabilite",
   version := "0.1-SNAPSHOT",
   scalaVersion := "2.11.8",
   addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full)
