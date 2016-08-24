@@ -223,4 +223,46 @@ class SeqOpsMacros(val c: whitebox.Context) extends Common {
         """
       }
     }
+
+  def groupBy[A: WeakTypeTag, K: WeakTypeTag](f: Tree) =
+    stabilizedSeq { seq =>
+      val A = weakTypeOf[A]
+      val K = weakTypeOf[K]
+      val valTpe = seqType[A]
+      val bufferTpe = bufferType[A]
+      val builderTpe = hashMapTypeSeq[K, A]
+      val builder = freshVal(
+          "builder",
+          builderTpe,
+          q"new $builderTpe"
+      )
+      val body = iterateSeq(seq, idx => {
+        val el = freshVal("el", A, q"$seq($idx)")
+        val key = freshVal("key", K, q"${app(f, q"${el.symbol}")}")
+        val optName = fresh("opt")
+        val newSeq = freshVal("seq", valTpe, q"new $bufferTpe")
+        var seqVal = freshVal("seq",
+                              valTpe,
+                              q"""
+                                if ($optName.nonEmpty) $optName.get
+                                else {
+                                  $newSeq
+                                  ${builder.symbol}.put(${key.symbol}, ${newSeq.symbol})
+                                  ${newSeq.symbol}
+                                }
+                              """)
+        q"""
+          $el
+          $key
+          val $optName = ${builder.symbol}.get(${key.symbol})
+          $seqVal
+          ${seqVal.symbol}.append(${el.symbol})
+        """
+      })
+      q"""
+        $builder
+        ..$body
+        ${builder.symbol}
+      """
+    }
 }

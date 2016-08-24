@@ -75,6 +75,19 @@ trait Definitions {
       case LongTpe => wt[Map_Long_Object[V]]
     }
 
+  def hashMapTypeSeq[K: WeakTypeTag, SV: WeakTypeTag]: Type =
+    wt[SV] match {
+      case BooleanTpe => hashMapType[K, Seq_Boolean]
+      case CharTpe => hashMapType[K, Seq_Char]
+      case ByteTpe => hashMapType[K, Seq_Byte]
+      case ShortTpe => hashMapType[K, Seq_Short]
+      case IntTpe => hashMapType[K, Seq_Int]
+      case LongTpe => hashMapType[K, Seq_Long]
+      case FloatTpe => hashMapType[K, Seq_Float]
+      case DoubleTpe => hashMapType[K, Seq_Double]
+      case _ => hashMapType[K, Seq_Object[SV]]
+    }
+
   def hashMapType[K: WeakTypeTag, V: WeakTypeTag]: Type =
     if (wt[K] <:< AnyRefTpe && wt[V] <:< AnyRefTpe)
       wt[HashMap_Object_Object[K, V]]

@@ -54,8 +54,7 @@ package object mutabilite {
       * @tparam B transforming function target type
       * @return mapped sequence
       */
-    def map[B](f: A => B): Seq[B] = macro mutabilite.macros.SeqOpsMacros
-      .map[B]
+    def map[B](f: A => B): Seq[B] = macro mutabilite.macros.SeqOpsMacros.map[B]
 
     /**
       * Build new sequence by applying given function to each value and appending all elements from resulting sequences.
@@ -163,6 +162,16 @@ package object mutabilite {
       */
     def zipToMap[B](values: Seq[B]): Map[A, B] = macro mutabilite.macros.SeqOpsMacros
       .zipToMap[A, B]
+
+    /**
+      * Group values to a map.
+      *
+      * @param f function that transforms sequence values to map keys
+      * @tparam K target map key type
+      * @return map with keys mapped by f and values that map to the same key
+      */
+    def groupBy[K](f: A => K): Map[K, _] = macro mutabilite.macros.SeqOpsMacros
+      .groupBy[A, K]
   }
 
   implicit class SetOps[A](val set: Set[A]) extends AnyVal {
@@ -174,8 +183,7 @@ package object mutabilite {
       * @tparam B transforming function target type
       * @return mapped set
       */
-    def map[B](f: A => B): Set[B] = macro mutabilite.macros.SetOpsMacros
-      .map[B]
+    def map[B](f: A => B): Set[B] = macro mutabilite.macros.SetOpsMacros.map[B]
 
     /**
       * Build new set by applying given function to each value and appending all elements from resulting sets.

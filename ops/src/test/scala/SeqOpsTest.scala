@@ -191,4 +191,20 @@ class SeqOpsTest extends FunSuite {
     assert(smallSeq.zipToMap(strings).size == 5)
     assert(seq.zipToMap(smallStrings).size == 5)
   }
+
+  test("groupBy") {
+    val seq: Seq_Int = new BufferSeq_Int
+    0 until 100 foreach (seq.append(_))
+
+    val map = seq groupBy (_ % 10)
+    val test: Map_Int_Object[Seq_Int] = map
+
+    assert(map.size == 10)
+    0 until 10 foreach { i =>
+      val s = map(i)
+      val t: Seq_Int = s
+      assert(s.size == 10)
+      0 until 10 foreach (j => assert(s(j) == i + j * 10))
+    }
+  }
 }
