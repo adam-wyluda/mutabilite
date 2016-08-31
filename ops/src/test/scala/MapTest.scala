@@ -9,7 +9,7 @@ class MapTest extends FunSuite with BeforeAndAfter {
   var map: Map_Int_Object[String] = _
 
   before {
-    map = new HashMap_Int_Object[String]
+    map = new Map_Int_Object[String]
     map.put(1, "one")
     map.put(2, "too")
     map.put(3, "tree")
@@ -25,7 +25,7 @@ class MapTest extends FunSuite with BeforeAndAfter {
 
   test("isEmpty") {
     assert(map.nonEmpty)
-    assert(new HashMap_Int_Object[String].isEmpty)
+    assert(new Map_Int_Object[String].isEmpty)
   }
 
   test("size") {
@@ -61,7 +61,7 @@ class MapTest extends FunSuite with BeforeAndAfter {
   }
 
   test("put and apply") {
-    val map = new HashMap_Object_Int[String]
+    val map = new Map_Object_Int[String]
     1 to 100 foreach { i =>
       map.put(i toString, i)
     }
@@ -79,7 +79,7 @@ class MapTest extends FunSuite with BeforeAndAfter {
   }
 
   test("put and remove") {
-    val map = new HashMap_Object_Int[String]
+    val map = new Map_Object_Int[String]
     1 to 100 foreach { i =>
       map.put(i toString, i)
     }
@@ -102,7 +102,7 @@ class MapTest extends FunSuite with BeforeAndAfter {
 
   test("put and remove 2") {
     for (_ <- 1 to 100) {
-      val map = new HashMap_Int_Int
+      val map = new Map_Int_Int
       val rand = scala.util.Random
 
       val keys = Array.fill[Int](100000)(rand.nextInt)
@@ -120,7 +120,7 @@ class MapTest extends FunSuite with BeforeAndAfter {
   }
 
   test("put and remove 3") {
-    val map = new HashMap_Int_Int
+    val map = new Map_Int_Int
     val rand = scala.util.Random
 
     val n = 50000
@@ -164,7 +164,7 @@ class MapTest extends FunSuite with BeforeAndAfter {
   }
 
   test("compact") {
-    val map = new HashMap_Int_Int
+    val map = new Map_Int_Int
     1 to 50 foreach (i => map.put(i, i * i))
     assert(map.capacity == 128)
 

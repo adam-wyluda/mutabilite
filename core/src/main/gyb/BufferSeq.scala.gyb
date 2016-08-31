@@ -24,16 +24,7 @@ types = ['Boolean', 'Char', 'Byte', 'Short',
     Cast_from_T = ''
 }%
 
-trait Seq_${T}${T_Param} extends Seq[${T_Arg}] {
-  def apply(index: Int): ${T_Arg}
-  def append(elem: ${T_Arg}): Unit
-  def update(index: Int, value: ${T_Arg}): Unit
-  def remove(n: Int): ${T_Arg}
-  def index(elem: ${T_Arg}): Int
-  def insert(index: Int, elem: ${T_Arg}): Unit
-}
-
-class BufferSeq_${T}${T_Param}(arr: Array[${T_Array}], _size: Int)(implicit eq: Eq_${T}) extends Seq_${T}${T_Param} {
+class Seq_${T}${T_Param}(arr: Array[${T_Array}], _size: Int)(implicit eq: Eq_${T}) extends Seq[${T_Arg}] {
 
   private[this] var array: Array[${T_Array}] = arr
   var size = _size

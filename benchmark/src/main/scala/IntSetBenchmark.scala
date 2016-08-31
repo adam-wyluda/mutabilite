@@ -14,8 +14,8 @@ class IntSetBenchmark {
 
   import IntBenchmark._
 
-  val specSet: HashSet_Int = {
-    val set = new HashSet_Int(initialSize = initialSize)
+  val specSet: Set_Int = {
+    val set = new Set_Int(initialSize = initialSize)
     var i = 0
     while (i < size) {
       set.add(keys(i))
@@ -89,7 +89,7 @@ class IntSetBenchmark {
 
   @Benchmark
   def addSpecialized = {
-    val s = new HashSet_Int(initialSize = initialSize)
+    val s = new Set_Int(initialSize = initialSize)
     var i = 0
     while (i < size) {
       s.add(keys(i))
@@ -160,11 +160,11 @@ class IntSetRemoveSpecializedBenchmark {
 
   import IntBenchmark._
 
-  var set: HashSet_Int = _
+  var set: Set_Int = _
 
   @Setup(Level.Invocation)
   def setup = {
-    set = new HashSet_Int(initialSize)
+    set = new Set_Int(initialSize)
     var i = 0
     while (i < size) {
       set.add(keys(i))

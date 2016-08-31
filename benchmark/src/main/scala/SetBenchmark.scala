@@ -14,8 +14,8 @@ class SetBenchmark {
 
   import Benchmark._
 
-  val specSet: HashSet_Object[Key] = {
-    val set = new HashSet_Object[Key](initialSize)
+  val specSet: Set_Object[Key] = {
+    val set = new Set_Object[Key](initialSize)
     var i = 0
     while (i < size) {
       set.add(keys(i))
@@ -89,7 +89,7 @@ class SetBenchmark {
 
   @Benchmark
   def addSpecialized = {
-    val s = new HashSet_Object[Key](initialSize = initialSize)
+    val s = new Set_Object[Key](initialSize = initialSize)
     var i = 0
     while (i < size) {
       s.add(keys(i))
@@ -151,11 +151,11 @@ class SetRemoveSpecializedBenchmark {
 
   import Benchmark._
 
-  var set: HashSet_Object[Key] = _
+  var set: Set_Object[Key] = _
 
   @Setup(Level.Invocation)
   def setup = {
-    set = new HashSet_Object[Key](initialSize)
+    set = new Set_Object[Key](initialSize)
     var i = 0
     while (i < size) {
       set.add(keys(i))

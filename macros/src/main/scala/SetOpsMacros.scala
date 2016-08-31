@@ -16,7 +16,7 @@ class SetOpsMacros(val c: whitebox.Context) extends Common {
 
   def map[B: WeakTypeTag](f: Tree) =
     stabilizedSet { set =>
-      val builderTpe = hashSetType[B]
+      val builderTpe = setType[B]
       val builder = freshVal("builder",
                              builderTpe,
                              q"new $builderTpe(initialSize = $set.capacity)")
@@ -35,7 +35,7 @@ class SetOpsMacros(val c: whitebox.Context) extends Common {
   def flatMap[B: WeakTypeTag](f: Tree) =
     stabilizedSet { set =>
       val resultTpe = setType[B]
-      val builderTpe = hashSetType[B]
+      val builderTpe = setType[B]
       val builder = freshVal("builder", builderTpe, q"new $builderTpe")
       val body = iterateHash(set, idx => {
         val result =
@@ -58,7 +58,7 @@ class SetOpsMacros(val c: whitebox.Context) extends Common {
   def filter[A: WeakTypeTag](f: Tree) =
     stabilizedSet { set =>
       val A = weakTypeOf[A]
-      val builderTpe = hashSetType[A]
+      val builderTpe = setType[A]
       val builder = freshVal("builder", builderTpe, q"new $builderTpe")
       val body = iterateHash(set, idx => {
         val el = freshVal("el", A, q"$set.keyAt($idx)")

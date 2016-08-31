@@ -19,7 +19,7 @@ class MapOpsMacros(val c: whitebox.Context) extends Common {
       val arrTpe =
         if (weakTypeOf[B] <:< AnyRefTpe) weakTypeOf[Array[AnyRef]]
         else weakTypeOf[Array[B]]
-      val resultTpe = bufferType[B]
+      val resultTpe = seqType[B]
       val arr = freshVal("array", arrTpe, q"new $arrTpe($map.size)")
       val idx2 = freshVar("j", IntTpe, q"0")
       val body = iterateHash(
@@ -39,7 +39,7 @@ class MapOpsMacros(val c: whitebox.Context) extends Common {
 
   def mapKeys[V: WeakTypeTag, B: WeakTypeTag](f: Tree) =
     stabilizedMap { map =>
-      val builderTpe = hashMapType[B, V]
+      val builderTpe = mapType[B, V]
       val builder = freshVal("builder",
                              builderTpe,
                              q"new $builderTpe(initialSize = $map.capacity)")
@@ -61,7 +61,7 @@ class MapOpsMacros(val c: whitebox.Context) extends Common {
 
   def mapValues[K: WeakTypeTag, B: WeakTypeTag](f: Tree) =
     stabilizedMap { map =>
-      val builderTpe = hashMapType[K, B]
+      val builderTpe = mapType[K, B]
       val builder = freshVal("builder",
                              builderTpe,
                              q"new $builderTpe(initialSize = $map.capacity)")
@@ -84,7 +84,7 @@ class MapOpsMacros(val c: whitebox.Context) extends Common {
   def flatMap[B: WeakTypeTag](f: Tree) =
     stabilizedMap { map =>
       val resultTpe = seqType[B]
-      val builderTpe = bufferType[B]
+      val builderTpe = seqType[B]
       val builder = freshVal("builder", resultTpe, q"new $builderTpe")
       val body = iterateHash(map, idx => {
         val result = freshVal("result",
@@ -114,7 +114,7 @@ class MapOpsMacros(val c: whitebox.Context) extends Common {
     stabilizedMap { map =>
       val K = weakTypeOf[K]
       val V = weakTypeOf[V]
-      val builderTpe = hashMapType[K, V]
+      val builderTpe = mapType[K, V]
       val builder = freshVal("builder", builderTpe, q"new $builderTpe")
       val body = iterateHash(map, idx => {
         val key = freshVal("key", K, q"$map.keyAt($idx)")

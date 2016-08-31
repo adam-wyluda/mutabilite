@@ -25,20 +25,7 @@ types = ['Char', 'Short', 'Int', 'Long', 'Float', 'Double', 'Object']
     Cast_from_T = ''
 }%
 
-trait Set_${T}${T_Param} extends Set[${T_Arg}] {
-  def apply(elem: ${T_Arg}): Boolean
-  def add(elem: ${T_Arg}): Boolean
-  def remove(elem: ${T_Arg}): Boolean
-  def intersect(that: Set_${T}${T_Param}): Set_${T}${T_Param}
-  def union(that: Set_${T}${T_Param}): Set_${T}${T_Param}
-  def diff(that: Set_${T}${T_Param}): Set_${T}${T_Param}
-
-  def hashAt(index: Int): Byte
-  def keyAt(index: Int): ${T_Arg}
-  def isInit(hash: Byte): Boolean
-}
-
-class HashSet_${T}${T_Param}(initialSize: Int = 8)(implicit hashK: Hash_${T}) extends Set_${T}${T_Param} {
+class Set_${T}${T_Param}(initialSize: Int = 8)(implicit hashK: Hash_${T}) extends Set[${T_Arg}] {
 
   private[this] var buckets: Array[Byte] = new Array[Byte](initialSize)
   private[this] var _keys: Array[${T_Array}] = new Array[${T_Array}](initialSize)
@@ -111,8 +98,8 @@ class HashSet_${T}${T_Param}(initialSize: Int = 8)(implicit hashK: Hash_${T}) ex
     return false
   }
 
-  def intersect(that: Set_${T}${T_Param}): HashSet_${T}${T_Param} = {
-    val result = new HashSet_${T}${T_Param}
+  def intersect(that: Set_${T}${T_Param}): Set_${T}${T_Param} = {
+    val result = new Set_${T}${T_Param}
     var i = 0
     while (i < capacity) {
       val status = buckets(i)
@@ -125,8 +112,8 @@ class HashSet_${T}${T_Param}(initialSize: Int = 8)(implicit hashK: Hash_${T}) ex
     result
   }
 
-  def union(that: Set_${T}${T_Param}): HashSet_${T}${T_Param} = {
-    val result = new HashSet_${T}${T_Param}(initialSize = capacity)
+  def union(that: Set_${T}${T_Param}): Set_${T}${T_Param} = {
+    val result = new Set_${T}${T_Param}(initialSize = capacity)
     var i = 0
     while (i < capacity) {
       val status = buckets(i)
@@ -142,8 +129,8 @@ class HashSet_${T}${T_Param}(initialSize: Int = 8)(implicit hashK: Hash_${T}) ex
     result
   }
 
-  def diff(that: Set_${T}${T_Param}): HashSet_${T}${T_Param} = {
-    val result = new HashSet_${T}${T_Param}
+  def diff(that: Set_${T}${T_Param}): Set_${T}${T_Param} = {
+    val result = new Set_${T}${T_Param}
     var i = 0
     while (i < capacity) {
       val status = buckets(i)

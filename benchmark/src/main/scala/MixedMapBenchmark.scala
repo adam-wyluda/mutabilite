@@ -14,8 +14,8 @@ class MixedMapBenchmark {
 
   import IntBenchmark._
 
-  val specMap: HashMap_Int_Object[String] = {
-    val map = new HashMap_Int_Object[String](initialSize)
+  val specMap: Map_Int_Object[String] = {
+    val map = new Map_Int_Object[String](initialSize)
     var i = 0
     while (i < size) {
       map.put(keys(i), i toString)
@@ -89,7 +89,7 @@ class MixedMapBenchmark {
 
   @Benchmark
   def putAllSpecialized = {
-    val m = new HashMap_Int_Object[String](initialSize = initialSize)
+    val m = new Map_Int_Object[String](initialSize = initialSize)
     var i = 0
     while (i < size) {
       m.put(keys(i), "x")
@@ -147,7 +147,7 @@ class MixedMapBenchmark {
 
   @Benchmark
   def putRemoveReadSpecialized(blackhole: Blackhole) = {
-    val map = new HashMap_Int_Object[String](initialSize = initialSize)
+    val map = new Map_Int_Object[String](initialSize = initialSize)
     var i = 0
     while (i < size) { map.put(keys(i), "x"); i += 1 }
     i = 0
@@ -204,11 +204,11 @@ class MixedMapRemoveSpecializedBenchmark {
 
   import IntBenchmark._
 
-  var map: HashMap_Int_Object[String] = _
+  var map: Map_Int_Object[String] = _
 
   @Setup(Level.Invocation)
   def setup = {
-    map = new HashMap_Int_Object[String](initialSize = initialSize)
+    map = new Map_Int_Object[String](initialSize = initialSize)
     0 until size foreach (i => map.put(keys(i), i toString))
   }
 

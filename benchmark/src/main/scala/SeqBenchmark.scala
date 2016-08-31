@@ -15,8 +15,8 @@ class SeqBenchmark {
 
   val seqSize = Benchmark.size
 
-  val specSeq: BufferSeq_Int = {
-    val seq = new BufferSeq_Int
+  val specSeq: Seq_Int = {
+    val seq = new Seq_Int
     1 to seqSize foreach (seq.append(_))
     seq
   }
@@ -100,7 +100,7 @@ class SeqBenchmark {
 
   @Benchmark
   def appendSpecialized = {
-    val s = new BufferSeq_Int(initialSize = 16)
+    val s = new Seq_Int(initialSize = 16)
     var i = 0
     while (i < seqSize) {
       s.append(i)
@@ -233,17 +233,17 @@ class SeqBenchmark {
 @State(Scope.Thread)
 class SeqRemoveSpecializedBenchmark {
 
-  val origin: BufferSeq_Int = {
-    val seq = new BufferSeq_Int
+  val origin: Seq_Int = {
+    val seq = new Seq_Int
     1 to 10000 foreach (seq.append(_))
     seq
   }
 
-  var seq: BufferSeq_Int = _
+  var seq: Seq_Int = _
 
   @Setup(Level.Invocation)
   def setup = {
-    seq = new BufferSeq_Int
+    seq = new Seq_Int
     origin.foreach(seq.append(_))
   }
 

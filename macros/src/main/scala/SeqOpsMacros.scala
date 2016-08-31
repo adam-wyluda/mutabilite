@@ -19,7 +19,7 @@ class SeqOpsMacros(val c: whitebox.Context) extends Common {
       val arrTpe =
         if (weakTypeOf[B] <:< AnyRefTpe) weakTypeOf[Array[AnyRef]]
         else weakTypeOf[Array[B]]
-      val resultTpe = bufferType[B]
+      val resultTpe = seqType[B]
       val arr = freshVal("array", arrTpe, q"new $arrTpe($seq.size)")
       val body = iterateSeq(
           seq,
@@ -34,7 +34,7 @@ class SeqOpsMacros(val c: whitebox.Context) extends Common {
 
   def flatMap[B: WeakTypeTag](f: Tree) =
     stabilizedSeq { seq =>
-      val builderTpe = bufferType[B]
+      val builderTpe = seqType[B]
       val builder = freshVal("builder",
                              builderTpe,
                              q"new $builderTpe(initialSize = $seq.capacity)")
@@ -60,7 +60,7 @@ class SeqOpsMacros(val c: whitebox.Context) extends Common {
   def filter[A: WeakTypeTag](f: Tree) =
     stabilizedSeq { seq =>
       val A = weakTypeOf[A]
-      val builderTpe = bufferType[A]
+      val builderTpe = seqType[A]
       val builder = freshVal("builder", builderTpe, q"new $builderTpe")
       val body = iterateSeq(seq, idx => {
         val el = freshVal("el", A, q"$seq($idx)")
@@ -206,7 +206,7 @@ class SeqOpsMacros(val c: whitebox.Context) extends Common {
       stabilized(values) { values =>
         val idx = freshVar("i", IntTpe, q"0")
         val size = freshVal("size", IntTpe, q"$keys.size min $values.size")
-        val builderTpe = hashMapType[A, B]
+        val builderTpe = mapType[A, B]
         val builder = freshVal(
             "builder",
             builderTpe,
@@ -229,8 +229,8 @@ class SeqOpsMacros(val c: whitebox.Context) extends Common {
       val A = weakTypeOf[A]
       val K = weakTypeOf[K]
       val valTpe = seqType[A]
-      val bufferTpe = bufferType[A]
-      val builderTpe = hashMapTypeSeq[K, A]
+      val bufferTpe = seqType[A]
+      val builderTpe = mapTypeSeq[K, A]
       val builder = freshVal(
           "builder",
           builderTpe,

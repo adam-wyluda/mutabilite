@@ -5,7 +5,7 @@ import org.scalatest.FunSuite
 
 class MapOpsTest extends FunSuite {
   test("map (int, string) to float") {
-    val map = new HashMap_Int_Object[String]
+    val map = new Map_Int_Object[String]
     1 to 10 foreach (i => map.put(i, i toString))
 
     val mapped = map map { (k, v) =>
@@ -19,7 +19,7 @@ class MapOpsTest extends FunSuite {
   }
 
   test("map (string, int) to string") {
-    val map = new HashMap_Object_Int[String]
+    val map = new Map_Object_Int[String]
     1 to 10 foreach (i => map.put(i toString, i + 10))
 
     val mapped = map map { (k, v) =>
@@ -33,7 +33,7 @@ class MapOpsTest extends FunSuite {
   }
 
   test("mapKeys (int, _) to (string, _)") {
-    val map = new HashMap_Int_Int
+    val map = new Map_Int_Int
     1 to 10 foreach (i => map.put(i, i * 10))
 
     val mapped = map mapKeys (_ toString)
@@ -44,7 +44,7 @@ class MapOpsTest extends FunSuite {
   }
 
   test("mapKeys (string, _) to (int, _)") {
-    val map = new HashMap_Object_Object[String, String]
+    val map = new Map_Object_Object[String, String]
     1 to 10 foreach (i => map.put(i toString, (i * 10) toString))
 
     val mapped = map mapKeys (Integer.parseInt(_))
@@ -55,7 +55,7 @@ class MapOpsTest extends FunSuite {
   }
 
   test("mapValues (_, int) to (_, string)") {
-    val map = new HashMap_Int_Int
+    val map = new Map_Int_Int
     1 to 10 foreach (i => map.put(i, i * 10))
 
     val mapped = map mapValues (_ toString)
@@ -66,7 +66,7 @@ class MapOpsTest extends FunSuite {
   }
 
   test("mapValues (_, string) to (_, int)") {
-    val map = new HashMap_Int_Object[String]
+    val map = new Map_Int_Object[String]
     1 to 10 foreach (i => map.put(i, (i * 10) toString))
 
     val mapped = map mapValues (Integer.parseInt(_))
@@ -77,11 +77,11 @@ class MapOpsTest extends FunSuite {
   }
 
   test("flatMap") {
-    val map = new HashMap_Int_Object[String]
+    val map = new Map_Int_Object[String]
     1 to 10 foreach (i => map.put(i * 3, (i * 3) toString))
 
     val mapped = map flatMap { (k, v) =>
-      val seq = new BufferSeq_Int
+      val seq = new Seq_Int
       seq.append(k + v.length)
       seq.append(k + v.length + 128)
       seq.append(k + v.length + 512)
@@ -98,7 +98,7 @@ class MapOpsTest extends FunSuite {
   }
 
   test("filter") {
-    val map = new HashMap_Int_Object[String]
+    val map = new Map_Int_Object[String]
     1 to 10 foreach (i => map.put(i, i toString))
 
     val filtered = map filter { (k, _) =>
@@ -111,7 +111,7 @@ class MapOpsTest extends FunSuite {
   }
 
   test("fold") {
-    val map = new HashMap_Int_Object[String]
+    val map = new Map_Int_Object[String]
     1 to 5 foreach (i => map.put(i, i toString))
 
     val sum = map.fold(3) { (acc, k, v) =>
@@ -119,13 +119,13 @@ class MapOpsTest extends FunSuite {
     }
     assert(sum == 3 + 5 * 6 / 2 + 5)
 
-    assert(new HashMap_Int_Short().fold(7) { (acc, k, v) =>
+    assert(new Map_Int_Short().fold(7) { (acc, k, v) =>
       acc + k + v
     } == 7)
   }
 
   test("reduceKeys") {
-    val map = new HashMap_Int_Object[String]
+    val map = new Map_Int_Object[String]
     1 to 5 foreach (i => map.put(i, i toString))
 
     val sum = map.reduceKeys { (acc, k) =>
@@ -135,7 +135,7 @@ class MapOpsTest extends FunSuite {
   }
 
   test("reduceValues") {
-    val map = new HashMap_Int_Object[String]
+    val map = new Map_Int_Object[String]
     1 to 5 foreach (i => map.put(i, i toString))
 
     val sum = map.reduceValues { (acc: String, v: String) =>
@@ -145,7 +145,7 @@ class MapOpsTest extends FunSuite {
   }
 
   test("transformValues") {
-    val map = new HashMap_Int_Int
+    val map = new Map_Int_Int
     1 to 10 foreach (i => map.put(i, i))
 
     map.transformValues(_ * 10)
@@ -154,7 +154,7 @@ class MapOpsTest extends FunSuite {
   }
 
   test("forall") {
-    val map = new HashMap_Int_Int
+    val map = new Map_Int_Int
     1 to 100 foreach (i => map.put(i * 2 + 1, i * 2))
 
     assert(map.forall((k, v) => k % 2 == 1 && v % 2 == 0))
@@ -163,7 +163,7 @@ class MapOpsTest extends FunSuite {
   }
 
   test("exists") {
-    val map = new HashMap_Int_Int
+    val map = new Map_Int_Int
     1 to 100 foreach (i => map.put(i * 2 + 1, i * 2))
 
     assert(map.exists((k, v) => k == 21 && v == 20))

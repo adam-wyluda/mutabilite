@@ -71,7 +71,7 @@
     
     @sect{Example}
       @hl.scala
-        val seq = new BufferSeq_Int
+        val seq = new Seq_Int
         seq.append(1)
         seq.append(2)
         seq.append(3)

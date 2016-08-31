@@ -7,13 +7,13 @@ class SeqTest extends FunSuite with BeforeAndAfter {
   var seq: Seq_Int = _
 
   before {
-    seq = new BufferSeq_Int
+    seq = new Seq_Int
     1 to 10 foreach (seq.append(_))
   }
 
   test("isEmpty") {
     assert(seq.nonEmpty)
-    assert(new BufferSeq_Int().isEmpty)
+    assert(new Seq_Int().isEmpty)
   }
 
   test("size") {
@@ -33,7 +33,7 @@ class SeqTest extends FunSuite with BeforeAndAfter {
   }
 
   test("append") {
-    val seq = new BufferSeq_Int
+    val seq = new Seq_Int
 
     assert(seq.isEmpty)
     1 to 3 foreach (seq.append(_))
@@ -60,7 +60,7 @@ class SeqTest extends FunSuite with BeforeAndAfter {
   }
 
   test("remove at capacity") {
-    val newSeq = new BufferSeq_Int
+    val newSeq = new Seq_Int
     1 to newSeq.capacity foreach (newSeq.append(_))
 
     assert(newSeq.size == newSeq.capacity)
@@ -86,7 +86,7 @@ class SeqTest extends FunSuite with BeforeAndAfter {
   }
 
   test("compact") {
-    val seq = new BufferSeq_Int
+    val seq = new Seq_Int
     1 to 50 foreach (seq.append(_))
     assert(seq.capacity == 64)
 
