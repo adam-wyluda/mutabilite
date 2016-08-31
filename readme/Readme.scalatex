@@ -39,7 +39,7 @@
     @sect{Features}
       @ul
         @li{No boxing when using primitives mixed with reference types (like in Map[Int, String])}
-        @li{Lightweight - whole library weighs about 500kB (vs. 15MB of debox + spire dependency)}
+        @li{Lightweight - library runtime weighs about 200kB (vs. 15MB of debox + spire dependency)}
         @li{Macros for higher-order functions that inline given closures}
         @li{Specialized interfaces that guarantee that you don't box}
 
