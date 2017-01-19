@@ -54,7 +54,7 @@ package object mutabilite {
       * @tparam B transforming function target type
       * @return mapped sequence
       */
-    def map[B](f: A => B): Seq[B] = macro mutabilite.macros.SeqOpsMacros.map[B]
+    def map[B](f: A => B): Seq[B] = macro mutabilite.macros.SeqOpsMacrosWhitebox.map[B]
 
     /**
       * Build new sequence by applying given function to each value and appending all elements from resulting sequences.
@@ -63,7 +63,7 @@ package object mutabilite {
       * @tparam B resulting sequence target type
       * @return sequence that contains all elements provided by f
       */
-    def flatMap[B](f: A => Seq[B]): Seq[B] = macro mutabilite.macros.SeqOpsMacros
+    def flatMap[B](f: A => Seq[B]): Seq[B] = macro mutabilite.macros.SeqOpsMacrosWhitebox
       .flatMap[B]
 
     /**
@@ -72,7 +72,7 @@ package object mutabilite {
       * @param f predicate that filters sequence values
       * @return filtered sequence
       */
-    def filter(f: A => Boolean): Seq[A] = macro mutabilite.macros.SeqOpsMacros
+    def filter(f: A => Boolean): Seq[A] = macro mutabilite.macros.SeqOpsMacrosWhitebox
       .filter[A]
 
     /**
@@ -160,7 +160,7 @@ package object mutabilite {
       * @tparam B the type of result map values
       * @return map with keys from this sequence and values from the other
       */
-    def zipToMap[B](values: Seq[B]): Map[A, B] = macro mutabilite.macros.SeqOpsMacros
+    def zipToMap[B](values: Seq[B]): Map[A, B] = macro mutabilite.macros.SeqOpsMacrosWhitebox
       .zipToMap[A, B]
 
     /**
@@ -170,7 +170,7 @@ package object mutabilite {
       * @tparam K target map key type
       * @return map with keys mapped by f and values that map to the same key
       */
-    def groupBy[K](f: A => K): Map[K, _] = macro mutabilite.macros.SeqOpsMacros
+    def groupBy[K](f: A => K): Map[K, _] = macro mutabilite.macros.SeqOpsMacrosWhitebox
       .groupBy[A, K]
   }
 
@@ -183,7 +183,7 @@ package object mutabilite {
       * @tparam B transforming function target type
       * @return mapped set
       */
-    def map[B](f: A => B): Set[B] = macro mutabilite.macros.SetOpsMacros.map[B]
+    def map[B](f: A => B): Set[B] = macro mutabilite.macros.SetOpsMacrosWhitebox.map[B]
 
     /**
       * Build new set by applying given function to each value and appending all elements from resulting sets.
@@ -192,7 +192,7 @@ package object mutabilite {
       * @tparam B resulting set target type
       * @return set that contains all elements provided by f
       */
-    def flatMap[B](f: A => Set[B]): Set[B] = macro mutabilite.macros.SetOpsMacros
+    def flatMap[B](f: A => Set[B]): Set[B] = macro mutabilite.macros.SetOpsMacrosWhitebox
       .flatMap[B]
 
     /**
@@ -201,7 +201,7 @@ package object mutabilite {
       * @param f predicate that filters set values
       * @return filtered set
       */
-    def filter(f: A => Boolean): Set[A] = macro mutabilite.macros.SetOpsMacros
+    def filter(f: A => Boolean): Set[A] = macro mutabilite.macros.SetOpsMacrosWhitebox
       .filter[A]
 
     /**
@@ -257,7 +257,7 @@ package object mutabilite {
       * @tparam B transforming function target type
       * @return mapped sequence
       */
-    def map[B](f: (K, V) => B): Seq[B] = macro mutabilite.macros.MapOpsMacros
+    def map[B](f: (K, V) => B): Seq[B] = macro mutabilite.macros.MapOpsMacrosWhitebox
       .map[B]
 
     /**
@@ -267,7 +267,7 @@ package object mutabilite {
       * @tparam B target key type
       * @return map with transformed keys and original values
       */
-    def mapKeys[B](f: K => B): Map[B, V] = macro mutabilite.macros.MapOpsMacros
+    def mapKeys[B](f: K => B): Map[B, V] = macro mutabilite.macros.MapOpsMacrosWhitebox
       .mapKeys[V, B]
 
     /**
@@ -277,7 +277,7 @@ package object mutabilite {
       * @tparam B target value type
       * @return map with transformed values and original keys
       */
-    def mapValues[B](f: V => B): Map[K, B] = macro mutabilite.macros.MapOpsMacros
+    def mapValues[B](f: V => B): Map[K, B] = macro mutabilite.macros.MapOpsMacrosWhitebox
       .mapValues[K, B]
 
     /**
@@ -288,7 +288,7 @@ package object mutabilite {
       * @tparam B resulting sequence target type
       * @return sequence that contains all elements provided by f
       */
-    def flatMap[B](f: (K, V) => Seq[B]): Seq[B] = macro mutabilite.macros.MapOpsMacros
+    def flatMap[B](f: (K, V) => Seq[B]): Seq[B] = macro mutabilite.macros.MapOpsMacrosWhitebox
       .flatMap[B]
 
     /**
@@ -297,7 +297,7 @@ package object mutabilite {
       * @param f predicate that filters pairs of key and value
       * @return filtered map
       */
-    def filter(f: (K, V) => Boolean): Map[K, V] = macro mutabilite.macros.MapOpsMacros
+    def filter(f: (K, V) => Boolean): Map[K, V] = macro mutabilite.macros.MapOpsMacrosWhitebox
       .filter[K, V]
 
     /**

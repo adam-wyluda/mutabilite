@@ -2,11 +2,11 @@ package mutabilite.macros
 
 import mutabilite._
 
-import scala.reflect.macros.whitebox
+import scala.reflect.macros.blackbox
 
 trait Definitions {
 
-  val c: whitebox.Context
+  val c: blackbox.Context
 
   import c.universe.{weakTypeOf => wt, _}
   import c.universe.definitions._

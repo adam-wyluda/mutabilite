@@ -1,7 +1,5 @@
 package mutabilite.macros
 
-import scala.reflect.macros.whitebox
-
 // Uses code from:
 // https://github.com/densh/scala-offheap
 trait Common extends Definitions {
