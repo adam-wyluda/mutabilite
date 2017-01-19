@@ -1,3 +1,3 @@
-## mutabilite - lightweight specialized collections that never box
+## mutabilite - Fast mutable collections for Scala
 
 [Documentation](https://adamwy.github.io/mutabilite/)

@@ -13,7 +13,7 @@
   table(rows.toSeq)
 }
 
-@sect(project, "lightweight specialized collections that never box")
+@sect(project, "Fast mutable collections for Scala")
   
   @sect{Overview}
     
