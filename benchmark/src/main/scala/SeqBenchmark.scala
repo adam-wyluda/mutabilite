@@ -21,11 +21,11 @@ class SeqBenchmark {
     seq
   }
 
-  val deboxSeq: debox.Buffer[Int] = {
-    val seq = debox.Buffer.empty[Int]
-    1 to seqSize foreach (seq.append(_))
-    seq
-  }
+//  val deboxSeq: debox.Buffer[Int] = {
+//    val seq = debox.Buffer.empty[Int]
+//    1 to seqSize foreach (seq.append(_))
+//    seq
+//  }
 
   val stdSeq: StdlibSeq[Int] = {
     val seq = StdlibSeq[Int]()
@@ -59,14 +59,14 @@ class SeqBenchmark {
     }
   }
 
-  @Benchmark
-  def readSequentialDebox(blackhole: Blackhole) = {
-    var i = 0
-    while (i < seqSize) {
-      blackhole.consume(deboxSeq(i))
-      i += 1
-    }
-  }
+//  @Benchmark
+//  def readSequentialDebox(blackhole: Blackhole) = {
+//    var i = 0
+//    while (i < seqSize) {
+//      blackhole.consume(deboxSeq(i))
+//      i += 1
+//    }
+//  }
 
   @Benchmark
   def readSequentialStdlib(blackhole: Blackhole) = {
@@ -89,8 +89,8 @@ class SeqBenchmark {
   @Benchmark
   def readRandomSpecialized = specSeq(randIndex)
 
-  @Benchmark
-  def readRandomDebox = deboxSeq(randIndex)
+//  @Benchmark
+//  def readRandomDebox = deboxSeq(randIndex)
 
   @Benchmark
   def readRandomStdlib = stdSeq(randIndex)
@@ -108,15 +108,15 @@ class SeqBenchmark {
     }
   }
 
-  @Benchmark
-  def appendDebox = {
-    var s = debox.Buffer.ofSize[Int](16)
-    var i = 0
-    while (i < seqSize) {
-      s.append(i)
-      i += 1
-    }
-  }
+//  @Benchmark
+//  def appendDebox = {
+//    var s = debox.Buffer.ofSize[Int](16)
+//    var i = 0
+//    while (i < seqSize) {
+//      s.append(i)
+//      i += 1
+//    }
+//  }
 
   @Benchmark
   def appendStdlib = {
@@ -148,15 +148,15 @@ class SeqBenchmark {
     }
   }
 
-  @Benchmark
-  def updateSequentialDebox = {
-    var s = deboxSeq
-    var i = 0
-    while (i < seqSize) {
-      s(i) = i * 2
-      i += 1
-    }
-  }
+//  @Benchmark
+//  def updateSequentialDebox = {
+//    var s = deboxSeq
+//    var i = 0
+//    while (i < seqSize) {
+//      s(i) = i * 2
+//      i += 1
+//    }
+//  }
 
   @Benchmark
   def updateSequentialStdlib = {
@@ -181,8 +181,8 @@ class SeqBenchmark {
   @Benchmark
   def updateRandomSpecialized = specSeq(randIndex) = randVal
 
-  @Benchmark
-  def updateRandomDebox = deboxSeq(randIndex) = randVal
+//  @Benchmark
+//  def updateRandomDebox = deboxSeq(randIndex) = randVal
 
   @Benchmark
   def updateRandomStdlib = stdSeq(randIndex) = randVal
@@ -197,12 +197,12 @@ class SeqBenchmark {
     sum
   }
 
-  @Benchmark
-  def foreachDebox = {
-    var sum = 0
-    deboxSeq foreach (sum += _)
-    sum
-  }
+//  @Benchmark
+//  def foreachDebox = {
+//    var sum = 0
+//    deboxSeq foreach (sum += _)
+//    sum
+//  }
 
   @Benchmark
   def foreachStdlib = {
@@ -223,8 +223,8 @@ class SeqBenchmark {
   @Benchmark
   def mapSpecialized = specSeq map (_ + 1)
 
-  @Benchmark
-  def mapDebox = deboxSeq map (_ + 1)
+//  @Benchmark
+//  def mapDebox = deboxSeq map (_ + 1)
 
   @Benchmark
   def mapStdlib = stdSeq map (_ + 1)
@@ -253,28 +253,28 @@ class SeqRemoveSpecializedBenchmark {
   }
 }
 
-@State(Scope.Thread)
-class SeqRemoveDeboxBenchmark {
-
-  val origin: debox.Buffer[Int] = {
-    val seq = debox.Buffer.empty[Int]
-    1 to 10000 foreach (seq.append(_))
-    seq
-  }
-
-  var seq: debox.Buffer[Int] = _
-
-  @Setup(Level.Invocation)
-  def setup = {
-    seq = debox.Buffer.empty[Int]
-    origin.foreach(seq.append(_))
-  }
-
-  @Benchmark
-  def benchmark = {
-    while (seq.nonEmpty) seq.remove(0)
-  }
-}
+//@State(Scope.Thread)
+//class SeqRemoveDeboxBenchmark {
+//
+//  val origin: debox.Buffer[Int] = {
+//    val seq = debox.Buffer.empty[Int]
+//    1 to 10000 foreach (seq.append(_))
+//    seq
+//  }
+//
+//  var seq: debox.Buffer[Int] = _
+//
+//  @Setup(Level.Invocation)
+//  def setup = {
+//    seq = debox.Buffer.empty[Int]
+//    origin.foreach(seq.append(_))
+//  }
+//
+//  @Benchmark
+//  def benchmark = {
+//    while (seq.nonEmpty) seq.remove(0)
+//  }
+//}
 
 @State(Scope.Thread)
 class SeqRemoveStdlibBenchmark {

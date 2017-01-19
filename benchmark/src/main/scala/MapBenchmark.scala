@@ -24,15 +24,15 @@ class MapBenchmark {
     map
   }
 
-  val deboxMap: debox.Map[Key, Key] = {
-    val map = debox.Map.ofSize[Key, Key](size)
-    var i = 0
-    while (i < size) {
-      map.update(keys(i), keys(i))
-      i += 1
-    }
-    map
-  }
+//  val deboxMap: debox.Map[Key, Key] = {
+//    val map = debox.Map.ofSize[Key, Key](size)
+//    var i = 0
+//    while (i < size) {
+//      map.update(keys(i), keys(i))
+//      i += 1
+//    }
+//    map
+//  }
 
   val stdMap: StdlibMap[Key, Key] = {
     val map = new StdlibMap[Key, Key](initialSize)
@@ -66,8 +66,8 @@ class MapBenchmark {
   @Benchmark
   def getDirectSpecialized = specMap(randKey)
 
-  @Benchmark
-  def getDirectDebox = deboxMap(randKey)
+//  @Benchmark
+//  def getDirectDebox = deboxMap(randKey)
 
   @Benchmark
   def getDirectStdlib = stdMap(randKey)
@@ -78,8 +78,8 @@ class MapBenchmark {
   @Benchmark
   def getNonExistingSpecialized = specMap.get(nonExistingKey)
 
-  @Benchmark
-  def getNonExistingDebox = deboxMap.get(nonExistingKey)
+//  @Benchmark
+//  def getNonExistingDebox = deboxMap.get(nonExistingKey)
 
   @Benchmark
   def getNonExistingStdlib = stdMap.get(nonExistingKey)
@@ -97,15 +97,15 @@ class MapBenchmark {
     }
   }
 
-  @Benchmark
-  def putAllDebox = {
-    val m = debox.Map.ofSize[Key, Key](size)
-    var i = 0
-    while (i < size) {
-      m.update(keys(i), keys(i))
-      i += 1
-    }
-  }
+//  @Benchmark
+//  def putAllDebox = {
+//    val m = debox.Map.ofSize[Key, Key](size)
+//    var i = 0
+//    while (i < size) {
+//      m.update(keys(i), keys(i))
+//      i += 1
+//    }
+//  }
 
   @Benchmark
   def putAllStdlib = {
@@ -131,9 +131,9 @@ class MapBenchmark {
   def foreachSpecialized(blackhole: Blackhole) =
     specMap foreach ((k, v) => blackhole.consume(k))
 
-  @Benchmark
-  def foreachDebox(blackhole: Blackhole) =
-    deboxMap foreach ((k, v) => blackhole.consume(k))
+//  @Benchmark
+//  def foreachDebox(blackhole: Blackhole) =
+//    deboxMap foreach ((k, v) => blackhole.consume(k))
 
   @Benchmark
   def foreachStdlib(blackhole: Blackhole) =
@@ -156,16 +156,16 @@ class MapBenchmark {
     while (i < size) { blackhole.consume(map.get(keys(i))); i += 1 }
   }
 
-  @Benchmark
-  def putRemoveReadDebox(blackhole: Blackhole) = {
-    val map = debox.Map.ofSize[Key, Key](size)
-    var i = 0
-    while (i < size) { map.update(keys(i), keys(i)); i += 1 }
-    i = 0
-    while (i < size / 10) { map.remove(keys(i * 10)); i += 1 }
-    i = 0
-    while (i < size) { blackhole.consume(map.get(keys(i))); i += 1 }
-  }
+//  @Benchmark
+//  def putRemoveReadDebox(blackhole: Blackhole) = {
+//    val map = debox.Map.ofSize[Key, Key](size)
+//    var i = 0
+//    while (i < size) { map.update(keys(i), keys(i)); i += 1 }
+//    i = 0
+//    while (i < size / 10) { map.remove(keys(i * 10)); i += 1 }
+//    i = 0
+//    while (i < size) { blackhole.consume(map.get(keys(i))); i += 1 }
+//  }
 
   @Benchmark
   def putRemoveReadStdlib(blackhole: Blackhole) = {
@@ -210,25 +210,25 @@ class MapRemoveSpecializedBenchmark {
   }
 }
 
-@State(Scope.Thread)
-class MapRemoveDeboxBenchmark {
-
-  import Benchmark._
-
-  var map: debox.Map[Key, Key] = _
-
-  @Setup(Level.Invocation)
-  def setup = {
-    map = debox.Map.ofSize[Key, Key](size)
-    0 until size foreach (i => map.update(keys(i), keys(i)))
-  }
-
-  @Benchmark
-  def benchmark = {
-    var i = 0
-    while (i < size / 10) { map.remove(keys(i * 10)); i += 1 }
-  }
-}
+//@State(Scope.Thread)
+//class MapRemoveDeboxBenchmark {
+//
+//  import Benchmark._
+//
+//  var map: debox.Map[Key, Key] = _
+//
+//  @Setup(Level.Invocation)
+//  def setup = {
+//    map = debox.Map.ofSize[Key, Key](size)
+//    0 until size foreach (i => map.update(keys(i), keys(i)))
+//  }
+//
+//  @Benchmark
+//  def benchmark = {
+//    var i = 0
+//    while (i < size / 10) { map.remove(keys(i * 10)); i += 1 }
+//  }
+//}
 
 @State(Scope.Thread)
 class MapRemoveStdlibBenchmark {

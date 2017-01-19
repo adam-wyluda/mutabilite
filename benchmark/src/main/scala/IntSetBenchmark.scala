@@ -24,15 +24,15 @@ class IntSetBenchmark {
     set
   }
 
-  val deboxSet: debox.Set[Int] = {
-    val set = debox.Set.ofSize[Int](size)
-    var i = 0
-    while (i < size) {
-      set.add(keys(i))
-      i += 1
-    }
-    set
-  }
+//  val deboxSet: debox.Set[Int] = {
+//    val set = debox.Set.ofSize[Int](size)
+//    var i = 0
+//    while (i < size) {
+//      set.add(keys(i))
+//      i += 1
+//    }
+//    set
+//  }
 
   val stdSet: StdlibSet[Int] = {
     val set = new StdlibSet[Int] { override val initialSize = IntBenchmark.initialSize }
@@ -66,8 +66,8 @@ class IntSetBenchmark {
   @Benchmark
   def containsExistingSpecialized = specSet(randKey)
 
-  @Benchmark
-  def containsExistingDebox = deboxSet(randKey)
+//  @Benchmark
+//  def containsExistingDebox = deboxSet(randKey)
 
   @Benchmark
   def containsExistingStdlib = stdSet(randKey)
@@ -78,8 +78,8 @@ class IntSetBenchmark {
   @Benchmark
   def containsNonExistingSpecialized = specSet(nonExistingKey)
 
-  @Benchmark
-  def containsNonExistingDebox = deboxSet(nonExistingKey)
+//  @Benchmark
+//  def containsNonExistingDebox = deboxSet(nonExistingKey)
 
   @Benchmark
   def containsNonExistingStdlib = stdSet(nonExistingKey)
@@ -97,15 +97,15 @@ class IntSetBenchmark {
     }
   }
 
-  @Benchmark
-  def addDebox = {
-    val s = debox.Set.ofSize[Int](size)
-    var i = 0
-    while (i < size) {
-      s.add(keys(i))
-      i += 1
-    }
-  }
+//  @Benchmark
+//  def addDebox = {
+//    val s = debox.Set.ofSize[Int](size)
+//    var i = 0
+//    while (i < size) {
+//      s.add(keys(i))
+//      i += 1
+//    }
+//  }
 
   @Benchmark
   def addStdlib = {
@@ -131,9 +131,9 @@ class IntSetBenchmark {
   def foreachSpecialized(blackhole: Blackhole) =
     specSet foreach (blackhole.consume(_))
 
-  @Benchmark
-  def foreachDebox(blackhole: Blackhole) =
-    deboxSet foreach (blackhole.consume(_))
+//  @Benchmark
+//  def foreachDebox(blackhole: Blackhole) =
+//    deboxSet foreach (blackhole.consume(_))
 
   @Benchmark
   def foreachStdlib(blackhole: Blackhole) =
@@ -148,8 +148,8 @@ class IntSetBenchmark {
   @Benchmark
   def mapSpecialized = specSet map (_ + 1)
 
-  @Benchmark
-  def mapDebox = deboxSet map (_ + 1)
+//  @Benchmark
+//  def mapDebox = deboxSet map (_ + 1)
 
   @Benchmark
   def mapStdlib = stdSet map (_ + 1)
@@ -179,29 +179,29 @@ class IntSetRemoveSpecializedBenchmark {
   }
 }
 
-@State(Scope.Thread)
-class IntSetRemoveDeboxBenchmark {
-
-  import IntBenchmark._
-
-  var set: debox.Set[Int] = _
-
-  @Setup(Level.Invocation)
-  def setup = {
-    set = debox.Set.ofSize[Int](size)
-    var i = 0
-    while (i < size) {
-      set.add(keys(i))
-      i += 1
-    }
-  }
-
-  @Benchmark
-  def benchmark = {
-    var i = 0
-    while (i < size / 10) { set.remove(keys(i * 10)); i += 1 }
-  }
-}
+//@State(Scope.Thread)
+//class IntSetRemoveDeboxBenchmark {
+//
+//  import IntBenchmark._
+//
+//  var set: debox.Set[Int] = _
+//
+//  @Setup(Level.Invocation)
+//  def setup = {
+//    set = debox.Set.ofSize[Int](size)
+//    var i = 0
+//    while (i < size) {
+//      set.add(keys(i))
+//      i += 1
+//    }
+//  }
+//
+//  @Benchmark
+//  def benchmark = {
+//    var i = 0
+//    while (i < size / 10) { set.remove(keys(i * 10)); i += 1 }
+//  }
+//}
 
 @State(Scope.Thread)
 class IntSetRemoveStdlibBenchmark {

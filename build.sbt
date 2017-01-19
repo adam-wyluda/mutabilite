@@ -5,13 +5,12 @@ name := "mutabilite"
 lazy val defaults = Defaults.coreDefaultSettings ++ Seq(
   organization := "mutabilite",
   version := "0.1-SNAPSHOT",
-  scalaVersion := "2.11.8",
+  scalaVersion := "2.12.1",
   addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full)
 )
 
 lazy val testDependencies = Seq(
-  "org.scalatest" % "scalatest_2.11" % "2.2.4",
-  "org.scalacheck" %% "scalacheck" % "1.12.2"
+  "org.scalatest" %% "scalatest" % "3.0.1"
 )
 
 lazy val core = project
@@ -30,7 +29,7 @@ lazy val macros = project
     defaults ++ Seq(
       moduleName := "macros",
       libraryDependencies ++= Seq(
-        "org.scala-lang" % "scala-reflect" % "2.11.8"
+        "org.scala-lang" % "scala-reflect" % "2.12.1"
       )
     )
   )
@@ -54,7 +53,7 @@ lazy val benchmark = project
       moduleName := "benchmark",
       resolvers += Resolver.sonatypeRepo("releases"),
       libraryDependencies ++= Seq(
-        "org.spire-math" %% "debox" % "0.7.3"
+//        "org.spire-math" %% "debox" % "0.7.3"
       )
     )
   )

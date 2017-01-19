@@ -24,15 +24,15 @@ class MixedMapBenchmark {
     map
   }
 
-  val deboxMap: debox.Map[Int, String] = {
-    val map = debox.Map.ofSize[Int, String](size)
-    var i = 0
-    while (i < size) {
-      map.update(keys(i), i toString)
-      i += 1
-    }
-    map
-  }
+//  val deboxMap: debox.Map[Int, String] = {
+//    val map = debox.Map.ofSize[Int, String](size)
+//    var i = 0
+//    while (i < size) {
+//      map.update(keys(i), i toString)
+//      i += 1
+//    }
+//    map
+//  }
 
   val stdMap: StdlibMap[Int, String] = {
     val map = new StdlibMap[Int, String](initialSize)
@@ -66,8 +66,8 @@ class MixedMapBenchmark {
   @Benchmark
   def getDirectSpecialized = specMap(randKey)
 
-  @Benchmark
-  def getDirectDebox = deboxMap(randKey)
+//  @Benchmark
+//  def getDirectDebox = deboxMap(randKey)
 
   @Benchmark
   def getDirectStdlib = stdMap(randKey)
@@ -78,8 +78,8 @@ class MixedMapBenchmark {
   @Benchmark
   def getNonExistingSpecialized = specMap.get(nonExistingKey)
 
-  @Benchmark
-  def getNonExistingDebox = deboxMap.get(nonExistingKey)
+//  @Benchmark
+//  def getNonExistingDebox = deboxMap.get(nonExistingKey)
 
   @Benchmark
   def getNonExistingStdlib = stdMap.get(nonExistingKey)
@@ -97,15 +97,15 @@ class MixedMapBenchmark {
     }
   }
 
-  @Benchmark
-  def putAllDebox = {
-    val m = debox.Map.ofSize[Int, String](size)
-    var i = 0
-    while (i < size) {
-      m.update(keys(i), "x")
-      i += 1
-    }
-  }
+//  @Benchmark
+//  def putAllDebox = {
+//    val m = debox.Map.ofSize[Int, String](size)
+//    var i = 0
+//    while (i < size) {
+//      m.update(keys(i), "x")
+//      i += 1
+//    }
+//  }
 
   @Benchmark
   def putAllStdlib = {
@@ -131,9 +131,9 @@ class MixedMapBenchmark {
   def foreachSpecialized(blackhole: Blackhole) =
     specMap foreach ((k, v) => blackhole.consume(k))
 
-  @Benchmark
-  def foreachDebox(blackhole: Blackhole) =
-    deboxMap foreach ((k, v) => blackhole.consume(v))
+//  @Benchmark
+//  def foreachDebox(blackhole: Blackhole) =
+//    deboxMap foreach ((k, v) => blackhole.consume(v))
 
   @Benchmark
   def foreachStdlib(blackhole: Blackhole) =
@@ -156,16 +156,16 @@ class MixedMapBenchmark {
     while (i < size) { blackhole.consume(map.get(i)); i += 1 }
   }
 
-  @Benchmark
-  def putRemoveReadDebox(blackhole: Blackhole) = {
-    val map = debox.Map.ofSize[Int, String](size)
-    var i = 0
-    while (i < size) { map.update(keys(i), "x"); i += 1 }
-    i = 0
-    while (i < size / 10) { map.remove(keys(i * 10)); i += 1 }
-    i = 0
-    while (i < size) { blackhole.consume(map.get(i)); i += 1 }
-  }
+//  @Benchmark
+//  def putRemoveReadDebox(blackhole: Blackhole) = {
+//    val map = debox.Map.ofSize[Int, String](size)
+//    var i = 0
+//    while (i < size) { map.update(keys(i), "x"); i += 1 }
+//    i = 0
+//    while (i < size / 10) { map.remove(keys(i * 10)); i += 1 }
+//    i = 0
+//    while (i < size) { blackhole.consume(map.get(i)); i += 1 }
+//  }
 
   @Benchmark
   def putRemoveReadStdlib(blackhole: Blackhole) = {
@@ -192,8 +192,8 @@ class MixedMapBenchmark {
   @Benchmark
   def mapSpecialized = specMap map ((k, v) => k)
 
-  @Benchmark
-  def mapDebox = deboxMap mapToArray ((k, v) => k)
+//  @Benchmark
+//  def mapDebox = deboxMap mapToArray ((k, v) => k)
 
   @Benchmark
   def mapStdlib = stdMap map { case (k, v) => k }
@@ -219,25 +219,25 @@ class MixedMapRemoveSpecializedBenchmark {
   }
 }
 
-@State(Scope.Thread)
-class MixedMapRemoveDeboxBenchmark {
-
-  import IntBenchmark._
-
-  var map: debox.Map[Int, String] = _
-
-  @Setup(Level.Invocation)
-  def setup = {
-    map = debox.Map.ofSize[Int, String](size)
-    0 until size foreach (i => map.update(keys(i), i toString))
-  }
-
-  @Benchmark
-  def benchmark = {
-    var i = 0
-    while (i < size / 10) { map.remove(keys(i)); i += 1 }
-  }
-}
+//@State(Scope.Thread)
+//class MixedMapRemoveDeboxBenchmark {
+//
+//  import IntBenchmark._
+//
+//  var map: debox.Map[Int, String] = _
+//
+//  @Setup(Level.Invocation)
+//  def setup = {
+//    map = debox.Map.ofSize[Int, String](size)
+//    0 until size foreach (i => map.update(keys(i), i toString))
+//  }
+//
+//  @Benchmark
+//  def benchmark = {
+//    var i = 0
+//    while (i < size / 10) { map.remove(keys(i)); i += 1 }
+//  }
+//}
 
 @State(Scope.Thread)
 class MixedMapRemoveStdlibBenchmark {

@@ -24,15 +24,15 @@ class SetBenchmark {
     set
   }
 
-  val deboxSet: debox.Set[Key] = {
-    val set = debox.Set.ofSize[Key](size)
-    var i = 0
-    while (i < size) {
-      set.add(keys(i))
-      i += 1
-    }
-    set
-  }
+//  val deboxSet: debox.Set[Key] = {
+//    val set = debox.Set.ofSize[Key](size)
+//    var i = 0
+//    while (i < size) {
+//      set.add(keys(i))
+//      i += 1
+//    }
+//    set
+//  }
 
   val stdSet: StdlibSet[Key] = {
     val set = new StdlibSet[Key] { override val initialSize = Benchmark.initialSize }
@@ -66,8 +66,8 @@ class SetBenchmark {
   @Benchmark
   def containsExistingSpecialized = specSet(randKey)
 
-  @Benchmark
-  def containsExistingDebox = deboxSet(randKey)
+//  @Benchmark
+//  def containsExistingDebox = deboxSet(randKey)
 
   @Benchmark
   def containsExistingStdlib = stdSet(randKey)
@@ -78,8 +78,8 @@ class SetBenchmark {
   @Benchmark
   def containsNonExistingSpecialized = specSet(nonExistingKey)
 
-  @Benchmark
-  def containsNonExistingDebox = deboxSet(nonExistingKey)
+//  @Benchmark
+//  def containsNonExistingDebox = deboxSet(nonExistingKey)
 
   @Benchmark
   def containsNonExistingStdlib = stdSet(nonExistingKey)
@@ -97,15 +97,15 @@ class SetBenchmark {
     }
   }
 
-  @Benchmark
-  def addDebox = {
-    val s = debox.Set.ofSize[Key](size)
-    var i = 0
-    while (i < size) {
-      s.add(keys(i))
-      i += 1
-    }
-  }
+//  @Benchmark
+//  def addDebox = {
+//    val s = debox.Set.ofSize[Key](size)
+//    var i = 0
+//    while (i < size) {
+//      s.add(keys(i))
+//      i += 1
+//    }
+//  }
 
   @Benchmark
   def addStdlib = {
@@ -131,9 +131,9 @@ class SetBenchmark {
   def foreachSpecialized(blackhole: Blackhole) =
     specSet foreach (blackhole.consume(_))
 
-  @Benchmark
-  def foreachDebox(blackhole: Blackhole) =
-    deboxSet foreach (blackhole.consume(_))
+//  @Benchmark
+//  def foreachDebox(blackhole: Blackhole) =
+//    deboxSet foreach (blackhole.consume(_))
 
   @Benchmark
   def foreachStdlib(blackhole: Blackhole) =
@@ -170,29 +170,29 @@ class SetRemoveSpecializedBenchmark {
   }
 }
 
-@State(Scope.Thread)
-class SetRemoveDeboxBenchmark {
-
-  import Benchmark._
-
-  var set: debox.Set[Key] = _
-
-  @Setup(Level.Invocation)
-  def setup = {
-    set = debox.Set.ofSize[Key](size)
-    var i = 0
-    while (i < size) {
-      set.add(keys(i))
-      i += 1
-    }
-  }
-
-  @Benchmark
-  def benchmark = {
-    var i = 0
-    while (i < size / 10) { set.remove(keys(i * 10)); i += 1 }
-  }
-}
+//@State(Scope.Thread)
+//class SetRemoveDeboxBenchmark {
+//
+//  import Benchmark._
+//
+//  var set: debox.Set[Key] = _
+//
+//  @Setup(Level.Invocation)
+//  def setup = {
+//    set = debox.Set.ofSize[Key](size)
+//    var i = 0
+//    while (i < size) {
+//      set.add(keys(i))
+//      i += 1
+//    }
+//  }
+//
+//  @Benchmark
+//  def benchmark = {
+//    var i = 0
+//    while (i < size / 10) { set.remove(keys(i * 10)); i += 1 }
+//  }
+//}
 
 @State(Scope.Thread)
 class SetRemoveStdlibBenchmark {
